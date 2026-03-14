@@ -1,0 +1,82 @@
+package com.xuan.entity;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.xuan.entity.base.BaseEntity;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
+import java.io.Serial;
+
+/**
+ * 留言
+ */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@TableName("messages")
+@EqualsAndHashCode(callSuper = true)
+public class Messages extends BaseEntity {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    @TableId(type = IdType.AUTO)
+    private Long id;
+
+    // 评论内容
+    private String content;
+
+    // 转换后的 HTML 内容
+    private String contentHtml;
+
+    // 根留言 ID,null 是一级留言
+    private Long rootId;
+
+    // 父留言 ID,null 是一级留言
+    private Long parentId;
+
+    // 父留言昵称
+    private String parentNickname;
+
+    // 访客 ID
+    private Long visitorId;
+
+    // 昵称
+    private String nickname;
+
+    // 邮箱或 qq
+    private String emailOrQq;
+
+    // 地址
+    private String location;
+
+    // 操作系统名称
+    private String userAgentOs;
+
+    // 浏览器名称
+    private String userAgentBrowser;
+
+    // 是否审核通过，0-否，1-是
+    private Integer isApproved;
+
+    // 是否使用 markdown，0-否，1-是
+    private Integer isMarkdown;
+
+    // 是否匿名，0-否，1-是
+    private Integer isSecret;
+
+    // 有回复是否通知，0-否，1-是
+    private Integer isNotice;
+
+    // 是否编辑过，0-否，1-是
+    private Integer isEdited;
+
+    // 是否为管理员回复，0-否，1-是
+    private Integer isAdminReply;
+}

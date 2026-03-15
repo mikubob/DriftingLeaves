@@ -3,6 +3,7 @@ package com.xuan.service;
 
 import cn.hutool.db.PageResult;
 import com.xuan.dto.ArticleCommentDTO;
+import com.xuan.dto.ArticleCommentEditDTO;
 import com.xuan.dto.ArticleCommentPageQueryDTO;
 import com.xuan.dto.ArticleCommentReplyDTO;
 import com.xuan.entity.ArticleComments;
@@ -64,7 +65,7 @@ public interface ArticleCommentService {
     /**
      * 访客编辑评论
      */
-    void editComment(cc.feitwnd.dto.ArticleCommentEditDTO editDTO);
+    void editComment(ArticleCommentEditDTO editDTO);
 
     /**
      * 访客删除评论

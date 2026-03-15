@@ -2,6 +2,7 @@ package com.xuan.controller.blog;
 
 
 import com.xuan.result.Result;
+import com.xuan.service.FriendLinkService;
 import com.xuan.vo.FriendLinkVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -3,6 +3,7 @@ package com.xuan.controller.cv;
 import com.xuan.annotation.RateLimit;
 import com.xuan.dto.VisitorRecordDTO;
 import com.xuan.result.Result;
+import com.xuan.service.VisitorService;
 import com.xuan.vo.VisitorRecordVO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;

@@ -3,6 +3,7 @@ package com.xuan.controller.blog;
 import com.xuan.annotation.RateLimit;
 import com.xuan.dto.RssSubscriptionDTO;
 import com.xuan.result.Result;
+import com.xuan.service.RssSubscriptionService;
 import com.xuan.vo.RssSubscriptionStatusVO;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;

@@ -6,6 +6,7 @@ import com.xuan.dto.MessagePageQueryDTO;
 import com.xuan.dto.MessageReplyDTO;
 import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
+import com.xuan.service.MessageService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;

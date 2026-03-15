@@ -1,6 +1,7 @@
 package com.xuan.controller.blog;
 
 import com.xuan.result.Result;
+import com.xuan.service.MusicService;
 import com.xuan.vo.MusicVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

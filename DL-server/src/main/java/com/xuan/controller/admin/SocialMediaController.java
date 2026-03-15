@@ -6,6 +6,7 @@ import com.xuan.dto.SocialMediaDTO;
 import com.xuan.entity.SocialMedia;
 import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
+import com.xuan.service.SocialMediaService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

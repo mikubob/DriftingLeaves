@@ -7,6 +7,7 @@ import com.xuan.dto.RssSubscriptionPageQueryDTO;
 import com.xuan.entity.RssSubscriptions;
 import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
+import com.xuan.service.RssSubscriptionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

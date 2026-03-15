@@ -2,6 +2,7 @@ package com.xuan.controller.home;
 
 
 import com.xuan.result.Result;
+import com.xuan.service.SocialMediaService;
 import com.xuan.vo.SocialMediaVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

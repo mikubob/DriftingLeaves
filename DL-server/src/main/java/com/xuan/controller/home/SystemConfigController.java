@@ -3,6 +3,7 @@ package com.xuan.controller.home;
 
 import com.xuan.entity.SystemConfig;
 import com.xuan.result.Result;
+import com.xuan.service.SystemConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

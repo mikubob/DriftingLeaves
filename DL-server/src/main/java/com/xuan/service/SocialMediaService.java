@@ -1,8 +1,9 @@
 package com.xuan.service;
 
-import cc.feitwnd.dto.SocialMediaDTO;
-import cc.feitwnd.entity.SocialMedia;
-import cc.feitwnd.vo.SocialMediaVO;
+
+import com.xuan.dto.SocialMediaDTO;
+import com.xuan.entity.SocialMedia;
+import com.xuan.vo.SocialMediaVO;
 
 import java.util.List;
 

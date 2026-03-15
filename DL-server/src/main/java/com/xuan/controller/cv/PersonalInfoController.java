@@ -2,6 +2,7 @@ package com.xuan.controller.cv;
 
 
 import com.xuan.result.Result;
+import com.xuan.service.PersonalInfoService;
 import com.xuan.vo.PersonalInfoVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -2,6 +2,7 @@ package com.xuan.service;
 
 import cn.hutool.db.PageResult;
 import com.xuan.dto.MessageDTO;
+import com.xuan.dto.MessageEditDTO;
 import com.xuan.dto.MessagePageQueryDTO;
 import com.xuan.dto.MessageReplyDTO;
 import com.xuan.vo.MessageVO;
@@ -56,7 +57,7 @@ public interface MessageService {
     /**
      * 访客编辑留言
      */
-    void editMessage(cc.feitwnd.dto.MessageEditDTO editDTO);
+    void editMessage(MessageEditDTO editDTO);
 
     /**
      * 访客删除留言

@@ -1,11 +1,12 @@
 package com.xuan.service;
 
-import cc.feitwnd.dto.ArticleDTO;
-import cc.feitwnd.dto.ArticlePageQueryDTO;
-import cc.feitwnd.entity.Articles;
-import cc.feitwnd.result.PageResult;
-import cc.feitwnd.vo.ArticleArchiveVO;
-import cc.feitwnd.vo.BlogArticleDetailVO;
+
+import cn.hutool.db.PageResult;
+import com.xuan.dto.ArticleDTO;
+import com.xuan.dto.ArticlePageQueryDTO;
+import com.xuan.entity.Articles;
+import com.xuan.vo.ArticleArchiveVO;
+import com.xuan.vo.BlogArticleDetailVO;
 
 import java.util.List;
 

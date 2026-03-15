@@ -1,7 +1,7 @@
 package com.xuan.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xuan.interceptor.JwtTokenAdminInterceptor;
-import com.xuan.json.JacksonObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +25,7 @@ import java.util.List;
 public class WebMvcConfiguration extends WebMvcConfigurationSupport {
 
     private final JwtTokenAdminInterceptor jwtTokenAdminInterceptor;
+    private final ObjectMapper objectMapper;
 
     /**
      * 注册自定义拦截器
@@ -70,8 +71,8 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
     protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
         // 创建消息转换器对象
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-        // 设置对象转换器，底层使用FastJSON将Java对象转为JSON
-        converter.setObjectMapper(new JacksonObjectMapper());
+        // 设置对象转换器，使用全局配置的 ObjectMapper（已包含自定义时间格式）
+        converter.setObjectMapper(objectMapper);
         // 将消息转换器加入到容器中
         converters.add(0, converter);
     }

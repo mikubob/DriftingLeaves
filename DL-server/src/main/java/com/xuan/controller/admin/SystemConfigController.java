@@ -8,8 +8,8 @@ import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
 import com.xuan.service.ISystemConfigService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,10 +20,10 @@ import java.util.List;
 @Slf4j
 @RestController("adminSystemConfigController")
 @RequestMapping("/admin/systemConfig")
+@RequiredArgsConstructor
 public class SystemConfigController {
 
-    @Autowired
-    private ISystemConfigService systemConfigService;
+    private final ISystemConfigService systemConfigService;
 
     /**
      * 获取所有系统配置

@@ -7,8 +7,8 @@ import com.xuan.result.Result;
 import com.xuan.service.IArticleService;
 import com.xuan.vo.ArticleArchiveVO;
 import com.xuan.vo.BlogArticleDetailVO;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,13 +20,12 @@ import java.util.List;
 @RestController("blogArticleController")
 @RequestMapping("/blog/article")
 @Slf4j
+@RequiredArgsConstructor
 public class ArticleController {
 
-    @Autowired
-    private IArticleService articleService;
+    private final IArticleService articleService;
 
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     private static final String VIEW_COUNT_KEY = "article:viewCount";
 

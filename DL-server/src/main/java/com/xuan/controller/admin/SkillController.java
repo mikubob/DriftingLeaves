@@ -7,8 +7,8 @@ import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
 import com.xuan.service.ISkillService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,10 +19,10 @@ import java.util.List;
 @RestController("adminSkillController")
 @RequestMapping("/admin/skill")
 @Slf4j
+@RequiredArgsConstructor
 public class SkillController {
 
-    @Autowired
-    private ISkillService skillService;
+    private final ISkillService skillService;
 
     /**
      * 获取所有技能信息

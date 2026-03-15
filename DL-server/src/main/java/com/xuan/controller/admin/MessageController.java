@@ -9,8 +9,8 @@ import com.xuan.result.Result;
 import com.xuan.service.IMessageService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,10 +21,10 @@ import java.util.List;
 @Slf4j
 @RestController("adminMessageController")
 @RequestMapping("/admin/message")
+@RequiredArgsConstructor
 public class MessageController {
 
-    @Autowired
-    private IMessageService messageService;
+    private final IMessageService messageService;
 
     /**
      * 分页条件查询留言

@@ -8,8 +8,8 @@ import com.xuan.vo.ProvinceVisitorVO;
 import com.xuan.vo.ViewReportVO;
 import com.xuan.vo.VisitorReportVO;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,10 +23,10 @@ import java.time.LocalDate;
 @Slf4j
 @RestController("adminReportController")
 @RequestMapping("/admin/report")
+@RequiredArgsConstructor
 public class ReportController {
 
-    @Autowired
-    private IReportService reportService;
+    private final IReportService reportService;
 
     /**
      * 浏览量统计

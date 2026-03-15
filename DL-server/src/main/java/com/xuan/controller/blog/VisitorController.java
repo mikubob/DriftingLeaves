@@ -8,7 +8,7 @@ import com.xuan.vo.VisitorRecordVO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController("blogVisitorController")
 @RequestMapping("/blog/visitor")
 @Slf4j
+@RequiredArgsConstructor
 public class VisitorController {
 
-    @Autowired
-    private IVisitorService visitorService;
+    private final IVisitorService visitorService;
 
     /**
      * 记录访客访问信息

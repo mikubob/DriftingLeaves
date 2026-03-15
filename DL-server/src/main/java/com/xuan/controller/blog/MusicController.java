@@ -3,8 +3,8 @@ package com.xuan.controller.blog;
 import com.xuan.result.Result;
 import com.xuan.service.IMusicService;
 import com.xuan.vo.MusicVO;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,10 +17,10 @@ import java.util.List;
 @Slf4j
 @RestController("blogMusicController")
 @RequestMapping("/blog/music")
+@RequiredArgsConstructor
 public class MusicController {
 
-    @Autowired
-    private IMusicService musicService;
+    private final IMusicService musicService;
 
     /**
      * 获取所有可见的音乐

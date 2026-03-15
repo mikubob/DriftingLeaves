@@ -8,8 +8,8 @@ import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
 import com.xuan.service.IArticleTagService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,10 +20,10 @@ import java.util.List;
 @Slf4j
 @RestController("adminArticleTagController")
 @RequestMapping("/admin/article/tag")
+@RequiredArgsConstructor
 public class ArticleTagController {
 
-    @Autowired
-    private IArticleTagService articleTagService;
+    private final IArticleTagService articleTagService;
 
     /**
      * 获取所有标签

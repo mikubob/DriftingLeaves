@@ -8,8 +8,8 @@ import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
 import com.xuan.service.IExperienceService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,10 +20,10 @@ import java.util.List;
 @RestController("adminExperienceController")
 @RequestMapping("/admin/experience")
 @Slf4j
+@RequiredArgsConstructor
 public class ExperienceController {
 
-    @Autowired
-    private IExperienceService experienceService;
+    private final IExperienceService experienceService;
 
     /**
      * 根据分类获取经历信息

@@ -2,11 +2,12 @@ package com.xuan.controller.admin;
 
 
 import cn.hutool.db.PageResult;
-import com.xuan.dto.ViewPageQueryDTO;
-import com.xuan.result.Result;
 import com.xuan.service.IViewService;
+import com.xuan.result.Result;
+import com.xuan.dto.ViewPageQueryDTO;
+import cn.hutool.db.PageResult;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,10 +18,10 @@ import java.util.List;
 @Slf4j
 @RestController("adminViewController")
 @RequestMapping("/admin/view")
+@RequiredArgsConstructor
 public class ViewController {
 
-    @Autowired
-    private IViewService viewService;
+    private final IViewService viewService;
 
     /**
      * 获取浏览记录列表

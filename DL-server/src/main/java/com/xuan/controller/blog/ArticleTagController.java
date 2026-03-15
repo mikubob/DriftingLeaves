@@ -6,8 +6,8 @@ import com.xuan.entity.ArticleTags;
 import com.xuan.result.Result;
 import com.xuan.service.IArticleService;
 import com.xuan.service.IArticleTagService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,13 +18,12 @@ import java.util.List;
 @Slf4j
 @RestController("blogArticleTagController")
 @RequestMapping("/blog/article/tag")
+@RequiredArgsConstructor
 public class ArticleTagController {
 
-    @Autowired
-    private IArticleTagService articleTagService;
+    private final IArticleTagService articleTagService;
 
-    @Autowired
-    private IArticleService articleService;
+    private final IArticleService articleService;
 
     /**
      * 获取有已发布文章的标签列表

@@ -6,20 +6,20 @@ import com.xuan.result.Result;
 import com.xuan.service.IRssSubscriptionService;
 import com.xuan.vo.RssSubscriptionStatusVO;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 博客端RSS订阅接口
+ * 博客端 RSS 订阅接口
  */
 @Slf4j
 @RestController("blogRssSubscriptionController")
 @RequestMapping("/blog/rssSubscription")
+@RequiredArgsConstructor
 public class RssSubscriptionController {
 
-    @Autowired
-    private IRssSubscriptionService rssSubscriptionService;
+    private final IRssSubscriptionService rssSubscriptionService;
 
     /**
      * 添加RSS订阅

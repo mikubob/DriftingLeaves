@@ -7,8 +7,8 @@ import com.xuan.dto.VisitorPageQueryDTO;
 import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
 import com.xuan.service.IVisitorService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,10 +19,10 @@ import java.util.List;
 @Slf4j
 @RestController("adminVisitorController")
 @RequestMapping("/admin/visitor")
+@RequiredArgsConstructor
 public class VisitorController {
 
-    @Autowired
-    private IVisitorService visitorService;
+    private final IVisitorService visitorService;
 
     /**
      * 获取访客列表

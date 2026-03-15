@@ -5,8 +5,8 @@ import cn.hutool.db.PageResult;
 import com.xuan.dto.OperationLogPageQueryDTO;
 import com.xuan.result.Result;
 import com.xuan.service.IOperationLogService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,10 +17,10 @@ import java.util.List;
 @Slf4j
 @RestController("adminOperationLogController")
 @RequestMapping("/admin/operationLog")
+@RequiredArgsConstructor
 public class OperationLogController {
 
-    @Autowired
-    private IOperationLogService operationLogService;
+    private final IOperationLogService operationLogService;
 
     /**
      * 分页查询操作日志

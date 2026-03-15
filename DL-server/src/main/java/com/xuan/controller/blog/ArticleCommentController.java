@@ -9,8 +9,8 @@ import com.xuan.service.IArticleCommentService;
 import com.xuan.vo.ArticleCommentVO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,10 +21,10 @@ import java.util.List;
 @RestController("blogArticleCommentController")
 @RequestMapping("/blog/articleComment")
 @Slf4j
+@RequiredArgsConstructor
 public class ArticleCommentController {
 
-    @Autowired
-    private IArticleCommentService articleCommentService;
+    private final IArticleCommentService articleCommentService;
 
     /**
      * 根据文章ID获取评论列表（树形结构，含当前访客的未审核评论）

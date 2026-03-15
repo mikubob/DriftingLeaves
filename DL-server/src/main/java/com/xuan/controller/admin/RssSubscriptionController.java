@@ -8,22 +8,22 @@ import com.xuan.entity.RssSubscriptions;
 import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
 import com.xuan.service.IRssSubscriptionService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /**
- * 管理端RSS订阅接口
+ * 管理端 RSS 订阅接口
  */
 @Slf4j
 @RestController("adminRssSubscriptionController")
 @RequestMapping("/admin/rssSubscription")
+@RequiredArgsConstructor
 public class RssSubscriptionController {
 
-    @Autowired
-    private IRssSubscriptionService rssSubscriptionService;
+    private final IRssSubscriptionService rssSubscriptionService;
 
     /**
      * 分页查询RSS订阅列表

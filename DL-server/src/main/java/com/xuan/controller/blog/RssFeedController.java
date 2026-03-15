@@ -2,8 +2,8 @@ package com.xuan.controller.blog;
 
 
 import com.xuan.service.IRssFeedService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController("blogRssFeedController")
 @RequestMapping("/blog")
+@RequiredArgsConstructor
 public class RssFeedController {
 
-    @Autowired
-    private IRssFeedService rssFeedService;
+    private final IRssFeedService rssFeedService;
 
     /**
      * 生成 RSS 2.0 Feed XML

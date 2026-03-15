@@ -8,8 +8,8 @@ import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
 import com.xuan.service.ISocialMediaService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,10 +20,10 @@ import java.util.List;
 @RestController("adminSocialMediaController")
 @RequestMapping("/admin/socialMedia")
 @Slf4j
+@RequiredArgsConstructor
 public class SocialMediaController {
 
-    @Autowired
-    private ISocialMediaService socialMediaService;
+    private final ISocialMediaService socialMediaService;
 
     /**
      * 获取所有社交媒体信息

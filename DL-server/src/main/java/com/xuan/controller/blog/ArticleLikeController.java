@@ -4,8 +4,8 @@ package com.xuan.controller.blog;
 import com.xuan.annotation.RateLimit;
 import com.xuan.result.Result;
 import com.xuan.service.IArticleLikeService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController("blogArticleLikeController")
 @RequestMapping("/blog/articleLike")
 @Slf4j
+@RequiredArgsConstructor
 public class ArticleLikeController {
 
-    @Autowired
-    private IArticleLikeService articleLikeService;
+    private final IArticleLikeService articleLikeService;
 
     /**
      * 点赞文章

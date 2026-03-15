@@ -10,8 +10,8 @@ import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
 import com.xuan.service.IMusicService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,10 +22,10 @@ import java.util.List;
 @Slf4j
 @RestController("adminMusicController")
 @RequestMapping("/admin/music")
+@RequiredArgsConstructor
 public class MusicController {
 
-    @Autowired
-    private IMusicService musicService;
+    private final IMusicService musicService;
 
     /**
      * 分页查询音乐列表

@@ -8,8 +8,8 @@ import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
 import com.xuan.service.IFriendLinkService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,10 +20,10 @@ import java.util.List;
 @RestController("adminFriendLinkController")
 @RequestMapping("/admin/friendLink")
 @Slf4j
+@RequiredArgsConstructor
 public class FriendLinkController {
 
-    @Autowired
-    private IFriendLinkService friendLinkService;
+    private final IFriendLinkService friendLinkService;
 
     /**
      * 获取所有友情链接信息

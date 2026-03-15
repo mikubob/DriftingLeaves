@@ -7,8 +7,8 @@ import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
 import com.xuan.service.IPersonalInfoService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController("adminPersonalInfoController")
 @RequestMapping("/admin/personalInfo")
 @Slf4j
+@RequiredArgsConstructor
 public class PersonalInfoController {
 
-    @Autowired
-    private IPersonalInfoService personalInfoService;
+    private final IPersonalInfoService personalInfoService;
 
     /**
      * 获取个人信息

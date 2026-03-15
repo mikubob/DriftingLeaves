@@ -10,8 +10,8 @@ import com.xuan.result.Result;
 import com.xuan.service.IArticleCommentService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,10 +22,10 @@ import java.util.List;
 @Slf4j
 @RestController("adminArticleCommentController")
 @RequestMapping("/admin/article/comment")
+@RequiredArgsConstructor
 public class ArticleCommentController {
 
-    @Autowired
-    private IArticleCommentService articleCommentService;
+    private final IArticleCommentService articleCommentService;
 
     /**
      * 分页条件查询评论（时间、是否审核）

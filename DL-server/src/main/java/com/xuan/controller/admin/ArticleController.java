@@ -10,8 +10,8 @@ import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
 import com.xuan.service.IArticleService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,10 +22,10 @@ import java.util.List;
 @Slf4j
 @RestController("adminArticleController")
 @RequestMapping("/admin/article")
+@RequiredArgsConstructor
 public class ArticleController {
 
-    @Autowired
-    private IArticleService articleService;
+    private final IArticleService articleService;
 
     /**
      * 分页条件查询文章列表

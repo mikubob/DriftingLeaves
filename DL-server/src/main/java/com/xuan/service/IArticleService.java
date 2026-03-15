@@ -1,6 +1,7 @@
 package com.xuan.service;
 
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import cn.hutool.db.PageResult;
 import com.xuan.dto.ArticleDTO;
 import com.xuan.dto.ArticlePageQueryDTO;
@@ -13,7 +14,7 @@ import java.util.List;
 /**
  * 文章服务
  */
-public interface ArticleService {
+public interface IArticleService extends IService<Articles> {
 
     /**
      * 创建文章

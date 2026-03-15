@@ -1,6 +1,7 @@
 package com.xuan.service;
 
 import cn.hutool.db.PageResult;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.xuan.dto.MusicDTO;
 import com.xuan.dto.MusicPageQueryDTO;
 import com.xuan.entity.Music;
@@ -8,7 +9,7 @@ import com.xuan.vo.MusicVO;
 
 import java.util.List;
 
-public interface MusicService {
+public interface IMusicService extends IService<Music> {
     /**
      * 添加音乐
      * @param musicDTO

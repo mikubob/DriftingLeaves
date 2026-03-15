@@ -1,11 +1,12 @@
 package com.xuan.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.xuan.dto.SystemConfigDTO;
 import com.xuan.entity.SystemConfig;
 
 import java.util.List;
 
-public interface SystemConfigService {
+public interface ISystemConfigService extends IService<SystemConfig> {
     /**
      * 获取所有系统配置
      * @return

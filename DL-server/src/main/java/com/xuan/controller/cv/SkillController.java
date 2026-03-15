@@ -1,6 +1,7 @@
 package com.xuan.controller.cv;
 
 import com.xuan.result.Result;
+import com.xuan.service.ISkillService;
 import com.xuan.vo.SkillVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +18,7 @@ import java.util.List;
 public class SkillController {
 
     @Autowired
-    private SkillService skillService;
+    private ISkillService skillService;
 
     /**
      * 获取技能信息

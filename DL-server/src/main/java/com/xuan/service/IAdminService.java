@@ -1,15 +1,17 @@
 package com.xuan.service;
 
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.xuan.dto.AdminChangeEmailDTO;
 import com.xuan.dto.AdminChangeNicknameDTO;
 import com.xuan.dto.AdminChangePasswordDTO;
 import com.xuan.dto.AdminLoginDTO;
 import com.xuan.dto.AdminLogoutDTO;
+import com.xuan.entity.Admin;
 import com.xuan.vo.AdminLoginVO;
 import com.xuan.vo.AdminVO;
 
-public interface AdminService {
+public interface IAdminService extends IService<Admin> {
 
     /**
      * 发送验证码

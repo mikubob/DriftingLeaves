@@ -10,7 +10,7 @@ import com.xuan.vo.VisitorReportVO;
 
 import java.time.LocalDate;
 
-public interface ReportService {
+public interface IReportService {
 
     /**
      * 获取博客统计数据

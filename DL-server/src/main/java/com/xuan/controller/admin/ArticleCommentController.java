@@ -7,7 +7,7 @@ import com.xuan.dto.ArticleCommentReplyDTO;
 import com.xuan.entity.ArticleComments;
 import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
-import com.xuan.service.ArticleCommentService;
+import com.xuan.service.IArticleCommentService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ import java.util.List;
 public class ArticleCommentController {
 
     @Autowired
-    private ArticleCommentService articleCommentService;
+    private IArticleCommentService articleCommentService;
 
     /**
      * 分页条件查询评论（时间、是否审核）

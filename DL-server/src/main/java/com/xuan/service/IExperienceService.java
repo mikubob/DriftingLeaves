@@ -1,13 +1,14 @@
 package com.xuan.service;
 
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.xuan.dto.ExperienceDTO;
 import com.xuan.entity.Experiences;
 import com.xuan.vo.ExperienceVO;
 
 import java.util.List;
 
-public interface ExperienceService {
+public interface IExperienceService extends IService<Experiences> {
     /**
      * 根据类型获取经历信息
      * @param type

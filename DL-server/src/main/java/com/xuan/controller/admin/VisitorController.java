@@ -6,7 +6,7 @@ import com.xuan.annotation.OperationLog;
 import com.xuan.dto.VisitorPageQueryDTO;
 import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
-import com.xuan.service.VisitorService;
+import com.xuan.service.IVisitorService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +22,7 @@ import java.util.List;
 public class VisitorController {
 
     @Autowired
-    private VisitorService visitorService;
+    private IVisitorService visitorService;
 
     /**
      * 获取访客列表

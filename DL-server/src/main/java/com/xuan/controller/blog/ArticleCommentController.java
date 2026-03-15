@@ -5,7 +5,7 @@ import com.xuan.annotation.RateLimit;
 import com.xuan.dto.ArticleCommentDTO;
 import com.xuan.dto.ArticleCommentEditDTO;
 import com.xuan.result.Result;
-import com.xuan.service.ArticleCommentService;
+import com.xuan.service.IArticleCommentService;
 import com.xuan.vo.ArticleCommentVO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -24,7 +24,7 @@ import java.util.List;
 public class ArticleCommentController {
 
     @Autowired
-    private ArticleCommentService articleCommentService;
+    private IArticleCommentService articleCommentService;
 
     /**
      * 根据文章ID获取评论列表（树形结构，含当前访客的未审核评论）

@@ -3,7 +3,7 @@ package com.xuan.controller.home;
 
 import com.xuan.entity.SystemConfig;
 import com.xuan.result.Result;
-import com.xuan.service.SystemConfigService;
+import com.xuan.service.ISystemConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SystemConfigController {
 
     @Autowired
-    private SystemConfigService systemConfigService;
+    private ISystemConfigService systemConfigService;
 
     /**
      * 根据配置键获取配置

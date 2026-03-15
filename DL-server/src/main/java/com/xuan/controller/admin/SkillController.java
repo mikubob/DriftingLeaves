@@ -5,7 +5,7 @@ import com.xuan.dto.SkillDTO;
 import com.xuan.entity.Skills;
 import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
-import com.xuan.service.SkillService;
+import com.xuan.service.ISkillService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ import java.util.List;
 public class SkillController {
 
     @Autowired
-    private SkillService skillService;
+    private ISkillService skillService;
 
     /**
      * 获取所有技能信息

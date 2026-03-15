@@ -1,13 +1,14 @@
 package com.xuan.service;
 
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.xuan.dto.FriendLinkDTO;
 import com.xuan.entity.FriendLinks;
 import com.xuan.vo.FriendLinkVO;
 
 import java.util.List;
 
-public interface FriendLinkService {
+public interface IFriendLinkService extends IService<FriendLinks> {
     /**
      * 管理端获取所有友情链接
      * @return

@@ -6,7 +6,7 @@ import com.xuan.dto.SystemConfigDTO;
 import com.xuan.entity.SystemConfig;
 import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
-import com.xuan.service.SystemConfigService;
+import com.xuan.service.ISystemConfigService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ import java.util.List;
 public class SystemConfigController {
 
     @Autowired
-    private SystemConfigService systemConfigService;
+    private ISystemConfigService systemConfigService;
 
     /**
      * 获取所有系统配置

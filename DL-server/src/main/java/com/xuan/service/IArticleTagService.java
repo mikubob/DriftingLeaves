@@ -1,16 +1,16 @@
 package com.xuan.service;
 
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.xuan.dto.ArticleTagDTO;
 import com.xuan.entity.ArticleTags;
 
 import java.util.List;
 
-public interface ArticleTagService {
+public interface IArticleTagService extends IService<ArticleTags> {
 
     /**
      * 获取所有标签
-     * @return
      */
     List<ArticleTags> listAll();
 

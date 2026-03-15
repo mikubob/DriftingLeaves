@@ -1,12 +1,13 @@
 package com.xuan.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.xuan.dto.SkillDTO;
 import com.xuan.entity.Skills;
 import com.xuan.vo.SkillVO;
 
 import java.util.List;
 
-public interface SkillService {
+public interface ISkillService extends IService<Skills> {
     /**
      * 获取所有技能信息
      * @return

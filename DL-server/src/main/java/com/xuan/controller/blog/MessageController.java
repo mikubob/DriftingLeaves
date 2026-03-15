@@ -4,7 +4,7 @@ import com.xuan.annotation.RateLimit;
 import com.xuan.dto.MessageDTO;
 import com.xuan.dto.MessageEditDTO;
 import com.xuan.result.Result;
-import com.xuan.service.MessageService;
+import com.xuan.service.IMessageService;
 import com.xuan.vo.MessageVO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -23,7 +23,7 @@ import java.util.List;
 public class MessageController {
 
     @Autowired
-    private MessageService messageService;
+    private IMessageService messageService;
 
     /**
      * 访客提交留言

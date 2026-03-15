@@ -1,7 +1,7 @@
 package com.xuan.controller.blog;
 
 import com.xuan.result.Result;
-import com.xuan.service.ReportService;
+import com.xuan.service.IReportService;
 import com.xuan.vo.BlogReportVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ReportController {
 
     @Autowired
-    private ReportService reportService;
+    private IReportService reportService;
 
     /**
      * 获取博客统计数据

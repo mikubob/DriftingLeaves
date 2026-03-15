@@ -3,7 +3,7 @@ package com.xuan.controller.blog;
 import com.xuan.annotation.RateLimit;
 import com.xuan.dto.RssSubscriptionDTO;
 import com.xuan.result.Result;
-import com.xuan.service.RssSubscriptionService;
+import com.xuan.service.IRssSubscriptionService;
 import com.xuan.vo.RssSubscriptionStatusVO;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class RssSubscriptionController {
 
     @Autowired
-    private RssSubscriptionService rssSubscriptionService;
+    private IRssSubscriptionService rssSubscriptionService;
 
     /**
      * 添加RSS订阅

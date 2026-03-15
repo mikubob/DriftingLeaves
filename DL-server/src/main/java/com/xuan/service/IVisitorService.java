@@ -1,14 +1,16 @@
 package com.xuan.service;
 
 import cn.hutool.db.PageResult;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.xuan.dto.VisitorPageQueryDTO;
 import com.xuan.dto.VisitorRecordDTO;
+import com.xuan.entity.Visitors;
 import com.xuan.vo.VisitorRecordVO;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 
-public interface VisitorService {
+public interface IVisitorService extends IService<Visitors> {
     /**
      * 记录访客访问信息
      * @param visitorRecordDTO

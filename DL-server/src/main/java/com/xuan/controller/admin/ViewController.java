@@ -4,7 +4,7 @@ package com.xuan.controller.admin;
 import cn.hutool.db.PageResult;
 import com.xuan.dto.ViewPageQueryDTO;
 import com.xuan.result.Result;
-import com.xuan.service.ViewService;
+import com.xuan.service.IViewService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +20,7 @@ import java.util.List;
 public class ViewController {
 
     @Autowired
-    private ViewService viewService;
+    private IViewService viewService;
 
     /**
      * 获取浏览记录列表

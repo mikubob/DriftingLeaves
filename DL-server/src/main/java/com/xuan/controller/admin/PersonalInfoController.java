@@ -5,7 +5,7 @@ import com.xuan.dto.PersonalInfoDTO;
 import com.xuan.entity.PersonalInfo;
 import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
-import com.xuan.service.PersonalInfoService;
+import com.xuan.service.IPersonalInfoService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class PersonalInfoController {
 
     @Autowired
-    private PersonalInfoService personalInfoService;
+    private IPersonalInfoService personalInfoService;
 
     /**
      * 获取个人信息

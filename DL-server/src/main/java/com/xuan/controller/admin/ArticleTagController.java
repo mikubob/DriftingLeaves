@@ -6,7 +6,7 @@ import com.xuan.dto.ArticleTagDTO;
 import com.xuan.entity.ArticleTags;
 import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
-import com.xuan.service.ArticleTagService;
+import com.xuan.service.IArticleTagService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ import java.util.List;
 public class ArticleTagController {
 
     @Autowired
-    private ArticleTagService articleTagService;
+    private IArticleTagService articleTagService;
 
     /**
      * 获取所有标签

@@ -2,7 +2,7 @@ package com.xuan.controller.cv;
 
 
 import com.xuan.result.Result;
-import com.xuan.service.ExperienceService;
+import com.xuan.service.IExperienceService;
 import com.xuan.vo.ExperienceVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +19,7 @@ import java.util.List;
 public class ExperienceController {
 
     @Autowired
-    private ExperienceService experienceService;
+    private IExperienceService experienceService;
 
     /**
      * 获取全部经历信息

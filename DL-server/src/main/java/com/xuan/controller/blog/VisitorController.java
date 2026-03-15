@@ -3,7 +3,7 @@ package com.xuan.controller.blog;
 import com.xuan.annotation.RateLimit;
 import com.xuan.dto.VisitorRecordDTO;
 import com.xuan.result.Result;
-import com.xuan.service.VisitorService;
+import com.xuan.service.IVisitorService;
 import com.xuan.vo.VisitorRecordVO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class VisitorController {
 
     @Autowired
-    private VisitorService visitorService;
+    private IVisitorService visitorService;
 
     /**
      * 记录访客访问信息

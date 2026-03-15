@@ -6,7 +6,7 @@ import com.xuan.dto.ExperienceDTO;
 import com.xuan.entity.Experiences;
 import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
-import com.xuan.service.ExperienceService;
+import com.xuan.service.IExperienceService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ import java.util.List;
 public class ExperienceController {
 
     @Autowired
-    private ExperienceService experienceService;
+    private IExperienceService experienceService;
 
     /**
      * 根据分类获取经历信息

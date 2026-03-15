@@ -1,8 +1,8 @@
 package com.xuan.service;
 
-public interface RssFeedService {
+public interface IRssFeedService {
     /**
-     * 生成RSS Feed
+     * 生成 RSS Feed
      * @return
      */
     String generateRssFeed();

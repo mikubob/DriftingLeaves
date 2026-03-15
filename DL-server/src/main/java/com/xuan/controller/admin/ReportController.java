@@ -1,7 +1,7 @@
 package com.xuan.controller.admin;
 
 import com.xuan.result.Result;
-import com.xuan.service.ReportService;
+import com.xuan.service.IReportService;
 import com.xuan.vo.AdminOverviewVO;
 import com.xuan.vo.ArticleViewTop10VO;
 import com.xuan.vo.ProvinceVisitorVO;
@@ -26,7 +26,7 @@ import java.time.LocalDate;
 public class ReportController {
 
     @Autowired
-    private ReportService reportService;
+    private IReportService reportService;
 
     /**
      * 浏览量统计

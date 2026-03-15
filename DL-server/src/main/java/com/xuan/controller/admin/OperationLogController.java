@@ -4,7 +4,7 @@ package com.xuan.controller.admin;
 import cn.hutool.db.PageResult;
 import com.xuan.dto.OperationLogPageQueryDTO;
 import com.xuan.result.Result;
-import com.xuan.service.OperationLogService;
+import com.xuan.service.IOperationLogService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +20,7 @@ import java.util.List;
 public class OperationLogController {
 
     @Autowired
-    private OperationLogService operationLogService;
+    private IOperationLogService operationLogService;
 
     /**
      * 分页查询操作日志

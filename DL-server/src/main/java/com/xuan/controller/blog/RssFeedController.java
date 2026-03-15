@@ -1,7 +1,7 @@
 package com.xuan.controller.blog;
 
 
-import com.xuan.service.RssFeedService;
+import com.xuan.service.IRssFeedService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class RssFeedController {
 
     @Autowired
-    private RssFeedService rssFeedService;
+    private IRssFeedService rssFeedService;
 
     /**
      * 生成 RSS 2.0 Feed XML

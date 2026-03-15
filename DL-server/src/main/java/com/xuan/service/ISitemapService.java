@@ -1,6 +1,6 @@
 package com.xuan.service;
 
-public interface SitemapService {
+public interface ISitemapService {
     /**
      * 生成站点地图 XML
      * @return

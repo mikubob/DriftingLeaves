@@ -8,7 +8,7 @@ import com.xuan.dto.ArticlePageQueryDTO;
 import com.xuan.entity.Articles;
 import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
-import com.xuan.service.ArticleService;
+import com.xuan.service.IArticleService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ import java.util.List;
 public class ArticleController {
 
     @Autowired
-    private ArticleService articleService;
+    private IArticleService articleService;
 
     /**
      * 分页条件查询文章列表

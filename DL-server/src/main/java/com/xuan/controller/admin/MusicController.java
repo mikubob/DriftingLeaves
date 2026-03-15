@@ -7,7 +7,8 @@ import com.xuan.dto.MusicDTO;
 import com.xuan.dto.MusicPageQueryDTO;
 import com.xuan.entity.Music;
 import com.xuan.enumeration.OperationType;
-import com.xuan.service.MusicService;
+import com.xuan.result.Result;
+import com.xuan.service.IMusicService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ import java.util.List;
 public class MusicController {
 
     @Autowired
-    private MusicService musicService;
+    private IMusicService musicService;
 
     /**
      * 分页查询音乐列表

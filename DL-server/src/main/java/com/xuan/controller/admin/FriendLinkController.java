@@ -6,7 +6,7 @@ import com.xuan.dto.FriendLinkDTO;
 import com.xuan.entity.FriendLinks;
 import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
-import com.xuan.service.FriendLinkService;
+import com.xuan.service.IFriendLinkService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ import java.util.List;
 public class FriendLinkController {
 
     @Autowired
-    private FriendLinkService friendLinkService;
+    private IFriendLinkService friendLinkService;
 
     /**
      * 获取所有友情链接信息

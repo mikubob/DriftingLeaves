@@ -4,8 +4,8 @@ package com.xuan.controller.blog;
 import cn.hutool.db.PageResult;
 import com.xuan.entity.ArticleTags;
 import com.xuan.result.Result;
-import com.xuan.service.ArticleService;
-import com.xuan.service.ArticleTagService;
+import com.xuan.service.IArticleService;
+import com.xuan.service.IArticleTagService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -21,10 +21,10 @@ import java.util.List;
 public class ArticleTagController {
 
     @Autowired
-    private ArticleTagService articleTagService;
+    private IArticleTagService articleTagService;
 
     @Autowired
-    private ArticleService articleService;
+    private IArticleService articleService;
 
     /**
      * 获取有已发布文章的标签列表

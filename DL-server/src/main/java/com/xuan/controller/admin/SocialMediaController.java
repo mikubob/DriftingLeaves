@@ -6,7 +6,7 @@ import com.xuan.dto.SocialMediaDTO;
 import com.xuan.entity.SocialMedia;
 import com.xuan.enumeration.OperationType;
 import com.xuan.result.Result;
-import com.xuan.service.SocialMediaService;
+import com.xuan.service.ISocialMediaService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ import java.util.List;
 public class SocialMediaController {
 
     @Autowired
-    private SocialMediaService socialMediaService;
+    private ISocialMediaService socialMediaService;
 
     /**
      * 获取所有社交媒体信息

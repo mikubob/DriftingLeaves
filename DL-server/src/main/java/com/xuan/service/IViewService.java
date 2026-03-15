@@ -1,11 +1,13 @@
 package com.xuan.service;
 
 import cn.hutool.db.PageResult;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.xuan.dto.ViewPageQueryDTO;
+import com.xuan.entity.Views;
 
 import java.util.List;
 
-public interface ViewService {
+public interface IViewService extends IService<Views> {
     /**
      * 分页查询浏览记录
      * @param viewPageQueryDTO

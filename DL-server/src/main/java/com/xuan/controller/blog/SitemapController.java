@@ -1,6 +1,6 @@
 package com.xuan.controller.blog;
 
-import com.xuan.service.SitemapService;
+import com.xuan.service.ISitemapService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SitemapController {
 
     @Autowired
-    private SitemapService sitemapService;
+    private ISitemapService sitemapService;
 
 
     /**

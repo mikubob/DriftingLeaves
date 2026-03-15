@@ -1,6 +1,9 @@
 package com.xuan.service;
 
-public interface ArticleLikeService {
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.xuan.entity.ArticleLikes;
+
+public interface IArticleLikeService extends IService<ArticleLikes> {
 
     /**
      * 点赞文章

@@ -2,7 +2,7 @@ package com.xuan.controller.blog;
 
 
 import com.xuan.result.Result;
-import com.xuan.service.FriendLinkService;
+import com.xuan.service.IFriendLinkService;
 import com.xuan.vo.FriendLinkVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +19,7 @@ import java.util.List;
 public class FriendLinkController {
 
     @Autowired
-    private FriendLinkService friendLinkService;
+    private IFriendLinkService friendLinkService;
 
     /**
      * 获取可见友情链接

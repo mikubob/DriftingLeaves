@@ -4,7 +4,7 @@ package com.xuan.controller.blog;
 import cn.hutool.db.PageResult;
 import com.xuan.annotation.RateLimit;
 import com.xuan.result.Result;
-import com.xuan.service.ArticleService;
+import com.xuan.service.IArticleService;
 import com.xuan.vo.ArticleArchiveVO;
 import com.xuan.vo.BlogArticleDetailVO;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ import java.util.List;
 public class ArticleController {
 
     @Autowired
-    private ArticleService articleService;
+    private IArticleService articleService;
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;

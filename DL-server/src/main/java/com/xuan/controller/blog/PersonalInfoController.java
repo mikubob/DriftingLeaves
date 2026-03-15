@@ -1,7 +1,7 @@
 package com.xuan.controller.blog;
 
 import com.xuan.result.Result;
-import com.xuan.service.PersonalInfoService;
+import com.xuan.service.IPersonalInfoService;
 import com.xuan.vo.PersonalInfoVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PersonalInfoController {
 
     @Autowired
-    private PersonalInfoService personalInfoService;
+    private IPersonalInfoService personalInfoService;
 
     /**
      * 获取个人信息

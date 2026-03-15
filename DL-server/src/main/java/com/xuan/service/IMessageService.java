@@ -1,10 +1,12 @@
 package com.xuan.service;
 
 import cn.hutool.db.PageResult;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.xuan.dto.MessageDTO;
 import com.xuan.dto.MessageEditDTO;
 import com.xuan.dto.MessagePageQueryDTO;
 import com.xuan.dto.MessageReplyDTO;
+import com.xuan.entity.Messages;
 import com.xuan.vo.MessageVO;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -13,7 +15,7 @@ import java.util.List;
 /**
  * 留言服务
  */
-public interface MessageService {
+public interface IMessageService extends IService<Messages> {
 
     /**
      * 访客提交留言
@@ -64,4 +66,3 @@ public interface MessageService {
      */
     void visitorDeleteMessage(Long id, Long visitorId);
 }
-

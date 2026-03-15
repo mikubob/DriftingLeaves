@@ -2,12 +2,13 @@ package com.xuan.service;
 
 
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.xuan.dto.ArticleCategoryDTO;
 import com.xuan.entity.ArticleCategories;
 
 import java.util.List;
 
-public interface ArticleCategoryService {
+public interface IArticleCategoryService extends IService<ArticleCategories> {
     /**
      * 获取所有文章分类
      * @return

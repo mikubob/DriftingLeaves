@@ -2,7 +2,7 @@ package com.xuan.controller.home;
 
 
 import com.xuan.result.Result;
-import com.xuan.service.SocialMediaService;
+import com.xuan.service.ISocialMediaService;
 import com.xuan.vo.SocialMediaVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +19,7 @@ import java.util.List;
 public class SocialMediaController {
 
     @Autowired
-    private SocialMediaService socialMediaService;
+    private ISocialMediaService socialMediaService;
 
     /**
      * 获取可见社交媒体信息

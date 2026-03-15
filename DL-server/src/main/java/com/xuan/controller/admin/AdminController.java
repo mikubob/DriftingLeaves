@@ -8,7 +8,7 @@ import com.xuan.dto.AdminLoginDTO;
 import com.xuan.dto.AdminLogoutDTO;
 import com.xuan.dto.SendCodeDTO;
 import com.xuan.result.Result;
-import com.xuan.service.AdminService;
+import com.xuan.service.IAdminService;
 import com.xuan.vo.AdminLoginVO;
 import com.xuan.vo.AdminVO;
 import jakarta.validation.Valid;
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 public class AdminController {
 
 
-    private final AdminService adminService;
+    private final IAdminService adminService;
 
     /**
      * 发送验证码

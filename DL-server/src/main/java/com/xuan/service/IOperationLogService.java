@@ -1,17 +1,18 @@
 package com.xuan.service;
 
 import cn.hutool.db.PageResult;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.xuan.dto.OperationLogPageQueryDTO;
 import com.xuan.entity.OperationLogs;
 
 import java.util.List;
 
-public interface OperationLogService {
+public interface IOperationLogService extends IService<OperationLogs> {
     /**
      * 保存操作日志
      * @param operationLogs
      */
-    void save(OperationLogs operationLogs);
+    void saveLog(OperationLogs operationLogs);
 
     /**
      * 分页查询操作日志

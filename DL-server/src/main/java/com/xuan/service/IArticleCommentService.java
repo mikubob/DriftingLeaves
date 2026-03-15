@@ -2,6 +2,7 @@ package com.xuan.service;
 
 
 import cn.hutool.db.PageResult;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.xuan.dto.ArticleCommentDTO;
 import com.xuan.dto.ArticleCommentEditDTO;
 import com.xuan.dto.ArticleCommentPageQueryDTO;
@@ -15,7 +16,7 @@ import java.util.List;
 /**
  * 文章评论服务
  */
-public interface ArticleCommentService {
+public interface IArticleCommentService extends IService<ArticleComments> {
 
     /**
      * 分页条件查询评论（时间、是否审核）

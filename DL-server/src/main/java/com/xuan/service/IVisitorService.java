@@ -1,10 +1,10 @@
 package com.xuan.service;
 
-import cn.hutool.db.PageResult;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xuan.dto.VisitorPageQueryDTO;
 import com.xuan.dto.VisitorRecordDTO;
 import com.xuan.entity.Visitors;
+import com.xuan.result.PageResult;
 import com.xuan.vo.VisitorRecordVO;
 import jakarta.servlet.http.HttpServletRequest;
 

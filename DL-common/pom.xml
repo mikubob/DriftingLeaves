@@ -119,6 +119,12 @@
             <groupId>org.lionsoul</groupId>
             <artifactId>ip2region</artifactId>
         </dependency>
+
+        <!-- MyBatis-Plus 分页支持 -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

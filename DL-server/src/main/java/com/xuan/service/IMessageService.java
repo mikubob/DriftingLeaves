@@ -1,12 +1,12 @@
 package com.xuan.service;
 
-import cn.hutool.db.PageResult;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xuan.dto.MessageDTO;
 import com.xuan.dto.MessageEditDTO;
 import com.xuan.dto.MessagePageQueryDTO;
 import com.xuan.dto.MessageReplyDTO;
 import com.xuan.entity.Messages;
+import com.xuan.result.PageResult;
 import com.xuan.vo.MessageVO;
 import jakarta.servlet.http.HttpServletRequest;
 

@@ -1,10 +1,10 @@
 package com.xuan.controller.admin;
 
 
-import cn.hutool.db.PageResult;
 import com.xuan.annotation.OperationLog;
 import com.xuan.dto.VisitorPageQueryDTO;
 import com.xuan.enumeration.OperationType;
+import com.xuan.result.PageResult;
 import com.xuan.result.Result;
 import com.xuan.service.IVisitorService;
 import lombok.RequiredArgsConstructor;

@@ -1,10 +1,10 @@
 package com.xuan.service;
 
-import cn.hutool.db.PageResult;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xuan.dto.MusicDTO;
 import com.xuan.dto.MusicPageQueryDTO;
 import com.xuan.entity.Music;
+import com.xuan.result.PageResult;
 import com.xuan.vo.MusicVO;
 
 import java.util.List;

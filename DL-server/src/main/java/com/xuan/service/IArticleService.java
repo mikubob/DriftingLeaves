@@ -2,10 +2,10 @@ package com.xuan.service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import cn.hutool.db.PageResult;
 import com.xuan.dto.ArticleDTO;
 import com.xuan.dto.ArticlePageQueryDTO;
 import com.xuan.entity.Articles;
+import com.xuan.result.PageResult;
 import com.xuan.vo.ArticleArchiveVO;
 import com.xuan.vo.BlogArticleDetailVO;
 

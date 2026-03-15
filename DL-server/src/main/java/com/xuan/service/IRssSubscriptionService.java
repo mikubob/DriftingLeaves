@@ -1,10 +1,10 @@
 package com.xuan.service;
 
-import cn.hutool.db.PageResult;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xuan.dto.RssSubscriptionDTO;
 import com.xuan.dto.RssSubscriptionPageQueryDTO;
 import com.xuan.entity.RssSubscriptions;
+import com.xuan.result.PageResult;
 import com.xuan.vo.RssSubscriptionStatusVO;
 
 import java.util.List;

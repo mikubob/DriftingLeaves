@@ -1,9 +1,9 @@
 package com.xuan.service;
 
-import cn.hutool.db.PageResult;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xuan.dto.ViewPageQueryDTO;
 import com.xuan.entity.Views;
+import com.xuan.result.PageResult;
 
 import java.util.List;
 

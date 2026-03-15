@@ -1,8 +1,8 @@
 package com.xuan.controller.blog;
 
 
-import cn.hutool.db.PageResult;
 import com.xuan.annotation.RateLimit;
+import com.xuan.result.PageResult;
 import com.xuan.result.Result;
 import com.xuan.service.IArticleService;
 import com.xuan.vo.ArticleArchiveVO;

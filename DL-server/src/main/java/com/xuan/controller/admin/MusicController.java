@@ -1,12 +1,12 @@
 package com.xuan.controller.admin;
 
 
-import cn.hutool.db.PageResult;
 import com.xuan.annotation.OperationLog;
 import com.xuan.dto.MusicDTO;
 import com.xuan.dto.MusicPageQueryDTO;
 import com.xuan.entity.Music;
 import com.xuan.enumeration.OperationType;
+import com.xuan.result.PageResult;
 import com.xuan.result.Result;
 import com.xuan.service.IMusicService;
 import jakarta.validation.Valid;

@@ -1,11 +1,10 @@
 package com.xuan.controller.admin;
 
 
-import cn.hutool.db.PageResult;
-import com.xuan.service.IViewService;
-import com.xuan.result.Result;
 import com.xuan.dto.ViewPageQueryDTO;
-import cn.hutool.db.PageResult;
+import com.xuan.result.PageResult;
+import com.xuan.result.Result;
+import com.xuan.service.IViewService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;

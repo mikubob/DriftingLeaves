@@ -256,8 +256,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
             wrapper.eq(Articles::getIsPublished, dto.getIsPublished());
         }
 
-        // 默认按创建时间降序
-        wrapper.orderByDesc(Articles::getCreateTime);
+        // 排序：先按置顶降序，再按创建时间降序
+        wrapper.orderByDesc(Articles::getIsTop, Articles::getCreateTime);
 
         return wrapper;
     }

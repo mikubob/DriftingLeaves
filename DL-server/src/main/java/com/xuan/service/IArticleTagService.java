@@ -40,4 +40,26 @@ public interface IArticleTagService extends IService<ArticleTags> {
      * @return
      */
     List<ArticleTags> getVisibleTags();
+
+    //<====其他实现类调用的业务接口=====>
+    /**
+     * 根据文章id获取标签id
+     *
+     * @param id
+     * @return
+     */
+    List<Long> getTagIdsByArticleId(Long id);
+
+    /**
+     * 根据文章id删除标签关联
+     * @param id
+     */
+    void deleteRelationsByArticleId(Long id);
+
+    /**
+     * 批量插入标签关联
+     * @param id
+     * @param tagIds
+     */
+    void batchInsertRelations(Long id, List<Long> tagIds);
 }

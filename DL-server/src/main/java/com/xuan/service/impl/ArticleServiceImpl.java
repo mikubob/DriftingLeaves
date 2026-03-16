@@ -1,17 +1,24 @@
 package com.xuan.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.xuan.dto.ArticleDTO;
 import com.xuan.dto.ArticlePageQueryDTO;
 import com.xuan.entity.Articles;
 import com.xuan.mapper.ArticleMapper;
 import com.xuan.result.PageResult;
 import com.xuan.service.IArticleService;
+import com.xuan.vo.ArticleArchiveVO;
+import com.xuan.vo.BlogArticleDetailVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * 文章服务实现类
@@ -40,26 +47,26 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     /**
      * 构建查询条件
      */
-    private com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Articles> buildQueryWrapper(ArticlePageQueryDTO dto) {
-        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Articles> wrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+    private LambdaQueryWrapper<Articles> buildQueryWrapper(ArticlePageQueryDTO dto) {
+        LambdaQueryWrapper<Articles> wrapper = new LambdaQueryWrapper<>();
         
         // 标题模糊搜索
         if (StringUtils.hasText(dto.getTitle())) {
-            wrapper.like("title", dto.getTitle());
+            wrapper.like(Articles::getTitle, dto.getTitle());
         }
         
         // 分类 ID 精确匹配
         if (dto.getCategoryId() != null) {
-            wrapper.eq("category_id", dto.getCategoryId());
+            wrapper.eq(Articles::getCategoryId, dto.getCategoryId());
         }
         
         // 发布状态匹配
         if (dto.getIsPublished() != null) {
-            wrapper.eq("is_published", dto.getIsPublished());
+            wrapper.eq(Articles::getIsPublished, dto.getIsPublished());
         }
         
         // 默认按创建时间降序
-        wrapper.orderByDesc("create_time");
+        wrapper.orderByDesc(Articles::getCreateTime);
         
         return wrapper;
     }
@@ -67,7 +74,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     // ===== 其他方法待实现 =====
     
     @Override
-    public void createArticle(com.xuan.dto.ArticleDTO articleDTO) {
+    public void createArticle(ArticleDTO articleDTO) {
         // TODO: 实现创建文章逻辑
     }
 
@@ -77,12 +84,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     }
 
     @Override
-    public void updateArticle(com.xuan.dto.ArticleDTO articleDTO) {
+    public void updateArticle(ArticleDTO articleDTO) {
         // TODO: 实现更新文章逻辑
     }
 
     @Override
-    public void batchDelete(java.util.List<Long> ids) {
+    public void batchDelete(List<Long> ids) {
         this.removeByIds(ids);
     }
 
@@ -107,9 +114,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     @Override
     public PageResult<Articles> search(String keyword, int page, int pageSize) {
         Page<Articles> mpPage = new Page<>(page, pageSize);
-        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Articles> wrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
-        wrapper.and(w -> w.like("title", keyword).or().like("content_markdown", keyword));
-        wrapper.orderByDesc("create_time");
+        LambdaQueryWrapper<Articles> wrapper = new LambdaQueryWrapper<>();
+        wrapper.and(w -> w.like(Articles::getTitle, keyword).or().like(Articles::getContentMarkdown, keyword));
+        wrapper.orderByDesc(Articles::getCreateTime);
         
         IPage<Articles> resultPage = this.page(mpPage, wrapper);
         return PageResult.fromIPage(resultPage);
@@ -118,18 +125,18 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     @Override
     public PageResult<Articles> getPublishedPage(int page, int pageSize) {
         Page<Articles> mpPage = new Page<>(page, pageSize);
-        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Articles> wrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
-        wrapper.eq("is_published", 1);
-        wrapper.orderByDesc("is_top", "create_time");
+        LambdaQueryWrapper<Articles> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Articles::getIsPublished, 1);
+        wrapper.orderByDesc(Articles::getIsTop, Articles::getCreateTime);
         
         IPage<Articles> resultPage = this.page(mpPage, wrapper);
         return PageResult.fromIPage(resultPage);
     }
 
     @Override
-    public com.xuan.vo.BlogArticleDetailVO getBySlug(String slug) {
-        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Articles> wrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
-        wrapper.eq("slug", slug);
+    public BlogArticleDetailVO getBySlug(String slug) {
+        LambdaQueryWrapper<Articles> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Articles::getSlug, slug);
         Articles articles = this.getOne(wrapper);
         
         if (articles == null) {
@@ -137,7 +144,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
         }
         
         // TODO: 转换为 BlogArticleDetailVO
-        com.xuan.vo.BlogArticleDetailVO vo = new com.xuan.vo.BlogArticleDetailVO();
+        BlogArticleDetailVO vo = new BlogArticleDetailVO();
         // 设置属性...
         return vo;
     }
@@ -150,28 +157,28 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     @Override
     public PageResult<Articles> getPublishedByCategoryId(Long categoryId, int page, int pageSize) {
         Page<Articles> mpPage = new Page<>(page, pageSize);
-        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Articles> wrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
-        wrapper.eq("category_id", categoryId);
-        wrapper.eq("is_published", 1);
-        wrapper.orderByDesc("is_top", "create_time");
+        LambdaQueryWrapper<Articles> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Articles::getCategoryId, categoryId);
+        wrapper.eq(Articles::getIsPublished, 1);
+        wrapper.orderByDesc(Articles::getIsTop, Articles::getCreateTime);
         
         IPage<Articles> resultPage = this.page(mpPage, wrapper);
         return PageResult.fromIPage(resultPage);
     }
 
     @Override
-    public java.util.List<com.xuan.vo.ArticleArchiveVO> getArchive() {
+    public List<ArticleArchiveVO> getArchive() {
         // TODO: 实现文章归档逻辑
-        return java.util.Collections.emptyList();
+        return Collections.emptyList();
     }
 
     @Override
     public PageResult<Articles> searchPublished(String keyword, int page, int pageSize) {
         Page<Articles> mpPage = new Page<>(page, pageSize);
-        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<Articles> wrapper = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
-        wrapper.eq("is_published", 1);
-        wrapper.and(w -> w.like("title", keyword).or().like("content_markdown", keyword));
-        wrapper.orderByDesc("is_top", "create_time");
+        LambdaQueryWrapper<Articles> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Articles::getIsPublished, 1);
+        wrapper.and(w -> w.like(Articles::getTitle, keyword).or().like(Articles::getContentMarkdown, keyword));
+        wrapper.orderByDesc(Articles::getIsTop, Articles::getCreateTime);
         
         IPage<Articles> resultPage = this.page(mpPage, wrapper);
         return PageResult.fromIPage(resultPage);

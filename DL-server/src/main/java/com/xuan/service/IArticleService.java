@@ -34,7 +34,7 @@ public interface IArticleService extends IService<Articles> {
      * @param id
      * @return
      */
-    Articles getById(Long id);
+    Articles getArticleById(Long id);
 
     /**
      * 更新文章

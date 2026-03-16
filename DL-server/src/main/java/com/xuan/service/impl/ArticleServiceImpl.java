@@ -114,13 +114,14 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
         }
     }
 
-    /*
-     * 根据 ID 查询文章
-     * @param id 文章 ID
-     * @return 文章
+
+    /**
+     * 根据 id 查询文章详情
+     * @param id 文章 id
+     * @return 文章详情
      */
     @Override
-    public Articles getById(Long id) {
+    public Articles getArticleById(Long id) {
         return super.getById(id);
     }
 
@@ -136,7 +137,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
 
     @Override
     public void publishOrCancel(Long id, Integer isPublished) {
-        Articles articles = this.getById(id);
+        Articles articles = this.getArticleById(id);
         if (articles != null) {
             articles.setIsPublished(isPublished);
             this.updateById(articles);
@@ -145,7 +146,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
 
     @Override
     public void toggleTop(Long id, Integer isTop) {
-        Articles articles = this.getById(id);
+        Articles articles = this.getArticleById(id);
         if (articles != null) {
             articles.setIsTop(isTop);
             this.updateById(articles);

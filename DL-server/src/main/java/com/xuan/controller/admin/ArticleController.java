@@ -40,14 +40,14 @@ public class ArticleController {
     }
 
     /**
-     * 根据ID获取文章详情
+     * 根据 ID 获取文章详情
      * @param id
      * @return
      */
     @GetMapping("/{id}")
-    public Result<Articles> getById(@PathVariable Long id) {
-        log.info("根据ID获取文章详情: {}", id);
-        Articles articles = articleService.getById(id);
+    public Result<Articles> getArticleById(@PathVariable Long id) {
+        log.info("根据 ID 获取文章详情：{}", id);
+        Articles articles = articleService.getArticleById(id);
         return Result.success(articles);
     }
 

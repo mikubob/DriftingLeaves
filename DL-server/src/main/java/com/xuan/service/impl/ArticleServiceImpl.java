@@ -1,22 +1,30 @@
 package com.xuan.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.xuan.constant.StatusConstant;
 import com.xuan.dto.ArticleDTO;
 import com.xuan.dto.ArticlePageQueryDTO;
 import com.xuan.entity.Articles;
 import com.xuan.mapper.ArticleMapper;
+import com.xuan.mapper.ArticleTagMapper;
 import com.xuan.result.PageResult;
 import com.xuan.service.IArticleService;
+import com.xuan.utils.MarkdownUtil;
 import com.xuan.vo.ArticleArchiveVO;
 import com.xuan.vo.BlogArticleDetailVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,9 +36,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> implements IArticleService {
 
+    private final ArticleTagMapper articleTagMapper;
+
+    //分钟阅读量：300字/分钟
+    private final int VIEWS = 300;
+
     /**
-     * 分页条件查询文章列表（含草稿）
-     * 使用 MyBatis-Plus 分页插件
+     * 分页查询文章
+     * @param articlePageQueryDTO 文章分页查询参数
+     * @return 分页结果
      */
     @Override
     public PageResult<Articles> pageQuery(ArticlePageQueryDTO articlePageQueryDTO) {
@@ -44,40 +58,67 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
         return PageResult.fromIPage(articlePage);
     }
 
-    /**
-     * 构建查询条件
-     */
-    private LambdaQueryWrapper<Articles> buildQueryWrapper(ArticlePageQueryDTO dto) {
-        LambdaQueryWrapper<Articles> wrapper = new LambdaQueryWrapper<>();
-        
-        // 标题模糊搜索
-        if (StringUtils.hasText(dto.getTitle())) {
-            wrapper.like(Articles::getTitle, dto.getTitle());
-        }
-        
-        // 分类 ID 精确匹配
-        if (dto.getCategoryId() != null) {
-            wrapper.eq(Articles::getCategoryId, dto.getCategoryId());
-        }
-        
-        // 发布状态匹配
-        if (dto.getIsPublished() != null) {
-            wrapper.eq(Articles::getIsPublished, dto.getIsPublished());
-        }
-        
-        // 默认按创建时间降序
-        wrapper.orderByDesc(Articles::getCreateTime);
-        
-        return wrapper;
-    }
-
     // ===== 其他方法待实现 =====
-    
+
+    /**
+     * 创建文章
+     * @param articleDTO 文章数据
+     */
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "articleList", allEntries = true),
+            @CacheEvict(value = "articleDetail", allEntries = true),
+            @CacheEvict(value = "articleArchive", allEntries = true),
+            @CacheEvict(value = "blogReport", allEntries = true)
+    })
     public void createArticle(ArticleDTO articleDTO) {
-        // TODO: 实现创建文章逻辑
+        Articles articles = BeanUtil.copyProperties(articleDTO, Articles.class);
+        //1.判断前端是否进行了md->html的渲染，如果没有则后端进行转换
+        if (StrUtil.isNotBlank(articles.getContentHtml())) {
+            articles.setContentHtml(articleDTO.getContentHtml());
+        } else {
+            String rawContent = articleDTO.getContentMarkdown();
+            String contentHtml = MarkdownUtil.isHtml(rawContent)
+                    ? MarkdownUtil.sanitize(rawContent)
+                    : MarkdownUtil.toHtml(rawContent);
+            articles.setContentHtml(contentHtml);
+        }
+
+        //2.计算字数得阅读的时间
+        String plainText = articleDTO.getContentMarkdown();
+        long wordCount = countWords(plainText);
+        long readingTime = Math.max(1, wordCount / VIEWS);//阅读时间,以每分钟阅读300字为例，最少为1分钟
+        articles.setWordCount(wordCount);
+        articles.setReadingTime(readingTime);
+
+        //3.设置发布信息
+        Integer isPublished = articleDTO.getIsPublished();
+        if(isPublished!=null&&isPublished.equals(StatusConstant.ENABLE)){
+            articles.setPublishTime(LocalDateTime.now());
+        }
+
+        //4.初始化统计字段和默认状态
+        articles.setViewCount(0L);
+        articles.setLikeCount(0L);
+        articles.setCommentCount(0L);
+        if (articles.getIsTop()==null){
+            articles.setIsTop(StatusConstant.DISABLE);
+        }
+
+        //5.保存文章到数据库
+        save(articles);
+
+        //6.保存文章-标签关联
+        if (articleDTO.getTagIds() != null&& !articleDTO.getTagIds().isEmpty()){
+            //TODO 待完善
+        }
     }
 
+    /*
+     * 根据 ID 查询文章
+     * @param id 文章 ID
+     * @return 文章
+     */
     @Override
     public Articles getById(Long id) {
         return super.getById(id);
@@ -188,5 +229,63 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     public PageResult<Articles> getPublishedByTagId(Long tagId, int page, int pageSize) {
         // TODO: 需要根据标签 ID 查询文章（涉及关联表）
         return PageResult.empty();
+    }
+
+
+
+    //<==========私有辅助方法辅助==========>
+
+    /**
+     * 构建查询条件
+     */
+    private LambdaQueryWrapper<Articles> buildQueryWrapper(ArticlePageQueryDTO dto) {
+        LambdaQueryWrapper<Articles> wrapper = new LambdaQueryWrapper<>();
+
+        // 标题模糊搜索
+        if (StrUtil.isNotBlank(dto.getTitle())) {
+            wrapper.like(Articles::getTitle, dto.getTitle());
+        }
+
+        // 分类 ID 精确匹配
+        if (dto.getCategoryId() != null) {
+            wrapper.eq(Articles::getCategoryId, dto.getCategoryId());
+        }
+
+        // 发布状态匹配
+        if (dto.getIsPublished() != null) {
+            wrapper.eq(Articles::getIsPublished, dto.getIsPublished());
+        }
+
+        // 默认按创建时间降序
+        wrapper.orderByDesc(Articles::getCreateTime);
+
+        return wrapper;
+    }
+
+    /**
+     * 统计字数（中文算1字，英文单词算1字）
+     * @param text 文本
+     * @return 字数
+     */
+    private long countWords(String text) {
+        if (text == null || text.isEmpty()) {
+            return 0;
+        }
+        // 去除Markdown语法符号
+        String cleanText = text.replaceAll("[#*`>\\-\\[\\]()!|]", "");
+        // 中文字符数
+        long chineseCount = cleanText.chars()
+                .filter(c -> Character.UnicodeScript.of(c) == Character.UnicodeScript.HAN)
+                .count();
+        // 英文单词数
+        String englishText = cleanText.replaceAll("[\\u4e00-\\u9fff]", " ");
+        String[] words = englishText.trim().split("\\s+");
+        long englishCount = 0;
+        for (String word : words) {
+            if (!word.isEmpty() && word.matches(".*[a-zA-Z0-9].*")) {
+                englishCount++;
+            }
+        }
+        return chineseCount + englishCount;
     }
 }

@@ -66,4 +66,10 @@ public class ArticleTagServiceImpl extends ServiceImpl<ArticleTagMapper, Article
     public void batchDeleteRelationsByArticleIds(List<Long> ids) {
         //TODO 实现批量删除标签关联逻辑
     }
+
+    @Override
+    public List<ArticleTags> getTagByArticleId(Long id) {
+        //TODO 实现根据文章 id 获取标签逻辑
+        return null;
+    }
 }

@@ -68,4 +68,11 @@ public interface IArticleTagService extends IService<ArticleTags> {
      * @param ids
      */
     void batchDeleteRelationsByArticleIds(List<Long> ids);
+
+    /**
+     * 根据文章id获取标签
+     * @param id
+     * @return
+     */
+    List<ArticleTags> getTagByArticleId(Long id);
 }

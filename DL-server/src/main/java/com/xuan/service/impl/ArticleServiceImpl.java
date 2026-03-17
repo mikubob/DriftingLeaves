@@ -3,7 +3,6 @@ package com.xuan.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -11,6 +10,7 @@ import com.xuan.constant.MessageConstant;
 import com.xuan.constant.StatusConstant;
 import com.xuan.dto.ArticleDTO;
 import com.xuan.dto.ArticlePageQueryDTO;
+import com.xuan.entity.ArticleTags;
 import com.xuan.entity.Articles;
 import com.xuan.entity.RssSubscriptions;
 import com.xuan.exception.ArticleException;
@@ -18,7 +18,6 @@ import com.xuan.mapper.ArticleMapper;
 import com.xuan.properties.WebsiteProperties;
 import com.xuan.result.PageResult;
 import com.xuan.service.AsyncEmailService;
-import com.xuan.service.IArticleCategoryService;
 import com.xuan.service.IArticleService;
 import com.xuan.service.IArticleTagService;
 import com.xuan.service.IRssSubscriptionService;
@@ -26,6 +25,7 @@ import com.xuan.utils.MarkdownUtil;
 import com.xuan.vo.ArticleArchiveVO;
 import com.xuan.vo.ArticleVO;
 import com.xuan.vo.BlogArticleDetailVO;
+import com.xuan.vo.BlogArticleVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -319,43 +319,45 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
      */
     @Override
     @Cacheable(value = "articleList", key = "'page:' + #page + ':' + #pageSize")
-    public PageResult<Articles> getPublishedPage(int page, int pageSize) {
-        // 1.创建分页对象
-        Page<Articles> mpPage = new Page<>(page, pageSize);
-        
-        // 2.构建查询条件（使用 LambdaQueryWrapper 保持类型安全）
-        LambdaQueryWrapper<Articles> wrapper = new LambdaQueryWrapper<>();
-        // 2.1 筛选已发布文章（is_published = 1）
-        wrapper.eq(Articles::getIsPublished, 1);
-        
-        // 3.设置排序规则
-        // 3.1 先按是否置顶降序（is_top DESC）
-        wrapper.orderByDesc(Articles::getIsTop);
-        // 3.2 再按发布时间降序，如果发布时间为空则使用创建时间（COALESCE(publish_time, create_time) DESC）
-        // 注意：LambdaQueryWrapper 不支持方法引用的 SQL 函数，需要使用 last() 添加自定义 SQL 排序
-        wrapper.last(", COALESCE(publish_time, create_time) DESC");
-        
-        // 4.执行分页查询
-        IPage<Articles> resultPage = this.page(mpPage, wrapper);
-        
-        // 5.构建分页结果并返回
+    public PageResult<BlogArticleVO> getPublishedPage(int page, int pageSize) {
+        Page<BlogArticleVO> mpPage = new Page<>(page, pageSize);
+        IPage<BlogArticleVO> resultPage = baseMapper.getPublishedPage(mpPage);
         return PageResult.fromIPage(resultPage);
     }
 
+    /**
+     * 获取文章详情
+     * @param slug 文章slug
+     * @return 文章详情
+     */
     @Override
+    @Cacheable(value = "articleDetail", key = "#slug")
     public BlogArticleDetailVO getBySlug(String slug) {
-        LambdaQueryWrapper<Articles> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Articles::getSlug, slug);
-        Articles articles = this.getOne(wrapper);
-
-        if (articles == null) {
-            throw new RuntimeException("文章不存在");
+        //1.根据slug获取文章详情
+        BlogArticleDetailVO articleDetail = baseMapper.getBySlug(slug);
+        if (articleDetail == null) {
+            throw new ArticleException(MessageConstant.ARTICLE_NOT_FOUND);
         }
 
-        // TODO: 转换为 BlogArticleDetailVO
-        BlogArticleDetailVO vo = new BlogArticleDetailVO();
-        // 设置属性...
-        return vo;
+        //TODO 2.填充标签名称列表
+        List<ArticleTags> tags = articleTagService.getTagByArticleId(articleDetail.getId());
+        if (tags != null && !tags.isEmpty()){
+            articleDetail.setTagNames(tags.stream()
+                    .map(ArticleTags::getName)
+                    .toList());
+        }
+
+        //3.填充上一篇/下一篇导航
+        articleDetail.setPrevArticle(baseMapper.getPrevArticle(articleDetail.getId()));
+        articleDetail.setNextArticle(baseMapper.getNextArticle(articleDetail.getId()));
+
+        //4.填充相关文章推荐（同分类，排除当前文章，最多 6 篇）
+        if (articleDetail.getCategoryId() != null){
+            articleDetail.setRelatedArticles(
+                    baseMapper.getRelatedArticles(articleDetail.getId(), articleDetail.getCategoryId())
+            );
+        }
+        return articleDetail;
     }
 
     @Override

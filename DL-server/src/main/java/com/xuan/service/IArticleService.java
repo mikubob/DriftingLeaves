@@ -9,6 +9,7 @@ import com.xuan.result.PageResult;
 import com.xuan.vo.ArticleArchiveVO;
 import com.xuan.vo.ArticleVO;
 import com.xuan.vo.BlogArticleDetailVO;
+import com.xuan.vo.BlogArticleVO;
 
 import java.util.List;
 
@@ -77,7 +78,7 @@ public interface IArticleService extends IService<Articles> {
     /**
      * 获取已发布文章列表（分页）
      */
-    PageResult getPublishedPage(int page, int pageSize);
+    PageResult<BlogArticleVO> getPublishedPage(int page, int pageSize);
 
     /**
      * 根据slug获取文章详情（浏览量+1）

@@ -3,6 +3,7 @@ package com.xuan.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -28,6 +29,7 @@ import com.xuan.vo.BlogArticleDetailVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +47,6 @@ import java.util.List;
 public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> implements IArticleService {
 
     private final IArticleTagService articleTagService;
-    private final IArticleCategoryService articleCategoryService;
     private final IRssSubscriptionService rssSubscriptionService;
     private final WebsiteProperties websiteProperties;
     private final AsyncEmailService asyncEmailService;
@@ -268,8 +269,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
 
     /**
      * 置顶/取消置顶文章
-     * @param id
-     * @param isTop
+     * @param id 文章id
+     * @param isTop 是否置顶
      */
     @Override
     @Caching(evict = {
@@ -310,14 +311,34 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     }
 
 
+    /**
+     * 获取已发布文章分页
+     * @param page 页码
+     * @param pageSize 每页数量
+     * @return 分页结果
+     */
     @Override
+    @Cacheable(value = "articleList", key = "'page:' + #page + ':' + #pageSize")
     public PageResult<Articles> getPublishedPage(int page, int pageSize) {
+        // 1.创建分页对象
         Page<Articles> mpPage = new Page<>(page, pageSize);
+        
+        // 2.构建查询条件（使用 LambdaQueryWrapper 保持类型安全）
         LambdaQueryWrapper<Articles> wrapper = new LambdaQueryWrapper<>();
+        // 2.1 筛选已发布文章（is_published = 1）
         wrapper.eq(Articles::getIsPublished, 1);
-        wrapper.orderByDesc(Articles::getIsTop, Articles::getCreateTime);
-
+        
+        // 3.设置排序规则
+        // 3.1 先按是否置顶降序（is_top DESC）
+        wrapper.orderByDesc(Articles::getIsTop);
+        // 3.2 再按发布时间降序，如果发布时间为空则使用创建时间（COALESCE(publish_time, create_time) DESC）
+        // 注意：LambdaQueryWrapper 不支持方法引用的 SQL 函数，需要使用 last() 添加自定义 SQL 排序
+        wrapper.last(", COALESCE(publish_time, create_time) DESC");
+        
+        // 4.执行分页查询
         IPage<Articles> resultPage = this.page(mpPage, wrapper);
+        
+        // 5.构建分页结果并返回
         return PageResult.fromIPage(resultPage);
     }
 

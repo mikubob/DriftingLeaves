@@ -62,4 +62,10 @@ public interface IArticleTagService extends IService<ArticleTags> {
      * @param tagIds
      */
     void batchInsertRelations(Long id, List<Long> tagIds);
+
+    /**
+     * 批量删除标签关联
+     * @param ids
+     */
+    void batchDeleteRelationsByArticleIds(List<Long> ids);
 }

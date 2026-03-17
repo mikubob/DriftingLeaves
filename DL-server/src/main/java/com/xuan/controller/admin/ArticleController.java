@@ -119,7 +119,7 @@ public class ArticleController {
     }
 
     /**
-     * 文章搜索（标题、内容）
+     * 文章搜索（全文本搜索：标题、摘要、内容）
      * @param keyword
      * @param page
      * @param pageSize
@@ -129,7 +129,7 @@ public class ArticleController {
     public Result<PageResult> search(@RequestParam String keyword,
                                      @RequestParam(defaultValue = "1") int page,
                                      @RequestParam(defaultValue = "10") int pageSize) {
-        log.info("文章搜索: keyword={}", keyword);
+        log.info("文章搜索：keyword={}", keyword);
         PageResult pageResult = articleService.search(keyword, page, pageSize);
         return Result.success(pageResult);
     }

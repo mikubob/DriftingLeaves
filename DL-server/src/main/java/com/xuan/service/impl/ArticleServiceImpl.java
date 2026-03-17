@@ -3,6 +3,7 @@ package com.xuan.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -10,15 +11,21 @@ import com.xuan.constant.MessageConstant;
 import com.xuan.constant.StatusConstant;
 import com.xuan.dto.ArticleDTO;
 import com.xuan.dto.ArticlePageQueryDTO;
+import com.xuan.entity.ArticleCategories;
 import com.xuan.entity.Articles;
+import com.xuan.entity.RssSubscriptions;
 import com.xuan.exception.ArticleException;
 import com.xuan.mapper.ArticleMapper;
-import com.xuan.mapper.ArticleTagMapper;
+import com.xuan.properties.WebsiteProperties;
 import com.xuan.result.PageResult;
+import com.xuan.service.AsyncEmailService;
+import com.xuan.service.IArticleCategoryService;
 import com.xuan.service.IArticleService;
 import com.xuan.service.IArticleTagService;
+import com.xuan.service.IRssSubscriptionService;
 import com.xuan.utils.MarkdownUtil;
 import com.xuan.vo.ArticleArchiveVO;
+import com.xuan.vo.ArticleVO;
 import com.xuan.vo.BlogArticleDetailVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +37,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 文章服务实现类
@@ -40,6 +49,10 @@ import java.util.List;
 public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> implements IArticleService {
 
     private final IArticleTagService articleTagService;
+    private final IArticleCategoryService articleCategoryService;
+    private final IRssSubscriptionService rssSubscriptionService;
+    private final WebsiteProperties websiteProperties;
+    private final AsyncEmailService asyncEmailService;
 
     //分钟阅读量：300字/分钟
     private final int VIEWS = 300;
@@ -117,8 +130,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
         //TODO 6.保存文章-标签关联
         if (articleDTO.getTagIds() != null && !articleDTO.getTagIds().isEmpty()) {
             articleTagService.deleteRelationsByArticleId(articleDTO.getId());
-            if (!articleDTO.getTagIds().isEmpty()){
-                articleTagService.batchInsertRelations(articleDTO.getId(),articleDTO.getTagIds());
+            if (!articleDTO.getTagIds().isEmpty()) {
+                articleTagService.batchInsertRelations(articleDTO.getId(), articleDTO.getTagIds());
             }
         }
     }
@@ -144,6 +157,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
 
     /**
      * 更新文章
+     *
      * @param articleDTO 文章数据
      */
     @Override
@@ -155,42 +169,143 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
             @CacheEvict(value = "blogReport", allEntries = true)
     })
     public void updateArticle(ArticleDTO articleDTO) {
-        // TODO: 实现更新文章逻辑
+        Articles articles = getById(articleDTO.getId());
+        if (articles == null) {
+            throw new ArticleException(MessageConstant.ARTICLE_NOT_FOUND);
+        }
+
+        BeanUtil.copyProperties(articleDTO, articles);
+
+        //1.如果文章状态由草稿变为发布，且没有发布时间，则设置发布时间
+        if (articleDTO.getIsPublished() != null
+                && articleDTO.getIsPublished().equals(StatusConstant.ENABLE)
+                && articles.getPublishTime() == null) {
+            articles.setPublishTime(LocalDateTime.now());
+        }
+
+        //2.如果markdown有内容更新，重新生成html并且计算字数
+        if (StrUtil.isNotBlank(articleDTO.getContentMarkdown())) {
+            // 2.1.优先查看前端是否渲染了html，渲染了直接使用前端渲染
+            if (StrUtil.isNotBlank(articleDTO.getContentHtml())) {
+                articles.setContentHtml(articleDTO.getContentHtml());
+            } else {
+                //2.2.否则使用markdown转换
+                String rawContent = articleDTO.getContentMarkdown();
+                String contentHtml = MarkdownUtil.isHtml(rawContent)
+                        ? MarkdownUtil.sanitize(rawContent)
+                        : MarkdownUtil.toHtml(rawContent);
+                articles.setContentHtml(contentHtml);
+            }
+        }
+
+        //3.计算字数和阅读时间
+        long wordCount = countWords(articles.getContentMarkdown());
+        long readingTime = Math.max(1, wordCount / VIEWS);
+        articles.setWordCount(wordCount);
+        articles.setReadingTime(readingTime);
+
+        //4.更新文章
+        updateById(articles);
+
+        //TODO 5.更新文章-标签关联
+        if (articleDTO.getTagIds() != null){
+            articleTagService.deleteRelationsByArticleId(articleDTO.getId());
+            if (!articleDTO.getTagIds().isEmpty()) {
+                articleTagService.batchInsertRelations(articleDTO.getId(), articleDTO.getTagIds());
+            }
+        }
     }
 
+    /**
+     * 批量删除文章
+     * @param ids 文章id列表
+     */
     @Override
+    @Transactional
     public void batchDelete(List<Long> ids) {
-        this.removeByIds(ids);
+        //1.批量删除文章-标签关联
+        articleTagService.batchDeleteRelationsByArticleIds(ids);
+        //2.批量删除文章
+        removeByIds(ids);
     }
 
+    /**
+     * 发布或取消发布文章
+     * @param id 文章id
+     * @param isPublished 是否发布
+     */
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "articleList", allEntries = true),
+            @CacheEvict(value = "articleDetail", allEntries = true),
+            @CacheEvict(value = "articleArchive", allEntries = true),
+            @CacheEvict(value = "blogReport", allEntries = true)
+    })
     public void publishOrCancel(Long id, Integer isPublished) {
-        Articles articles = this.getArticleById(id);
-        if (articles != null) {
-            articles.setIsPublished(isPublished);
-            this.updateById(articles);
+        //1.查询文章是否存在
+        Articles articles = getById(id);
+        if (articles == null) {
+            throw new ArticleException(MessageConstant.ARTICLE_NOT_FOUND);
         }
+
+        //2.设置发布状态
+        Articles updateArticle = Articles.builder()
+                .id(id)
+                .isPublished(isPublished)
+                .build();
+
+        //3.如果为首次发布，则设置发布时间
+        if (isPublished.equals(StatusConstant.ENABLE) && articles.getPublishTime() == null) {
+            updateArticle.setPublishTime(LocalDateTime.now());
+        }
+
+        //4.更新文章状态
+        updateById(updateArticle);
+
+        //TODO 5.发布时通知RSS订阅者
+        if (isPublished.equals(StatusConstant.ENABLE)) {
+            notifyRssSubscribers(articles);
+        }
+
+
     }
 
+    /**
+     * 置顶/取消置顶文章
+     * @param id
+     * @param isTop
+     */
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "articleList", allEntries = true),
+            @CacheEvict(value = "articleDetail", allEntries = true),
+    })
     public void toggleTop(Long id, Integer isTop) {
-        Articles articles = this.getArticleById(id);
-        if (articles != null) {
-            articles.setIsTop(isTop);
-            this.updateById(articles);
+        //1.根据id获取当前文章
+        Articles articles = getById(id);
+        if (articles == null) {
+            throw new ArticleException(MessageConstant.ARTICLE_NOT_FOUND);
         }
+        //2.更新文章置顶状态
+        updateById(Articles.builder()
+                .id(id)
+                .isTop(isTop)
+                .build());
+
     }
 
+    /**
+     * 文章搜索
+     * @param keyword 关键字
+     * @param page 页码
+     * @param pageSize 每页数量
+     * @return 分页结果
+     */
     @Override
-    public PageResult<Articles> search(String keyword, int page, int pageSize) {
-        Page<Articles> mpPage = new Page<>(page, pageSize);
-        LambdaQueryWrapper<Articles> wrapper = new LambdaQueryWrapper<>();
-        wrapper.and(w -> w.like(Articles::getTitle, keyword).or().like(Articles::getContentMarkdown, keyword));
-        wrapper.orderByDesc(Articles::getCreateTime);
+    public PageResult<ArticleVO> search(String keyword, int page, int pageSize) {
 
-        IPage<Articles> resultPage = this.page(mpPage, wrapper);
-        return PageResult.fromIPage(resultPage);
     }
+
 
     @Override
     public PageResult<Articles> getPublishedPage(int page, int pageSize) {
@@ -261,7 +376,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     }
 
 
-    //<==========私有辅助方法辅助==========>
+//<==========私有辅助方法辅助==========>
 
     /**
      * 构建查询条件
@@ -316,5 +431,33 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
             }
         }
         return chineseCount + englishCount;
+    }
+
+
+    /**
+     * 通知RSS订阅者新文章发布
+     */
+    private void notifyRssSubscribers(Articles article) {
+        try {
+            //TODO 1. 获取所有激活的订阅者
+            List<RssSubscriptions> subscribers = rssSubscriptionService.getAllActiveSubscriptions();
+            if (subscribers == null || subscribers.isEmpty()) {
+                return;
+            }
+            String articleUrl = websiteProperties.getBlog() + "/article/" + article.getSlug();
+            //TODO2. 发送邮件
+            for (RssSubscriptions subscriber : subscribers) {
+                asyncEmailService.sendNewArticleNotificationAsync(
+                        subscriber.getEmail(),
+                        subscriber.getNickname() != null ? subscriber.getNickname() : "订阅者",
+                        article.getTitle(),
+                        article.getSummary(),
+                        articleUrl
+                );
+            }
+            log.info("已向 {} 个RSS订阅者发送新文章通知: title={}", subscribers.size(), article.getTitle());
+        } catch (Exception e) {
+            log.error("通知RSS订阅者异常: title={}, ex={}", article.getTitle(), e.getMessage());
+        }
     }
 }

@@ -7,6 +7,7 @@ import com.xuan.dto.ArticlePageQueryDTO;
 import com.xuan.entity.Articles;
 import com.xuan.result.PageResult;
 import com.xuan.vo.ArticleArchiveVO;
+import com.xuan.vo.ArticleVO;
 import com.xuan.vo.BlogArticleDetailVO;
 
 import java.util.List;
@@ -63,13 +64,13 @@ public interface IArticleService extends IService<Articles> {
     void toggleTop(Long id, Integer isTop);
 
     /**
-     * 文章搜索（标题、内容）
+     * 文章搜索（标题、摘要、内容的全文本搜索）
      * @param keyword
      * @param page
      * @param pageSize
      * @return
      */
-    PageResult search(String keyword, int page, int pageSize);
+    PageResult<ArticleVO> search(String keyword, int page, int pageSize);
 
     // ===== 博客端方法 =====
 

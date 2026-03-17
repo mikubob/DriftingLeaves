@@ -61,4 +61,9 @@ public class ArticleTagServiceImpl extends ServiceImpl<ArticleTagMapper, Article
     public void batchInsertRelations(Long id, List<Long> tagIds) {
         //TODO 实现批量插入标签关联逻辑
     }
+
+    @Override
+    public void batchDeleteRelationsByArticleIds(List<Long> ids) {
+        //TODO 实现批量删除标签关联逻辑
+    }
 }

@@ -3,7 +3,6 @@ package com.xuan.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -11,7 +10,6 @@ import com.xuan.constant.MessageConstant;
 import com.xuan.constant.StatusConstant;
 import com.xuan.dto.ArticleDTO;
 import com.xuan.dto.ArticlePageQueryDTO;
-import com.xuan.entity.ArticleCategories;
 import com.xuan.entity.Articles;
 import com.xuan.entity.RssSubscriptions;
 import com.xuan.exception.ArticleException;
@@ -37,8 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 文章服务实现类
@@ -303,7 +299,14 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
      */
     @Override
     public PageResult<ArticleVO> search(String keyword, int page, int pageSize) {
-
+        // 1.创建分页对象
+        Page<ArticleVO> mpPage = new Page<>(page, pageSize);
+        
+        // 2.使用全文索引搜索（通过 Mapper XML）
+        IPage<ArticleVO> resultPage = baseMapper.searchWithFullText(mpPage, keyword);
+        
+        // 3.使用 PageResult.fromIPage() 构建分页结果
+        return PageResult.fromIPage(resultPage);
     }
 
 
@@ -435,7 +438,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
 
 
     /**
-     * 通知RSS订阅者新文章发布
+     * 通知 RSS 订阅者新文章发布
      */
     private void notifyRssSubscribers(Articles article) {
         try {

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuan.mapper.ArticleMapper">
+
+    <!-- 全文搜索文章 -->
+    <select id="searchWithFullText" resultType="com.xuan.vo.ArticleVO">
+        SELECT 
+            a.id, 
+            a.title, 
+            a.slug, 
+            a.summary, 
+            a.cover_image, 
+            a.category_id,
+            ac.name AS category_name,
+            a.view_count, 
+            a.like_count, 
+            a.comment_count, 
+            a.word_count, 
+            a.reading_time,
+            a.is_published, 
+            a.is_top, 
+            a.publish_time, 
+            a.create_time, 
+            a.update_time
+        FROM articles a
+        LEFT JOIN article_categories ac ON a.category_id = ac.id
+        WHERE a.is_published = 1
+        <if test="keyword != null and keyword != ''">
+            AND MATCH(a.title, a.summary, a.content_markdown) AGAINST(#{keyword} IN BOOLEAN MODE)
+        </if>
+        ORDER BY a.is_top DESC, a.create_time DESC
+    </select>
+
+</mapper>

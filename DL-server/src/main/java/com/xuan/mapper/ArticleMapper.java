@@ -67,8 +67,25 @@ public interface ArticleMapper extends BaseMapper<Articles> {
     
     /**
      * 博客端文章搜索（仅获取已发布文章）
+     * @param page 分页对象
      * @param keyword 搜索关键词
      * @return 分页结果
      */
     IPage<BlogArticleVO> searchPublished(IPage<BlogArticleVO> page, @Param("keyword") String keyword);
+
+    /**
+     * 根据分类 ID 获取已发布文章分页列表
+     * @param page 分页对象
+     * @param categoryId 分类 ID
+     * @return 分页结果
+     */
+    IPage<BlogArticleVO> getPublishedByCategoryId(IPage<BlogArticleVO> page, @Param("categoryId") Long categoryId);
+
+    /**
+     * 根据标签 ID 获取已发布文章分页列表
+     * @param page 分页对象
+     * @param tagId 标签 ID
+     * @return 分页结果
+     */
+    IPage<BlogArticleVO> getPublishedByTagId(IPage<BlogArticleVO> page, @Param("tagId") Long tagId);
 }

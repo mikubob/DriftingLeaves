@@ -193,4 +193,51 @@
         ORDER BY a.is_top DESC, COALESCE(a.publish_time, a.create_time) DESC
     </select>
 
+    <!-- 根据分类 ID 获取已发布文章分页列表 -->
+    <select id="getPublishedByCategoryId" resultType="com.xuan.vo.BlogArticleVO">
+        SELECT 
+            a.id, 
+            a.title, 
+            a.slug, 
+            a.summary, 
+            a.cover_image, 
+            a.category_id,
+            ac.name AS category_name,
+            a.view_count, 
+            a.like_count, 
+            a.comment_count, 
+            a.word_count, 
+            a.reading_time,
+            a.is_top, 
+            a.publish_time
+        FROM articles a
+        LEFT JOIN article_categories ac ON a.category_id = ac.id
+        WHERE a.is_published = 1 AND a.category_id = #{categoryId}
+        ORDER BY a.is_top DESC, COALESCE(a.publish_time, a.create_time) DESC
+    </select>
+
+    <!-- 根据标签 ID 获取已发布文章分页列表 -->
+    <select id="getPublishedByTagId" resultType="com.xuan.vo.BlogArticleVO">
+        SELECT 
+            a.id, 
+            a.title, 
+            a.slug, 
+            a.summary, 
+            a.cover_image, 
+            a.category_id,
+            ac.name AS category_name,
+            a.view_count, 
+            a.like_count, 
+            a.comment_count, 
+            a.word_count, 
+            a.reading_time,
+            a.is_top, 
+            a.publish_time
+        FROM articles a
+        LEFT JOIN article_categories ac ON a.category_id = ac.id
+        INNER JOIN article_tag_relations atr ON a.id = atr.article_id
+        WHERE a.is_published = 1 AND atr.tag_id = #{tagId}
+        ORDER BY a.is_top DESC, COALESCE(a.publish_time, a.create_time) DESC
+    </select>
+
 </mapper>

@@ -93,7 +93,7 @@ public interface IArticleService extends IService<Articles> {
     /**
      * 根据分类ID获取已发布文章列表（分页）
      */
-    PageResult getPublishedByCategoryId(Long categoryId, int page, int pageSize);
+    PageResult<BlogArticleVO> getPublishedByCategoryId(Long categoryId, int page, int pageSize);
 
     /**
      * 获取文章归档（按年月分组）

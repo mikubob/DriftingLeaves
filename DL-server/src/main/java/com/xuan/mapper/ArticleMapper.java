@@ -3,6 +3,7 @@ package com.xuan.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.xuan.entity.Articles;
+import com.xuan.vo.ArticleArchiveItemVO;
 import com.xuan.vo.ArticleVO;
 import com.xuan.vo.BlogArticleDetailVO;
 import com.xuan.vo.BlogArticleVO;
@@ -57,4 +58,10 @@ public interface ArticleMapper extends BaseMapper<Articles> {
      * @return 相关文章列表
      */
     List<BlogArticleVO> getRelatedArticles(@Param("articleId") Long articleId, @Param("categoryId") Long categoryId);
+    
+    /**
+     * 获取文章归档列表
+     * @return 文章归档列表
+     */
+    List<ArticleArchiveItemVO> getArchiveList();
 }

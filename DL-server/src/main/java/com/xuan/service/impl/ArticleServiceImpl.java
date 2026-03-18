@@ -23,6 +23,7 @@ import com.xuan.service.IArticleService;
 import com.xuan.service.IArticleTagService;
 import com.xuan.service.IRssSubscriptionService;
 import com.xuan.utils.MarkdownUtil;
+import com.xuan.vo.ArticleArchiveItemVO;
 import com.xuan.vo.ArticleArchiveVO;
 import com.xuan.vo.ArticleVO;
 import com.xuan.vo.BlogArticleDetailVO;
@@ -37,8 +38,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 文章服务实现类
@@ -399,13 +402,44 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
         return PageResult.fromIPage(resultPage);
     }
 
+    /**
+     * 获取文章归档
+     * @return 文章归档列表
+     */
     @Override
+    @Cacheable(value = "articleArchive", key = "'all'")
     public List<ArticleArchiveVO> getArchive() {
-        // TODO: 实现文章归档逻辑
-        return Collections.emptyList();
+        //1. 查询所有已发布文章
+        List<ArticleArchiveItemVO> allArticles = baseMapper.getArchiveList();
+        
+        //2. 按年月分组
+        Map<String, ArticleArchiveVO> archiveMap = new LinkedHashMap<>();
+        
+        for (ArticleArchiveItemVO item : allArticles) {
+            if (item.getPublishTime() == null) {
+                continue;
+            }
+            
+            int year = item.getPublishTime().getYear();
+            int month = item.getPublishTime().getMonthValue();
+            String key = year + "-" + month;
+            
+            ArticleArchiveVO archiveVO = archiveMap.computeIfAbsent(key, k ->
+                    ArticleArchiveVO.builder()
+                            .year(year)
+                            .month(month)
+                            .articles(new ArrayList<>())
+                            .build()
+            );
+            archiveVO.getArticles().add(item);
+        }
+        
+        //3. 返回归档列表
+        return new ArrayList<>(archiveMap.values());
     }
 
     @Override
+    @Cacheable(value = "articleList", key = "'search:' + #keyword + ':' + #page + ':' + #pageSize")
     public PageResult<Articles> searchPublished(String keyword, int page, int pageSize) {
         Page<Articles> mpPage = new Page<>(page, pageSize);
         LambdaQueryWrapper<Articles> wrapper = new LambdaQueryWrapper<>();

@@ -154,4 +154,17 @@
         LIMIT 6
     </select>
 
+    <!-- 获取文章归档列表 -->
+    <select id="getArchiveList" resultType="com.xuan.vo.ArticleArchiveItemVO">
+        SELECT 
+            id, 
+            title, 
+            slug, 
+            publish_day, 
+            COALESCE(publish_time, create_time) AS publishTime
+        FROM articles
+        WHERE is_published = 1
+        ORDER BY COALESCE(publish_time, create_time) DESC
+    </select>
+
 </mapper>

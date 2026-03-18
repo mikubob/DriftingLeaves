@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xuan.mapper.ArticleCommentMapper">
+
+    <select id="pageQueryWithArticleTitle" resultType="com.xuan.entity.ArticleComments">
+        SELECT c.*, a.title AS article_title
+        FROM article_comments c
+        LEFT JOIN articles a ON c.article_id = a.id
+        <where>
+            <if test="dto.articleId != null">
+                AND c.article_id = #{dto.articleId}
+            </if>
+            <if test="dto.isApproved != null">
+                AND c.is_approved = #{dto.isApproved}
+            </if>
+            <if test="dto.startTime != null">
+                AND c.create_time &gt;= #{dto.startTime}
+            </if>
+            <if test="dto.endTime != null">
+                AND c.create_time &lt;= #{dto.endTime}
+            </if>
+        </where>
+        ORDER BY c.create_time DESC
+    </select>
+
+</mapper>

@@ -4,6 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.lionsoul.ip2region.xdb.Searcher;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 public class IpUtil {
@@ -84,6 +86,32 @@ public class IpUtil {
             log.error("IP 地理位置解析失败", e);
         }
         return "未知";
+    }
+
+    /**
+     * 获取地理位置信息（兼容旧版 API）
+     * 返回包含 province 和 city 的 Map
+     *
+     * @param ip IP 地址
+     * @return 包含 province 和 city 的 Map
+     */
+    public static Map<String, String> getGeoInfo(String ip) {
+        String location = getIpLocation(ip);
+        Map<String, String> result = new HashMap<>();
+        if ("本地".equals(location) || "未知".equals(location)) {
+            result.put("province", "");
+            result.put("city", "");
+        } else {
+            String[] parts = location.split("\\s+");
+            if (parts.length >= 2) {
+                result.put("province", parts[0]);
+                result.put("city", parts[1]);
+            } else if (parts.length == 1) {
+                result.put("province", parts[0]);
+                result.put("city", parts[0]);
+            }
+        }
+        return result;
     }
 
     private static boolean isInvalid(String ip) {

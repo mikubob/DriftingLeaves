@@ -38,9 +38,11 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
      */
     @Override
     public List<ArticleCategories> listAll() {
+        // 构建查询条件
         LambdaQueryWrapper<ArticleCategories> wrapper = new LambdaQueryWrapper<>();
         wrapper.orderByAsc(ArticleCategories::getSort)
                 .orderByDesc(ArticleCategories::getId);
+        // 执行查询
         return list(wrapper);
     }
 
@@ -57,7 +59,9 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
             @CacheEvict(value = "blogReport", allEntries = true)
     })
     public void addCategory(ArticleCategoryDTO articleCategoryDTO) {
+        //1.复制属性
         ArticleCategories articleCategories = BeanUtil.copyProperties(articleCategoryDTO, ArticleCategories.class);
+        //2.保存分类
         save(articleCategories);
     }
 
@@ -74,12 +78,15 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
             @CacheEvict(value = "blogReport", allEntries = true)
     })
     public void updateCategory(ArticleCategoryDTO articleCategoryDTO) {
+        //1.根据 ID 查询分类
         ArticleCategories articleCategories = getById(articleCategoryDTO.getId());
         if (articleCategories == null) {
             throw new ArticleCategoryException(MessageConstant.CATEGORY_NOT_FOUND);
         }
         
+        //2.复制属性
         BeanUtil.copyProperties(articleCategoryDTO, articleCategories);
+        //3.更新分类
         updateById(articleCategories);
     }
 
@@ -96,7 +103,7 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
             @CacheEvict(value = "blogReport", allEntries = true)
     })
     public void batchDelete(List<Long> ids) {
-        // 检查分类下是否有关联文章
+        //1.检查分类下是否有关联文章
         for (Long id : ids) {
             long count = articleService.count(new LambdaQueryWrapper<Articles>()
                     .eq(Articles::getCategoryId, id));
@@ -104,6 +111,7 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
                 throw new ArticleCategoryException(MessageConstant.CATEGORY_HAS_ARTICLES);
             }
         }
+        //2.批量删除分类
         removeByIds(ids);
     }
 
@@ -115,6 +123,7 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
     @Override
     @Cacheable(value = "articleCategories", key = "'visible'")
     public List<ArticleCategories> getVisibleCategories() {
+        // 执行自定义 SQL 查询
         return baseMapper.getVisibleCategories();
     }
 }

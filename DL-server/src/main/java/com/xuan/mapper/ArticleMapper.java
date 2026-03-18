@@ -64,4 +64,11 @@ public interface ArticleMapper extends BaseMapper<Articles> {
      * @return 文章归档列表
      */
     List<ArticleArchiveItemVO> getArchiveList();
+    
+    /**
+     * 博客端文章搜索（仅获取已发布文章）
+     * @param keyword 搜索关键词
+     * @return 分页结果
+     */
+    IPage<BlogArticleVO> searchPublished(IPage<BlogArticleVO> page, @Param("keyword") String keyword);
 }

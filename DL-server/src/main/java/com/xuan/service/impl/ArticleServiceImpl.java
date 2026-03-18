@@ -326,8 +326,13 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     @Override
     @Cacheable(value = "articleList", key = "'page:' + #page + ':' + #pageSize")
     public PageResult<BlogArticleVO> getPublishedPage(int page, int pageSize) {
+        // 1. 创建分页对象
         Page<BlogArticleVO> mpPage = new Page<>(page, pageSize);
+        
+        // 2. 查询已发布文章（使用自定义 SQL）
         IPage<BlogArticleVO> resultPage = baseMapper.getPublishedPage(mpPage);
+        
+        // 3. 返回分页结果
         return PageResult.fromIPage(resultPage);
     }
 
@@ -403,16 +408,16 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     }
 
     /**
-     * 获取文章归档
+     * 获取文章归档（按年月分组）
      * @return 文章归档列表
      */
     @Override
     @Cacheable(value = "articleArchive", key = "'all'")
     public List<ArticleArchiveVO> getArchive() {
-        //1. 查询所有已发布文章
+        // 1. 查询所有已发布文章
         List<ArticleArchiveItemVO> allArticles = baseMapper.getArchiveList();
         
-        //2. 按年月分组
+        // 2. 按年月分组
         Map<String, ArticleArchiveVO> archiveMap = new LinkedHashMap<>();
         
         for (ArticleArchiveItemVO item : allArticles) {
@@ -434,20 +439,22 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
             archiveVO.getArticles().add(item);
         }
         
-        //3. 返回归档列表
+        // 3. 返回归档列表
         return new ArrayList<>(archiveMap.values());
     }
 
+    /**
+     * 博客端文章搜索（仅获取已发布文章）
+     * @param keyword 关键字
+     * @param page 页码
+     * @param pageSize 每页数量
+     * @return 分页结果
+     */
     @Override
     @Cacheable(value = "articleList", key = "'search:' + #keyword + ':' + #page + ':' + #pageSize")
-    public PageResult<Articles> searchPublished(String keyword, int page, int pageSize) {
-        Page<Articles> mpPage = new Page<>(page, pageSize);
-        LambdaQueryWrapper<Articles> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Articles::getIsPublished, 1);
-        wrapper.and(w -> w.like(Articles::getTitle, keyword).or().like(Articles::getContentMarkdown, keyword));
-        wrapper.orderByDesc(Articles::getIsTop, Articles::getCreateTime);
-
-        IPage<Articles> resultPage = this.page(mpPage, wrapper);
+    public PageResult<BlogArticleVO> searchPublished(String keyword, int page, int pageSize) {
+        Page<BlogArticleVO> mpPage = new Page<>(page, pageSize);
+        IPage<BlogArticleVO> resultPage = baseMapper.searchPublished(mpPage, keyword);
         return PageResult.fromIPage(resultPage);
     }
 

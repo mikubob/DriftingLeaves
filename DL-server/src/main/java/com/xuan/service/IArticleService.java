@@ -103,7 +103,7 @@ public interface IArticleService extends IService<Articles> {
     /**
      * 博客端文章搜索（仅已发布）
      */
-    PageResult searchPublished(String keyword, int page, int pageSize);
+    PageResult<BlogArticleVO> searchPublished(String keyword, int page, int pageSize);
 
     /**
      * 根据标签ID获取已发布文章列表

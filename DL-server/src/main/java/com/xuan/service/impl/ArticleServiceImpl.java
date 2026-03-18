@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xuan.constant.MessageConstant;
+import com.xuan.constant.RedisConstant;
 import com.xuan.constant.StatusConstant;
 import com.xuan.dto.ArticleDTO;
 import com.xuan.dto.ArticlePageQueryDTO;
@@ -31,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,9 +52,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     private final IRssSubscriptionService rssSubscriptionService;
     private final WebsiteProperties websiteProperties;
     private final AsyncEmailService asyncEmailService;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     //分钟阅读量：300字/分钟
-    private final int VIEWS = 300;
+    private static final int VIEWS = 300;
 
     /**
      * 分页查询文章
@@ -360,20 +363,39 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
         return articleDetail;
     }
 
+    /**
+     * 文章浏览量+1（写入Redis，定期写入mysql）
+     * @param articleId 文章ID
+     */
     @Override
     public void incrementViewCount(Long articleId) {
-        // TODO: 实现浏览量增加逻辑（Redis）
+        redisTemplate.opsForHash().increment(RedisConstant.ARTICLE_VIEW_COUNT, articleId, 1);
     }
 
+    /**
+     * 根据分类ID获取文章分页
+     * @param categoryId 分类ID
+     * @param page 页码
+     * @param pageSize 每页数量
+     * @return 分页结果
+     */
     @Override
+    @Cacheable(value = "articleList", key = "'cat:' + #categoryId + ':' + #page + ':' + #pageSize")
     public PageResult<Articles> getPublishedByCategoryId(Long categoryId, int page, int pageSize) {
+        //1.创建分页对象
         Page<Articles> mpPage = new Page<>(page, pageSize);
+        
+        //2.构建查询条件
         LambdaQueryWrapper<Articles> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Articles::getCategoryId, categoryId);
-        wrapper.eq(Articles::getIsPublished, 1);
-        wrapper.orderByDesc(Articles::getIsTop, Articles::getCreateTime);
-
-        IPage<Articles> resultPage = this.page(mpPage, wrapper);
+        wrapper.eq(Articles::getIsPublished, StatusConstant.ENABLE);
+        wrapper.orderByDesc(Articles::getIsTop)
+               .orderByDesc(true, Articles::getPublishTime, Articles::getCreateTime);
+        
+        //3.执行分页查询
+        IPage<Articles> resultPage = page(mpPage, wrapper);
+        
+        //4.返回分页结果
         return PageResult.fromIPage(resultPage);
     }
 

@@ -30,4 +30,7 @@ public class MessageConstant {
     public static final String CATEGORY_NOT_FOUND = "分类不存在";
     public static final String CATEGORY_HAS_ARTICLES = "分类下存在关联文章，无法删除";
     public static final String GUEST_READ_ONLY = "游客账号仅有查看权限，无法进行此操作";
+    public static final String MESSAGE_NOT_FOUND = "留言不存在";
+    public static final String MESSAGE_NOT_EDIT = "无权编辑此留言";
+    public static final String MESSAGE_NOT_DELETE = "无权删除此留言";
 }

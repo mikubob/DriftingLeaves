@@ -151,7 +151,7 @@ public class ArticleCommentServiceImpl extends ServiceImpl<ArticleCommentMapper,
         }
 
         //5.批量删除评论
-        this.removeByIds(ids);
+        removeBatchByIds(ids);
     }
 
     /**

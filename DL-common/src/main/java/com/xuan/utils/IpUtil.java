@@ -14,12 +14,10 @@ public class IpUtil {
 
     // 静态加载 ip2region 数据库
     static {
-        try {
-            InputStream inputStream = IpUtil.class.getClassLoader().getResourceAsStream("ip2region.xdb");
+        try (InputStream inputStream = IpUtil.class.getClassLoader().getResourceAsStream("ip2region.xdb")) {
             if (inputStream != null) {
                 byte[] bytes = inputStream.readAllBytes();
                 searcher = Searcher.newWithBuffer(bytes);
-                inputStream.close();
             } else {
                 log.error("无法找到 ip2region.xdb 文件");
             }
@@ -62,6 +60,8 @@ public class IpUtil {
         return ip;
     }
 
+
+
     /**
      * 获取地理位置 (离线高性能版)
      */
@@ -89,32 +89,73 @@ public class IpUtil {
     }
 
     /**
-     * 获取地理位置信息（兼容旧版 API）
-     * 返回包含 province 和 city 的 Map
+     * 获取地理位置信息
+     * 返回包含 country、province 和 city 的 Map
      *
      * @param ip IP 地址
-     * @return 包含 province 和 city 的 Map
+     * @return 包含 country、province 和 city 的 Map
      */
     public static Map<String, String> getGeoInfo(String ip) {
-        String location = getIpLocation(ip);
-        Map<String, String> result = new HashMap<>();
-        if ("本地".equals(location) || "未知".equals(location)) {
-            result.put("province", "");
-            result.put("city", "");
-        } else {
-            String[] parts = location.split("\\s+");
-            if (parts.length >= 2) {
-                result.put("province", parts[0]);
-                result.put("city", parts[1]);
-            } else if (parts.length == 1) {
-                result.put("province", parts[0]);
-                result.put("city", parts[0]);
-            }
+        if (isInvalid(ip) || "127.0.0.1".equals(ip)) {
+            return createEmptyResult();
         }
+        
+        if (searcher == null) {
+            return createEmptyResult();
+        }
+
+        try {
+            String region = searcher.search(ip);
+            if (region != null) {
+                String[] parts = region.split("\\|");
+                // 格式：国家|区域|省份|城市|ISP
+                String country = parts.length > 0 && !"0".equals(parts[0]) ? parts[0] : "";
+                String province = parts.length > 2 && !"0".equals(parts[2]) ? parts[2] : "";
+                String city = parts.length > 3 && !"0".equals(parts[3]) ? parts[3] : "";
+                
+                Map<String, String> result = new HashMap<>();
+                result.put("country", country);
+                result.put("province", province);
+                result.put("city", city);
+                return result;
+            }
+        } catch (Exception e) {
+            log.error("IP 地理位置解析失败", e);
+        }
+        return createEmptyResult();
+    }
+
+    // 提取公共方法避免重复代码
+    private static Map<String, String> createEmptyResult() {
+        Map<String, String> result = new HashMap<>();
+        result.put("country", "");
+        result.put("province", "");
+        result.put("city", "");
         return result;
     }
 
     private static boolean isInvalid(String ip) {
-        return ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip);
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            return true;
+        }
+        // 简单 IPv4 验证
+        if (!ip.matches("^\\d{1,3}(\\.\\d{1,3}){3}$") &&
+            !ip.matches("^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$")) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 关闭 ip2region searcher 资源
+     */
+    public static void close() {
+        if (searcher != null) {
+            try {
+                searcher.close();
+            } catch (Exception e) {
+                log.error("关闭 ip2region searcher 失败", e);
+            }
+        }
     }
 }

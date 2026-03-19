@@ -127,8 +127,6 @@ create table visitors(
                          country varchar(25) comment '国家',
                          province varchar(25) comment '省份',
                          city varchar(25) comment '城市',
-                         longitude varchar(50) comment '经度',
-                         latitude varchar(50) comment '纬度',
     -- 访问信息
                          first_visit_time datetime comment '首次访问时间',
                          last_visit_time datetime comment '最后访问时间',

@@ -52,12 +52,6 @@ public class Visitors extends BaseEntity {
     // 城市
     private String city;
 
-    // 经度
-    private String longitude;
-
-    // 纬度
-    private String latitude;
-
     // 首次访问时间
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime firstVisitTime;

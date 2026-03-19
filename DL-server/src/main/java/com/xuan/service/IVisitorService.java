@@ -1,4 +1,4 @@
-package com.xuan.service;
+ package com.xuan.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xuan.dto.VisitorPageQueryDTO;
@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 
-public interface IVisitorService extends IService<Visitors> {
+public interface  IVisitorService extends IService<Visitors> {
     /**
      * 记录访客访问信息
      * @param visitorRecordDTO

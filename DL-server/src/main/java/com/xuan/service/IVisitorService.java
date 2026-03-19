@@ -37,4 +37,10 @@ public interface  IVisitorService extends IService<Visitors> {
      * @param ids
      */
     void batchUnblock(List<Long> ids);
+
+    /**
+     * 根据指纹查询访客
+     * @param fingerprint 指纹
+     */
+    Visitors findVisitorByFingerprint(String fingerprint);
 }

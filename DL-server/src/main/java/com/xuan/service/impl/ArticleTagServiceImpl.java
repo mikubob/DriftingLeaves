@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xuan.dto.ArticleTagDTO;
+import com.xuan.entity.ArticleTagRelations;
 import com.xuan.entity.ArticleTags;
 import com.xuan.mapper.ArticleTagMapper;
 import com.xuan.service.IArticleTagService;
@@ -98,30 +99,66 @@ public class ArticleTagServiceImpl extends ServiceImpl<ArticleTagMapper, Article
         return list != null ? list : Collections.emptyList();
     }
 
+    /**
+     * 根据文章 id 获取标签 id
+     * @param id 文章 id
+     * @return 标签 id 列表
+     */
     @Override
     public List<Long> getTagIdsByArticleId(Long id) {
-        //TODO 实现根据文章 id 获取标签 id 逻辑
-        return null;
+        List<Long> tagIds = baseMapper.getTagIdsByArticleId(id);
+        return tagIds != null ? tagIds : Collections.emptyList();
     }
 
+    /**
+     * 删除文章标签关系
+     * @param id 文章 id
+     */
     @Override
     public void deleteRelationsByArticleId(Long id) {
-        //TODO 实现根据文章 id 删除标签关联逻辑
+        baseMapper.deleteRelationsByArticleId(id);
     }
 
+    /**
+     * 批量插入文章标签关系
+     * @param articleId 文章 id
+     * @param tagIds 标签 id 列表
+     */
     @Override
-    public void batchInsertRelations(Long id, List<Long> tagIds) {
-        //TODO 实现批量插入标签关联逻辑
+    @Transactional(rollbackFor = Exception.class)
+    public void batchInsertRelations(Long articleId, List<Long> tagIds) {
+        if (tagIds == null || tagIds.isEmpty()) {
+            return;
+        }
+        List<ArticleTagRelations> relations = tagIds.stream()
+                .map(tagId -> ArticleTagRelations.builder()
+                        .articleId(articleId)
+                        .tagId(tagId)
+                        .build())
+                .toList();
+        baseMapper.batchInsertRelations(relations);
     }
 
+    /**
+     * 批量删除文章标签关系
+     * @param ids 文章 id 列表
+     */
     @Override
     public void batchDeleteRelationsByArticleIds(List<Long> ids) {
-        //TODO 实现批量删除标签关联逻辑
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+        baseMapper.batchDeleteRelationsByArticleIds(ids);
     }
 
+    /**
+     * 根据文章 id 获取标签
+     * @param id 文章 id
+     * @return 标签列表
+     */
     @Override
     public List<ArticleTags> getTagByArticleId(Long id) {
-        //TODO 实现根据文章 id 获取标签逻辑
-        return null;
+        List<ArticleTags> tags = baseMapper.getTagByArticleId(id);
+        return tags != null ? tags : Collections.emptyList();
     }
 }

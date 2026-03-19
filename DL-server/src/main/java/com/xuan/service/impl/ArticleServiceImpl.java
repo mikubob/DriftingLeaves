@@ -130,7 +130,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
         //5.保存文章到数据库
         save(articles);
 
-        //TODO 6.保存文章-标签关联
+        //6.保存文章-标签关联
         if (articleDTO.getTagIds() != null && !articleDTO.getTagIds().isEmpty()) {
             articleTagService.deleteRelationsByArticleId(articleDTO.getId());
             if (!articleDTO.getTagIds().isEmpty()) {
@@ -152,7 +152,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
         if (article == null) {
             throw new ArticleException(MessageConstant.ARTICLE_NOT_FOUND);
         }
-        //TODO 填充标签id列表，用于管理端编辑时回显
+        //填充标签id列表，用于管理端编辑时回显
         List<Long> tagIds = articleTagService.getTagIdsByArticleId(id);
         article.setTagIds(tagIds);
         return article;
@@ -210,7 +210,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
         //4.更新文章
         updateById(articles);
 
-        //TODO 5.更新文章-标签关联
+        //5.更新文章-标签关联
         if (articleDTO.getTagIds() != null){
             articleTagService.deleteRelationsByArticleId(articleDTO.getId());
             if (!articleDTO.getTagIds().isEmpty()) {
@@ -265,7 +265,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
         //4.更新文章状态
         updateById(updateArticle);
 
-        //TODO 5.发布时通知RSS订阅者
+        //5.发布时通知RSS订阅者
         if (isPublished.equals(StatusConstant.ENABLE)) {
             notifyRssSubscribers(articles);
         }
@@ -350,7 +350,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
             throw new ArticleException(MessageConstant.ARTICLE_NOT_FOUND);
         }
 
-        //TODO 2.填充标签名称列表
+        //2.填充标签名称列表
         List<ArticleTags> tags = articleTagService.getTagByArticleId(articleDetail.getId());
         if (tags != null && !tags.isEmpty()){
             articleDetail.setTagNames(tags.stream()
@@ -535,13 +535,13 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
      */
     private void notifyRssSubscribers(Articles article) {
         try {
-            //TODO 1. 获取所有激活的订阅者
+            //1. 获取所有激活的订阅者
             List<RssSubscriptions> subscribers = rssSubscriptionService.getAllActiveSubscriptions();
             if (subscribers == null || subscribers.isEmpty()) {
                 return;
             }
             String articleUrl = websiteProperties.getBlog() + "/article/" + article.getSlug();
-            //TODO2. 发送邮件
+            //2. 发送邮件
             for (RssSubscriptions subscriber : subscribers) {
                 asyncEmailService.sendNewArticleNotificationAsync(
                         subscriber.getEmail(),

@@ -33,7 +33,7 @@ public interface IArticleTagService extends IService<ArticleTags> {
      * @param ids
      * @return
      */
-    void batchDelete(List<Long> ids);
+    void batchDeleteTags(List<Long> ids);
 
     /**
      * 获取有已发布文章的标签列表（博客端）

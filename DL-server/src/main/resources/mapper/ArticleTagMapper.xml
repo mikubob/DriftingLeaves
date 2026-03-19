@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuan.mapper.ArticleTagMapper">
+
+    <select id="getVisibleTags" resultType="com.xuan.entity.ArticleTags">
+        SELECT
+            t.*,
+            COUNT(a.id) AS article_count
+        FROM article_tags t
+        LEFT JOIN article_tag_relations atr ON t.id = atr.tag_id
+        LEFT JOIN articles a ON atr.article_id = a.id AND a.is_published = 1
+        WHERE t.is_deleted = 0 AND t.visible = 1
+        GROUP BY t.id
+        ORDER BY t.id
+    </select>
+
+</mapper>

@@ -68,9 +68,9 @@ public class ArticleTagController {
      */
     @DeleteMapping
     @OperationLog(value = OperationType.DELETE, target = "articleTag", targetId = "#ids")
-    public Result batchDelete(@RequestParam List<Long> ids) {
-        log.info("批量删除文章标签: {}", ids);
-        articleTagService.batchDelete(ids);
+    public Result batchDeleteTags(@RequestParam List<Long> ids) {
+        log.info("批量删除文章标签：{}", ids);
+        articleTagService.batchDeleteTags(ids);
         return Result.success();
     }
 }

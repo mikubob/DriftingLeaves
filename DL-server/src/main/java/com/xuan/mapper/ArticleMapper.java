@@ -88,4 +88,8 @@ public interface ArticleMapper extends BaseMapper<Articles> {
      * @return 分页结果
      */
     IPage<BlogArticleVO> getPublishedByTagId(IPage<BlogArticleVO> page, @Param("tagId") Long tagId);
+
+    void addViewCount(@Param("id") Long id, @Param("increment") int increment);
+
+    void addLikeCount(@Param("id") Long id, @Param("increment") int increment);
 }

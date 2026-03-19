@@ -240,4 +240,14 @@
         ORDER BY a.is_top DESC, COALESCE(a.publish_time, a.create_time) DESC
     </select>
 
+    <!-- 增加浏览量 -->
+    <update id="addViewCount">
+        UPDATE articles SET view_count = view_count + #{increment} WHERE id = #{id}
+    </update>
+
+    <!-- 增加点赞数 -->
+    <update id="addLikeCount">
+        UPDATE articles SET like_count = like_count + #{increment} WHERE id = #{id}
+    </update>
+
 </mapper>

@@ -5,4 +5,8 @@ package com.xuan.constant;
  */
 public class RedisConstant {
     public static final String ARTICLE_VIEW_COUNT = "article:viewCount";
+    public static final String ARTICLE_LIKE_COUNT = "article:likeCount";
+    public static final String ARTICLE_LIKE_USER_SET = "article:like:users:";
+    public static final String LOCK_LIKE_COUNT_SYNC = "lock:likeCountSync";
+    public static final String LOCK_VIEW_COUNT_SYNC = "lock:viewCountSync";
 }

@@ -3,6 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.xuan.mapper.ArticleCommentMapper">
 
+    <-- 分页查询评论列表，并返回文章标题 -->
     <select id="pageQueryWithArticleTitle" resultType="com.xuan.entity.ArticleComments">
         SELECT c.*, a.title AS article_title
         FROM article_comments c

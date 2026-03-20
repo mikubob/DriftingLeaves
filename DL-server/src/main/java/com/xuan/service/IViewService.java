@@ -20,4 +20,16 @@ public interface IViewService extends IService<Views> {
      * @param ids
      */
     void batchDelete(List<Long> ids);
+
+    /**
+     * 统计总浏览量
+     * @return 总浏览量
+     */
+    Integer countTotal();
+
+    /**
+     * 统计今日浏览量
+     * @return 今日浏览量
+     */
+    Integer countToday();
 }

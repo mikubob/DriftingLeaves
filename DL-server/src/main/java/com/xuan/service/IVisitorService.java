@@ -43,4 +43,10 @@ public interface  IVisitorService extends IService<Visitors> {
      * @param fingerprint 指纹
      */
     Visitors findVisitorByFingerprint(String fingerprint);
+
+    /**
+     * 统计总访客数
+     * @return 总访客数
+     */
+    Integer countTotal();
 }

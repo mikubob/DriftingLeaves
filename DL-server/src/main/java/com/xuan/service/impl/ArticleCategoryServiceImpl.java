@@ -126,4 +126,13 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
         // 执行自定义 SQL 查询
         return baseMapper.getVisibleCategories();
     }
+
+    /**
+     * 获取文章分类总数
+     * @return 文章分类总数
+     */
+    @Override
+    public Integer countTotal() {
+        return Math.toIntExact(count());
+    }
 }

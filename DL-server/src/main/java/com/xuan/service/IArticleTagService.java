@@ -75,4 +75,10 @@ public interface IArticleTagService extends IService<ArticleTags> {
      * @return
      */
     List<ArticleTags> getTagByArticleId(Long id);
+
+    /**
+     * 获取标签总数
+     * @return 标签总数
+     */
+    Integer countTotal();
 }

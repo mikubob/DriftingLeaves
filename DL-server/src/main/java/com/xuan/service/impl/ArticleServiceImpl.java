@@ -472,6 +472,18 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     }
 
 
+    /**
+     * 获取已发布文章总数
+     * @return 已发布文章总数
+     */
+    @Override
+    public Integer countPublished() {
+        LambdaQueryWrapper<Articles> wrapper=new LambdaQueryWrapper<>();
+        wrapper.eq(Articles::getIsPublished, StatusConstant.ENABLE);
+        return Math.toIntExact(count(wrapper));
+    }
+
+
 //<==========私有辅助方法辅助==========>
 
     /**

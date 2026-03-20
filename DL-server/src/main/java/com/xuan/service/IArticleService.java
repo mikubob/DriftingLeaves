@@ -109,4 +109,10 @@ public interface IArticleService extends IService<Articles> {
      * 根据标签ID获取已发布文章列表
      */
     PageResult getPublishedByTagId(Long tagId, int page, int pageSize);
+
+    /**
+     * 获取已发布文章总数
+     * @return 已发布文章总数
+     */
+    Integer countPublished();
 }

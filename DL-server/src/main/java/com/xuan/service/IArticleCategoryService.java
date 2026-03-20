@@ -39,4 +39,10 @@ public interface IArticleCategoryService extends IService<ArticleCategories> {
      * 获取所有有已发布文章的可见分类
      */
     List<ArticleCategories> getVisibleCategories();
+
+    /**
+     * 获取文章分类总数
+     * @return 文章分类总数
+     */
+    Integer countTotal();
 }

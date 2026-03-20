@@ -44,4 +44,16 @@ public class VisitorServiceImpl extends ServiceImpl<VisitorMapper, Visitors> imp
     public void batchUnblock(List<Long> ids) {
         // TODO: 实现批量解封访客逻辑
     }
+
+    @Override
+    public Visitors findVisitorByFingerprint(String fingerprint) {
+        //TODO : 实现根据指纹查询访客逻辑
+        return null;
+    }
+
+    @Override
+    public Integer countTotal() {
+        //TODO: 实现统计访客总数逻辑
+        return 0;
+    }
 }

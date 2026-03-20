@@ -185,4 +185,13 @@ public class ArticleTagServiceImpl extends ServiceImpl<ArticleTagMapper, Article
         List<ArticleTags> tags = baseMapper.getTagByArticleId(id);
         return tags != null ? tags : Collections.emptyList();
     }
+
+    /**
+     * 获取文章总数
+     * @return 文章总数
+     */
+    @Override
+    public Integer countTotal() {
+        return Math.toIntExact(count());
+    }
 }

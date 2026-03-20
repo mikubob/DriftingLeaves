@@ -1,10 +1,8 @@
 package com.xuan.config;
 
 import com.baomidou.mybatisplus.annotation.DbType;
-import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
-import com.xuan.handle.MyMetaObjectHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -36,14 +34,5 @@ public class MybatisPlusConfig {
         interceptor.addInnerInterceptor(paginationInterceptor);
         
         return interceptor;
-    }
-
-    /**
-     * 注册自动填充处理器
-     * 用于自动填充创建时间、更新时间等字段
-     */
-    @Bean
-    public MetaObjectHandler metaObjectHandler() {
-        return new MyMetaObjectHandler();
     }
 }

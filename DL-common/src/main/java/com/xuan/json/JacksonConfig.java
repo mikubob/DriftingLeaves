@@ -28,7 +28,7 @@ import java.time.format.DateTimeFormatter;
  *
  */
 @Configuration
-public class JacksonObjectMapper {
+public class JacksonConfig {
 
     /** 日期时间格式 */
     private static final String DATETIME_PATTERN = "yyyy-MM-dd HH:mm";

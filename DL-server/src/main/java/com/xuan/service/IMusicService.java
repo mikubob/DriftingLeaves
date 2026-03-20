@@ -40,7 +40,7 @@ public interface IMusicService extends IService<Music> {
      * @param id
      * @return
      */
-    Music getById(Long id);
+    Music getMusicWithId(Long id);
 
     /**
      * 获取所有可见的音乐

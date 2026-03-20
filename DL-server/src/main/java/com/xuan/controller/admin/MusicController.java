@@ -47,7 +47,7 @@ public class MusicController {
     @GetMapping("/{id}")
     public Result<Music> getById(@PathVariable Long id) {
         log.info("根据ID查询音乐,{}", id);
-        Music music = musicService.getById(id);
+        Music music = musicService.getMusicWithId(id);
         return Result.success(music);
     }
 

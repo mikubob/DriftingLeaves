@@ -4,6 +4,7 @@ package com.xuan.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xuan.dto.ArticleDTO;
 import com.xuan.dto.ArticlePageQueryDTO;
+import com.xuan.dto.ArticleTitleViewCountDTO;
 import com.xuan.entity.Articles;
 import com.xuan.result.PageResult;
 import com.xuan.vo.ArticleArchiveVO;
@@ -115,4 +116,10 @@ public interface IArticleService extends IService<Articles> {
      * @return 已发布文章总数
      */
     Integer countPublished();
+
+    /**
+     * 获取文章浏览量top10
+     * @return 文章浏览量top10
+     */
+    List<ArticleTitleViewCountDTO> getViewTop10();
 }

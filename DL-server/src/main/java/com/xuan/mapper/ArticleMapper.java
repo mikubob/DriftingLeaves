@@ -2,6 +2,7 @@ package com.xuan.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.xuan.dto.ArticleTitleViewCountDTO;
 import com.xuan.entity.Articles;
 import com.xuan.vo.ArticleArchiveItemVO;
 import com.xuan.vo.ArticleVO;
@@ -92,4 +93,10 @@ public interface ArticleMapper extends BaseMapper<Articles> {
     void addViewCount(@Param("id") Long id, @Param("increment") int increment);
 
     void addLikeCount(@Param("id") Long id, @Param("increment") int increment);
+
+    /**
+     * 获取文章浏览量 top10
+     * @return 文章浏览量 top10 列表
+     */
+    List<ArticleTitleViewCountDTO> getViewTop10();
 }

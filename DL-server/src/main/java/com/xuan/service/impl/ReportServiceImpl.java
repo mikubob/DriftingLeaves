@@ -1,6 +1,8 @@
 package com.xuan.service.impl;
 
+import com.xuan.dto.ArticleTitleViewCountDTO;
 import com.xuan.dto.DailyViewCountDTO;
+import com.xuan.dto.ProvinceCountDTO;
 import com.xuan.service.IArticleCategoryService;
 import com.xuan.service.IArticleService;
 import com.xuan.service.IArticleTagService;
@@ -40,6 +42,7 @@ public class ReportServiceImpl implements IReportService {
 
     /**
      * 获取博客报表
+     *
      * @return 博客报表
      */
     @Override
@@ -57,6 +60,7 @@ public class ReportServiceImpl implements IReportService {
 
     /**
      * 获取浏览量统计
+     *
      * @param begin 开始时间
      * @param end   结束时间
      * @return 浏览量统计
@@ -66,7 +70,7 @@ public class ReportServiceImpl implements IReportService {
         //1. 获取指定日期范围内的日期列表
         List<LocalDate> dateList = getDateList(begin, end);
         //2. 获取指定日期范围内的浏览量
-        List<DailyViewCountDTO> dailyStats = viewService.getDailyViewStats(begin,end);
+        List<DailyViewCountDTO> dailyStats = viewService.getDailyViewStats(begin, end);
         //3. 转换为Map, key: 日期, value: 浏览量
         Map<LocalDate, Integer> dailyViewMap = dailyStats.stream()
                 .collect(Collectors.toMap(DailyViewCountDTO::getDate, DailyViewCountDTO::getCount));
@@ -81,21 +85,75 @@ public class ReportServiceImpl implements IReportService {
                 .build();
     }
 
+    /**
+     * 获取访客统计
+     *
+     * @param begin 起始日期
+     * @param end   结束日期
+     * @return 访客统计
+     */
     @Override
     public VisitorReportVO getVisitorStatistics(LocalDate begin, LocalDate end) {
-        // TODO: 实现访客统计逻辑
-        return null;
+        //1. 获取指定日期范围内的日期列表
+        List<LocalDate> dateList = getDateList(begin, end);
+        //2. 获取指定日期范围内的访客量数据
+        List<DailyViewCountDTO> dailyStats = visitorService.getDailyNewVisitorStats(begin, end);
+        //3. 转换为Map结构，便于按日期快速查找访客量，key: 日期, value: 新增访客量
+        Map<LocalDate, Integer> dailyNewVisitorMap = dailyStats.stream()
+                .collect(Collectors.toMap(DailyViewCountDTO::getDate, DailyViewCountDTO::getCount));
+        //4. 根据日期列表生成对应的新访客数量列表，不存在的日期默认为0
+        List<Integer> newVisitorCountList = dateList.stream()
+                .map(date -> dailyNewVisitorMap.getOrDefault(date, 0))
+                .toList();
+        //5. 计算累计访客量，通过累加每日新访客数量得到历史总访客量
+        List<Integer> totalViewCountList = new ArrayList<>();
+        for (int i = 0; i < newVisitorCountList.size(); i++) {
+            if (i == 0) {
+                totalViewCountList.add(newVisitorCountList.get(i));
+            } else {
+                totalViewCountList.add(newVisitorCountList.get(i) + totalViewCountList.get(i - 1));
+            }
+        }
+
+        //6. 构建并返回访客统计结果，将各数据列表转换为逗号分隔的字符串格式
+        return VisitorReportVO.builder()
+                .dateList(dateList.stream().map(LocalDate::toString).collect(Collectors.joining(",")))
+                .newVisitorCountList(newVisitorCountList.stream().map(String::valueOf).collect(Collectors.joining(",")))
+                .totalVisitorCountList(totalViewCountList.stream().map(String::valueOf).collect(Collectors.joining(",")))
+                .build();
     }
 
+    /**
+     * 获取访客省份分布统计
+     * @return 访客省份分布统计
+     */
     @Override
     public ProvinceVisitorVO getProvinceDistribution() {
-        // TODO: 实现访客省份分布统计逻辑
-        return null;
+        //1. 获取访客省份分布
+        List<ProvinceCountDTO> provinceStats = visitorService.getProvinceDistribution();
+        //2. 提取省份对应的访客数量列表
+        List<Integer> countList = provinceStats.stream()
+                .map(ProvinceCountDTO::getCount)
+                .toList();
+        //3. 提取省份列表
+        List<String> provinceList = provinceStats.stream()
+                .map(ProvinceCountDTO::getProvince)
+                .toList();
+        //4. 返回结果
+        return ProvinceVisitorVO.builder()
+                .provinceList(String.join(",", provinceList))
+                .countList(countList.stream().map(String::valueOf).collect(Collectors.joining(",")))
+                .build();
     }
 
+    /**
+     * 获取文章访问量排行前十
+     * @return 文章访问量排行前十
+     */
     @Override
     public ArticleViewTop10VO getArticleViewTop10() {
-        // TODO: 实现文章访问量排行前十逻辑
+        // 1. 获取文章访问量排行前十的列表
+        List<ArticleTitleViewCountDTO> top10List = articleService.getViewTop10();
         return null;
     }
 

@@ -11,6 +11,7 @@ import com.xuan.constant.RedisConstant;
 import com.xuan.constant.StatusConstant;
 import com.xuan.dto.ArticleDTO;
 import com.xuan.dto.ArticlePageQueryDTO;
+import com.xuan.dto.ArticleTitleViewCountDTO;
 import com.xuan.entity.ArticleTags;
 import com.xuan.entity.Articles;
 import com.xuan.entity.RssSubscriptions;
@@ -481,6 +482,15 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
         LambdaQueryWrapper<Articles> wrapper=new LambdaQueryWrapper<>();
         wrapper.eq(Articles::getIsPublished, StatusConstant.ENABLE);
         return Math.toIntExact(count(wrapper));
+    }
+
+    /**
+     * 获取文章浏览量top10
+     * @return 文章浏览量top10
+     */
+    @Override
+    public List<ArticleTitleViewCountDTO> getViewTop10() {
+        return baseMapper.getViewTop10();
     }
 
 

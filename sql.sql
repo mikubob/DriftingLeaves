@@ -138,7 +138,8 @@ create table visitors(
 
                          unique index uk_visitor_fingerprint(fingerprint),
                          index idx_session_id(session_id),
-                         index idx_last_visit(last_visit_time desc)
+                         index idx_last_visit(last_visit_time desc),
+                         index idx_create_time(create_time)
 ) comment '访客表';
 
 -- 浏览表

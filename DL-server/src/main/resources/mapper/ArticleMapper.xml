@@ -250,4 +250,13 @@
         UPDATE articles SET like_count = like_count + #{increment} WHERE id = #{id}
     </update>
 
+    <!-- 获取文章浏览量 top10 -->
+    <select id="getViewTop10" resultType="com.xuan.dto.ArticleTitleViewCountDTO">
+        SELECT title, view_count AS viewCount
+        FROM articles
+        WHERE is_published = 1
+        ORDER BY view_count DESC
+        LIMIT 10
+    </select>
+
 </mapper>

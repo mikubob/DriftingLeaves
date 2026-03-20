@@ -1,6 +1,8 @@
  package com.xuan.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xuan.dto.DailyViewCountDTO;
+import com.xuan.dto.ProvinceCountDTO;
 import com.xuan.dto.VisitorPageQueryDTO;
 import com.xuan.dto.VisitorRecordDTO;
 import com.xuan.entity.Visitors;
@@ -8,6 +10,7 @@ import com.xuan.result.PageResult;
 import com.xuan.vo.VisitorRecordVO;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface  IVisitorService extends IService<Visitors> {
@@ -49,4 +52,18 @@ public interface  IVisitorService extends IService<Visitors> {
      * @return 总访客数
      */
     Integer countTotal();
+
+    /**
+     * 统计今日访客数
+     * @param begin 起始时间
+     * @param end 结束时间
+     * @return 访客数
+     */
+    List<DailyViewCountDTO> getDailyNewVisitorStats(LocalDate begin, LocalDate end);
+
+    /**
+     * 获取访客省份分布
+     * @return 访客省份分布
+     */
+    List<ProvinceCountDTO> getProvinceDistribution();
 }

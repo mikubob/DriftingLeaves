@@ -2,6 +2,7 @@ package com.xuan.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.xuan.dto.DailyViewCountDTO;
 import com.xuan.dto.ViewPageQueryDTO;
 import com.xuan.entity.Views;
 import com.xuan.mapper.ViewMapper;
@@ -50,13 +51,26 @@ public class ViewServiceImpl extends ServiceImpl<ViewMapper, Views> implements I
      */
     @Override
     public Integer countToday() {
+        //1. 获取当前时间
         LocalDate today = LocalDate.now();
+        //2. 获取今天开始和结束的时间
         LocalDateTime startOfDay = today.atStartOfDay();
         LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
-        
+        //3. 查询
         LambdaQueryWrapper<Views> wrapper = new LambdaQueryWrapper<>();
         wrapper.between(Views::getViewTime, startOfDay, endOfDay);
-        
+        //4. 返回结果
         return Math.toIntExact(count(wrapper));
+    }
+
+    /**
+     * 获取指定日期范围内的浏览量
+     * @param begin 开始时间
+     * @param end 结束时间
+     * @return 每日浏览量
+     */
+    @Override
+    public List<DailyViewCountDTO> getDailyViewStats(LocalDate begin, LocalDate end) {
+        return baseMapper.getDailyViewStats(begin, end);
     }
 }

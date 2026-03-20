@@ -1,5 +1,6 @@
 package com.xuan.service.impl;
 
+import com.xuan.dto.DailyViewCountDTO;
 import com.xuan.service.IArticleCategoryService;
 import com.xuan.service.IArticleService;
 import com.xuan.service.IArticleTagService;
@@ -18,6 +19,10 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 报表服务实现类
@@ -50,10 +55,30 @@ public class ReportServiceImpl implements IReportService {
                 .build();
     }
 
+    /**
+     * 获取浏览量统计
+     * @param begin 开始时间
+     * @param end   结束时间
+     * @return 浏览量统计
+     */
     @Override
     public ViewReportVO getViewStatistics(LocalDate begin, LocalDate end) {
-        // TODO: 实现浏览量统计逻辑
-        return null;
+        //1. 获取指定日期范围内的日期列表
+        List<LocalDate> dateList = getDateList(begin, end);
+        //2. 获取指定日期范围内的浏览量
+        List<DailyViewCountDTO> dailyStats = viewService.getDailyViewStats(begin,end);
+        //3. 转换为Map, key: 日期, value: 浏览量
+        Map<LocalDate, Integer> dailyViewMap = dailyStats.stream()
+                .collect(Collectors.toMap(DailyViewCountDTO::getDate, DailyViewCountDTO::getCount));
+        //4. 将日期列表和浏览量列表转换为字符串
+        List<Integer> viewCountList = dateList.stream()
+                .map(date -> dailyViewMap.getOrDefault(date, 0))
+                .toList();
+        //5. 返回结果
+        return ViewReportVO.builder()
+                .dateList(dateList.stream().map(LocalDate::toString).collect(Collectors.joining(",")))
+                .viewCountList(viewCountList.stream().map(String::valueOf).collect(Collectors.joining(",")))
+                .build();
     }
 
     @Override
@@ -78,5 +103,18 @@ public class ReportServiceImpl implements IReportService {
     public AdminOverviewVO getAdminOverview() {
         // TODO: 实现获取管理端总览数据逻辑
         return null;
+    }
+
+    /**
+     * 获取指定日期范围内的日期列表
+     */
+    private List<LocalDate> getDateList(LocalDate begin, LocalDate end) {
+        List<LocalDate> dateList = new ArrayList<>();
+        dateList.add(begin);
+        while (!begin.equals(end)) {
+            begin = begin.plusDays(1);
+            dateList.add(begin);
+        }
+        return dateList;
     }
 }

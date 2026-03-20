@@ -24,8 +24,8 @@ public class OperationLogController {
 
     /**
      * 分页查询操作日志
-     * @param operationLogPageQueryDTO
-     * @return
+     * @param operationLogPageQueryDTO 分页查询参数
+     * @return 分页查询结果
      */
     @GetMapping("/page")
     public Result<PageResult> pageQuery(OperationLogPageQueryDTO operationLogPageQueryDTO) {
@@ -36,8 +36,8 @@ public class OperationLogController {
 
     /**
      * 批量删除操作日志
-     * @param ids
-     * @return
+     * @param ids 要删除的操作日志 ID 列表
+     * @return 删除结果
      */
     @DeleteMapping
     public Result batchDelete(@RequestParam List<Long> ids) {

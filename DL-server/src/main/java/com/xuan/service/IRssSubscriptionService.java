@@ -40,7 +40,7 @@ public interface IRssSubscriptionService extends IService<RssSubscriptions> {
      * @param id
      * @return
      */
-    RssSubscriptions getById(Long id);
+    RssSubscriptions getRssWithId(Long id);
 
     /**
      * 获取所有激活的订阅

@@ -55,7 +55,7 @@ public class RssSubscriptionController {
     @GetMapping("/{id}")
     public Result<RssSubscriptions> getById(@PathVariable Long id) {
         log.info("根据ID查询RSS订阅,{}", id);
-        RssSubscriptions rssSubscriptions = rssSubscriptionService.getById(id);
+        RssSubscriptions rssSubscriptions = rssSubscriptionService.getRssWithId(id);
         return Result.success(rssSubscriptions);
     }
 

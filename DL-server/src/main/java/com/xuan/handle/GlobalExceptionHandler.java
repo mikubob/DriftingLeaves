@@ -1,11 +1,13 @@
 package com.xuan.handle;
 
+import com.xuan.constant.ConstraintErrorMessage;
 import com.xuan.constant.MessageConstant;
 import com.xuan.exception.BaseException;
 import com.xuan.exception.BlockedException;
 import com.xuan.exception.GuestReadOnlyException;
 import com.xuan.exception.TokenException;
 import com.xuan.result.Result;
+import com.xuan.utils.SqlConstraintExceptionParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -74,15 +76,20 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     public Result exceptionHandler(SQLIntegrityConstraintViolationException ex){
-        String message = ex.getMessage();
-        if(message.contains("Duplicate entry")){
-            String [] split = message.split(" ");
-            String username = split[2];
-            String msg = username + MessageConstant.ALREADY_EXIST;
-            return Result.error(msg);
-        }else{
-            return Result.error(MessageConstant.UNKNOWN_ERROR);
+        log.error("SQL 完整性约束异常：{}", ex.getMessage());
+        
+        SqlConstraintExceptionParser.ConstraintInfo info = 
+            SqlConstraintExceptionParser.parse(ex);
+        
+        if (info != null) {
+            String errorMessage = ConstraintErrorMessage.buildMessage(
+                info.getConstraintName(), 
+                info.getDuplicateValue()
+            );
+            return Result.error(errorMessage);
         }
+        
+        return Result.error(MessageConstant.UNKNOWN_ERROR);
     }
 
     /**

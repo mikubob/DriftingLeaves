@@ -1,6 +1,6 @@
 package com.xuan.controller.blog;
 
-import com.xuan.service.ISitemapService;
+import com.xuan.service.SitemapService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class SitemapController {
 
-    private final ISitemapService sitemapService;
+    private final SitemapService sitemapService;
 
 
     /**
@@ -27,7 +27,6 @@ public class SitemapController {
     @GetMapping(value = "/sitemap.xml", produces = "application/xml; charset=UTF-8")
     @Cacheable(value = "sitemap", key = "'xml'")
     public String sitemap() {
-        String xml = sitemapService.generateSitemap();
-        return xml;
+        return sitemapService.generateSitemap();
     }
 }

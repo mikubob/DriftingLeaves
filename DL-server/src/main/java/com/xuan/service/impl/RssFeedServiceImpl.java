@@ -37,9 +37,8 @@ public class RssFeedServiceImpl implements IRssFeedService {
         String siteDescription = info != null && info.getDescription() != null ? info.getDescription() : "个人博客";
 
         // 获取最新20篇已发布文章
-        PageResult pageResult = articleService.getPublishedPage(1, 20);
-        @SuppressWarnings("unchecked")
-        List<BlogArticleVO> articles = (List<BlogArticleVO>) pageResult.getRecords();
+        PageResult<BlogArticleVO> pageResult = articleService.getPublishedPage(1, 20);
+        List<BlogArticleVO> articles = pageResult.getRecords();
 
         StringBuilder xml = new StringBuilder();
         xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");

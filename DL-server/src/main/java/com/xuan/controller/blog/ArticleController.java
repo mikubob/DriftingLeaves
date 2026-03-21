@@ -7,6 +7,7 @@ import com.xuan.result.Result;
 import com.xuan.service.IArticleService;
 import com.xuan.vo.ArticleArchiveVO;
 import com.xuan.vo.BlogArticleDetailVO;
+import com.xuan.vo.BlogArticleVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -33,10 +34,10 @@ public class ArticleController {
      * 获取已发布文章列表（分页）
      */
     @GetMapping("/page")
-    public Result<PageResult> getPublishedPage(@RequestParam(defaultValue = "1") int page,
+    public Result<PageResult<BlogArticleVO>> getPublishedPage(@RequestParam(defaultValue = "1") int page,
                                                @RequestParam(defaultValue = "10") int pageSize) {
         log.info("博客端获取已发布文章列表: page={}, pageSize={}", page, pageSize);
-        PageResult pageResult = articleService.getPublishedPage(page, pageSize);
+        PageResult<BlogArticleVO> pageResult = articleService.getPublishedPage(page, pageSize);
         return Result.success(pageResult);
     }
 

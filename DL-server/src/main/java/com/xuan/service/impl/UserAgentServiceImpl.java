@@ -144,8 +144,31 @@ public class UserAgentServiceImpl implements UserAgentService {
             case "opera" -> "Opera";
             case "micromessenger" -> "WeChat"; // 兜底：防止 Hutool 直接识别出 MicroMessenger
             default -> {
-                // 如果 Hutool 返回了带版本号的名称或其他未知名称，直接返回
-                // 也可以在这里做进一步的清洗
+                String lower = browserName.toLowerCase();
+                if (lower.contains("360")) {
+                    yield "360Browser";
+                }
+                if (lower.contains("sogou")) {
+                    yield "Sogou";
+                }
+                if (lower.contains("uc") || lower.contains("ucbrowser")) {
+                    yield "UCBrowser";
+                }
+                if (lower.contains("quark")) {
+                    yield "Quark";
+                }
+                if (lower.contains("baidu") || lower.contains("bidu")) {
+                    yield "Baidu";
+                }
+                if (lower.contains("maxthon")) {
+                    yield "Maxthon";
+                }
+                if (lower.contains("2345")) {
+                    yield "2345Browser";
+                }
+                if (lower.contains("liebao")) {
+                    yield "Liebao";
+                }
                 yield browserName;
             }
         };

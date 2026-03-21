@@ -25,7 +25,7 @@ public interface ISystemConfigService extends IService<SystemConfig> {
      * @param id
      * @return
      */
-    SystemConfig getById(Long id);
+    SystemConfig getConfigById(Long id);
 
     /**
      * 添加系统配置

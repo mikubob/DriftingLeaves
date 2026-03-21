@@ -55,7 +55,7 @@ public class SystemConfigController {
     @GetMapping("/{id}")
     public Result<SystemConfig> getById(@PathVariable Long id) {
         log.info("根据ID获取配置,{}", id);
-        SystemConfig systemConfig = systemConfigService.getById(id);
+        SystemConfig systemConfig = systemConfigService.getConfigById(id);
         return Result.success(systemConfig);
     }
 

@@ -23,9 +23,9 @@ public class MessageConstant {
     public static final String INVALID_EMAIL_FORMAT = "邮箱格式不正确";
     public static final String INVALID_QQ_FORMAT = "QQ号格式不正确";
     public static final String EMAIL_OR_QQ_REQUIRED = "请输入邮箱或QQ号";
-    public static final String RssNotFound = "Rss订阅不存在";
-    public static final String RssAlreadyExists = "Rss订阅已存在";
-    public static final String ConfigKeyExists = "配置键已存在";
+    public static final String RSS_NOT_FOUND = "Rss订阅不存在";
+    public static final String RSS_ALREADY_EXISTS = "Rss订阅已存在";
+    public static final String CONFIG_KEY_EXISTS = "配置键已存在";
     public static final String ARTICLE_NOT_FOUND = "文章不存在";
     public static final String CATEGORY_NOT_FOUND = "分类不存在";
     public static final String CATEGORY_HAS_ARTICLES = "分类下存在关联文章，无法删除";

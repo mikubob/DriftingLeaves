@@ -42,7 +42,7 @@ public class RssSubscriptionServiceImpl extends ServiceImpl<RssSubscriptionMappe
         if (existingSubscription != null) {
             // 如果已存在且激活，抛出异常
             if (existingSubscription.getIsActive() == 1) {
-                throw new RssSubscriptionException(MessageConstant.RssAlreadyExists);
+                throw new RssSubscriptionException(MessageConstant.RSS_ALREADY_EXISTS);
             }
             // 如果已存在但未激活，重新激活
             existingSubscription.setIsActive(1);
@@ -141,12 +141,12 @@ public class RssSubscriptionServiceImpl extends ServiceImpl<RssSubscriptionMappe
 
         // 订阅不存在
         if (subscription == null) {
-            throw new RssSubscriptionException(MessageConstant.RssNotFound);
+            throw new RssSubscriptionException(MessageConstant.RSS_NOT_FOUND);
         }
 
         // 已经取消订阅
         if (subscription.getIsActive() == 0) {
-            throw new RssSubscriptionException(MessageConstant.RssNotFound);
+            throw new RssSubscriptionException(MessageConstant.RSS_NOT_FOUND);
         }
 
         // 更新订阅状态

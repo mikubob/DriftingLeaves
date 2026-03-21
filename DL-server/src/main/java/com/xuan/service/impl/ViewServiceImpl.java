@@ -1,6 +1,8 @@
 package com.xuan.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xuan.dto.DailyViewCountDTO;
 import com.xuan.dto.ViewPageQueryDTO;
@@ -11,6 +13,7 @@ import com.xuan.service.IViewService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,15 +28,29 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ViewServiceImpl extends ServiceImpl<ViewMapper, Views> implements IViewService {
 
+    /**
+     * 分页查询浏览记录
+     * @param viewPageQueryDTO 查询参数
+     * @return 分页结果
+     */
     @Override
     public PageResult pageQuery(ViewPageQueryDTO viewPageQueryDTO) {
-        // TODO: 实现分页查询浏览记录逻辑
-        return null;
+        //1.创建分页对象
+        Page<Views> page = new Page<>(viewPageQueryDTO.getPage(), viewPageQueryDTO.getPageSize());
+        //2.创建查询条件
+        Page<Views> viewPage = page(page, buildQueryWrapper(viewPageQueryDTO));
+        //3.转换为自定义的 PageResult并且返回
+        return PageResult.fromIPage(viewPage);
     }
 
+    /**
+     * 批量删除浏览记录
+     * @param ids 浏览记录 ID 列表
+     */
     @Override
+    @Transactional
     public void batchDelete(List<Long> ids) {
-        // TODO: 实现批量删除浏览记录逻辑
+        removeBatchByIds(ids);
     }
 
     /**
@@ -72,5 +89,30 @@ public class ViewServiceImpl extends ServiceImpl<ViewMapper, Views> implements I
     @Override
     public List<DailyViewCountDTO> getDailyViewStats(LocalDate begin, LocalDate end) {
         return baseMapper.getDailyViewStats(begin, end);
+    }
+
+    //<==========私有辅助方法==============>
+
+    /**
+     * 构建查询条件
+     * @param viewPageQueryDTO 查询参数
+     * @return 查询条件包装器
+     */
+    private LambdaQueryWrapper<Views> buildQueryWrapper(ViewPageQueryDTO viewPageQueryDTO) {
+        //1.构建查询条件
+        LambdaQueryWrapper<Views> wrapper = new LambdaQueryWrapper<>();
+        //2.添加查询条件
+        if (StrUtil.isNotBlank(viewPageQueryDTO.getPagePath())) {
+            wrapper.like(Views::getPagePath, viewPageQueryDTO.getPagePath());
+        }
+        if (StrUtil.isNotBlank(viewPageQueryDTO.getReferer())) {
+            wrapper.like(Views::getReferer, viewPageQueryDTO.getReferer());
+        }
+        if (viewPageQueryDTO.getVisitorId() != null) {
+            wrapper.eq(Views::getVisitorId, viewPageQueryDTO.getVisitorId());
+        }
+        wrapper.orderByDesc(Views::getViewTime);
+        //3.返回
+        return wrapper;
     }
 }

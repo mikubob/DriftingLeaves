@@ -11,4 +11,5 @@ public class RedisConstant {
     public static final String LOCK_VIEW_COUNT_SYNC = "lock:viewCountSync";
     public static final String RATE_LIMIT_KEY = "visitor:rate:";
     public static final String BLOCKED_KEY = "visitor:blocked:";
+    public static final String TOKEN_PREFIX = "token:active:";
 }

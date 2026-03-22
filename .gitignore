@@ -88,6 +88,7 @@ application-local.yml
 # Coverage 工具生成的文件
 coverage/
 *.exec
+*.sql
 
 # JUnit 临时文件
 .junit/

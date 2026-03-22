@@ -16,4 +16,5 @@ public class RedisConstant {
     public static final String KEY_RATE_LIMIT = "rate_limit";
     public static final String KEY_ATTEMPT_COUNT = "attempt_count";
     public static final String KEY_LOCK = "lock";
+    public static final String VISITOR_KEY = "visitor:fingerprint:";
 }

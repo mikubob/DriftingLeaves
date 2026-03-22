@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.stream.Collectors;
@@ -120,6 +121,16 @@ public class GlobalExceptionHandler {
     public Result exceptionHandler(NoHandlerFoundException ex){
         log.warn("请求路径不存在：{} {}", ex.getHttpMethod(), ex.getRequestURL());
         return Result.error("请求地址不存在");
+    }
+
+    /**
+     * 静态资源不存在异常（如 favicon.ico）
+     */
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Result exceptionHandler(NoResourceFoundException ex){
+        log.debug("静态资源不存在：{}", ex.getResourcePath());
+        return Result.error("资源不存在");
     }
 
     /**

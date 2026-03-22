@@ -6,8 +6,8 @@ import com.xuan.entity.Visitors;
 import com.xuan.exception.BlockedException;
 import com.xuan.service.BlockService;
 import com.xuan.service.IVisitorService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -18,11 +18,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class BlockServiceImpl implements BlockService {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final IVisitorService visitorService;
+
+    public BlockServiceImpl(RedisTemplate<String, Object> redisTemplate,
+                            @Lazy IVisitorService visitorService) {
+        this.redisTemplate = redisTemplate;
+        this.visitorService = visitorService;
+    }
 
     // 访问频率限制配置
     private static final int IP_RATE_LIMIT = 60; // 每分钟最多访问次数

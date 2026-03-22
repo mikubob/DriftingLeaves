@@ -24,7 +24,7 @@
         <maven.compiler.target>21</maven.compiler.target>
         <mysql.version>8.0.33</mysql.version>
         <lombok>1.18.40</lombok>
-        <knife4j>4.5.0</knife4j>
+
         <jjwt>0.12.5</jjwt>
         <aliyun-sdk-oss>3.17.4</aliyun-sdk-oss>
         <druid.version>1.2.23</druid.version>
@@ -41,6 +41,7 @@
         <ip2region.version>2.7.0</ip2region.version>
         <cache-api>1.1.1</cache-api>
         <caffeine.version>3.1.6</caffeine.version>
+
     </properties>
 
     <dependencyManagement>
@@ -60,13 +61,6 @@
                 <version>${mybatis-plus.version}</version>
             </dependency>
 
-
-            <!-- Knife4j -->
-            <dependency>
-                <groupId>com.github.xiaoymin</groupId>
-                <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
-                <version>${knife4j}</version>
-            </dependency>
 
 
             <!-- JWT for Spring Boot 3.x -->

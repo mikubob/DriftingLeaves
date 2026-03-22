@@ -1,5 +1,6 @@
 package com.xuan.interceptor;
 
+import cn.hutool.core.util.StrUtil;
 import com.xuan.constant.JwtClaimsConstant;
 import com.xuan.constant.MessageConstant;
 import com.xuan.constant.StatusConstant;
@@ -15,7 +16,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -50,7 +50,7 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
         String token = request.getHeader(jwtProperties.getTokenName());
 
         // 如果令牌为空，抛出未登录异常
-        if(StringUtils.isEmpty(token)){
+        if(StrUtil.isBlank(token)){
             throw new NotLoginException(MessageConstant.NOT_LOGIN);
         }
 

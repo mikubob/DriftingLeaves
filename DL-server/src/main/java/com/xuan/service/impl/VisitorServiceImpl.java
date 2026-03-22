@@ -188,6 +188,15 @@ public class VisitorServiceImpl extends ServiceImpl<VisitorMapper, Visitors> imp
     }
 
     /**
+     * 统计今日新增访客数
+     * @return 今日新增访客数
+     */
+    @Override
+    public Integer countToday() {
+        return baseMapper.countToday();
+    }
+
+    /**
      * 获取每日新增访客数
      * @param begin 起始时间
      * @param end 结束时间

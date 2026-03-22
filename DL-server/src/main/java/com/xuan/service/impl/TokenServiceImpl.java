@@ -10,7 +10,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.scripting.support.ResourceScriptSource;
 import org.springframework.stereotype.Service;
@@ -37,7 +37,7 @@ public class TokenServiceImpl implements TokenService {
      */
     private static final int MAX_TOKEN_COUNT = 10;
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
     private final JwtProperties jwtProperties;
 
     /**
@@ -84,10 +84,10 @@ public class TokenServiceImpl implements TokenService {
         // 3. 执行 Lua 脚本 (原子操作：检查数量 + 添加 + 设置过期)
         // 这解决了之前代码中 check 和 add 分离导致的并发竞态问题
         try {
-            Long result = redisTemplate.execute(
+            Long result = stringRedisTemplate.execute(
                     tokenAddScript,
                     Collections.singletonList(tokenKey),
-                    String.valueOf(token),
+                    token,
                     String.valueOf(ttlMillis),
                     String.valueOf(MAX_TOKEN_COUNT)
             );
@@ -120,7 +120,7 @@ public class TokenServiceImpl implements TokenService {
         }
 
         String tokenKey = RedisConstant.TOKEN_PREFIX + userId;
-        Boolean isMember = redisTemplate.opsForSet().isMember(tokenKey, token);
+        Boolean isMember = stringRedisTemplate.opsForSet().isMember(tokenKey, token);
         
         return Boolean.TRUE.equals(isMember);
     }
@@ -134,7 +134,7 @@ public class TokenServiceImpl implements TokenService {
             return;
         }
         String tokenKey = RedisConstant.TOKEN_PREFIX + userId;
-        Long removedCount = redisTemplate.opsForSet().remove(tokenKey, token);
+        Long removedCount = stringRedisTemplate.opsForSet().remove(tokenKey, token);
         
         if (removedCount != null && removedCount > 0) {
             log.info("用户 [{}] 单端登出成功", userId);
@@ -150,7 +150,7 @@ public class TokenServiceImpl implements TokenService {
             return;
         }
         String tokenKey = RedisConstant.TOKEN_PREFIX + userId;
-        Boolean deleted = redisTemplate.delete(tokenKey);
+        Boolean deleted = stringRedisTemplate.delete(tokenKey);
         
         if (Boolean.TRUE.equals(deleted)) {
             log.info("用户 [{}] 全端登出成功", userId);

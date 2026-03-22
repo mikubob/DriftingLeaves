@@ -133,10 +133,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
 
         //6.保存文章-标签关联
         if (articleDTO.getTagIds() != null && !articleDTO.getTagIds().isEmpty()) {
-            articleTagService.deleteRelationsByArticleId(articleDTO.getId());
-            if (!articleDTO.getTagIds().isEmpty()) {
-                articleTagService.batchInsertRelations(articleDTO.getId(), articleDTO.getTagIds());
-            }
+            articleTagService.batchInsertRelations(articles.getId(), articleDTO.getTagIds());
         }
     }
 
@@ -200,13 +197,13 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
                         : MarkdownUtil.toHtml(rawContent);
                 articles.setContentHtml(contentHtml);
             }
-        }
 
-        //3.计算字数和阅读时间
-        long wordCount = countWords(articles.getContentMarkdown());
-        long readingTime = Math.max(1, wordCount / VIEWS);
-        articles.setWordCount(wordCount);
-        articles.setReadingTime(readingTime);
+            //2.3.重新计算字数和阅读时间
+            long wordCount = countWords(articleDTO.getContentMarkdown());
+            long readingTime = Math.max(1, wordCount / VIEWS);
+            articles.setWordCount(wordCount);
+            articles.setReadingTime(readingTime);
+        }
 
         //4.更新文章
         updateById(articles);
@@ -226,6 +223,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
      */
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "articleList", allEntries = true),
+            @CacheEvict(value = "articleDetail", allEntries = true),
+            @CacheEvict(value = "articleArchive", allEntries = true),
+            @CacheEvict(value = "blogReport", allEntries = true)
+    })
     public void batchDelete(List<Long> ids) {
         //1.批量删除文章-标签关联
         articleTagService.batchDeleteRelationsByArticleIds(ids);
@@ -378,7 +381,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
      */
     @Override
     public void incrementViewCount(Long articleId) {
-        redisTemplate.opsForHash().increment(RedisConstant.ARTICLE_VIEW_COUNT, articleId, 1);
+        redisTemplate.opsForHash().increment(RedisConstant.ARTICLE_VIEW_COUNT, articleId.toString(), 1);
     }
 
     /**

@@ -37,6 +37,7 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
      * @return 文章分类列表
      */
     @Override
+    @Cacheable(value = "articleCategories", key = "'all'")
     public List<ArticleCategories> listAll() {
         // 构建查询条件
         LambdaQueryWrapper<ArticleCategories> wrapper = new LambdaQueryWrapper<>();

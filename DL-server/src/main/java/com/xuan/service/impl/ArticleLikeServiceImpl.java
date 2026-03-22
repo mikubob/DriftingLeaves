@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -30,6 +31,7 @@ public class ArticleLikeServiceImpl extends ServiceImpl<ArticleLikeMapper, Artic
      * @param visitorId 访客 ID
      */
     @Override
+    @Transactional
     public void likeArticle(Long articleId, Long visitorId) {
         String userSetKey = RedisConstant.ARTICLE_LIKE_USER_SET + articleId;
 
@@ -53,6 +55,7 @@ public class ArticleLikeServiceImpl extends ServiceImpl<ArticleLikeMapper, Artic
      * @param visitorId 访客 ID
      */
     @Override
+    @Transactional
     public void unlikeArticle(Long articleId, Long visitorId) {
         String userSetKey = RedisConstant.ARTICLE_LIKE_USER_SET + articleId;
 

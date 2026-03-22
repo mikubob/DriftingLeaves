@@ -4,8 +4,10 @@ import com.xuan.dto.ArticleTitleViewCountDTO;
 import com.xuan.dto.DailyViewCountDTO;
 import com.xuan.dto.ProvinceCountDTO;
 import com.xuan.service.IArticleCategoryService;
+import com.xuan.service.IArticleCommentService;
 import com.xuan.service.IArticleService;
 import com.xuan.service.IArticleTagService;
+import com.xuan.service.IMessageService;
 import com.xuan.service.IReportService;
 import com.xuan.service.IViewService;
 import com.xuan.service.IVisitorService;
@@ -39,6 +41,8 @@ public class ReportServiceImpl implements IReportService {
     private final IArticleCategoryService articleCategoryService;
     private final IArticleService articleService;
     private final IArticleTagService articleTagService;
+    private final IArticleCommentService articleCommentService;
+    private final IMessageService messageService;
 
     /**
      * 获取博客报表
@@ -154,13 +158,38 @@ public class ReportServiceImpl implements IReportService {
     public ArticleViewTop10VO getArticleViewTop10() {
         // 1. 获取文章访问量排行前十的列表
         List<ArticleTitleViewCountDTO> top10List = articleService.getViewTop10();
-        return null;
+        // 2. 提取标题列表
+        List<String> titleList = top10List.stream()
+                .map(ArticleTitleViewCountDTO::getTitle)
+                .toList();
+        // 3. 提取浏览量列表
+        List<Integer> viewCountList = top10List.stream()
+                .map(ArticleTitleViewCountDTO::getViewCount)
+                .toList();
+        // 4. 返回结果
+        return ArticleViewTop10VO.builder()
+                .titleList(titleList)
+                .viewCountList(viewCountList)
+                .build();
     }
 
+    /**
+     * 获取管理端总览数据
+     * @return 管理端总览数据
+     */
     @Override
     public AdminOverviewVO getAdminOverview() {
-        // TODO: 实现获取管理端总览数据逻辑
-        return null;
+        return AdminOverviewVO.builder()
+                .totalViewCount(viewService.countTotal())
+                .totalVisitorCount(visitorService.countTotal())
+                .todayViewCount(viewService.countToday())
+                .todayNewVisitorCount(visitorService.countToday())
+                .totalArticleCount(articleService.countPublished())
+                .totalCommentCount(articleCommentService.countTotal())
+                .totalMessageCount(messageService.countTotal())
+                .pendingCommentCount(articleCommentService.countPending())
+                .pendingMessageCount(messageService.countPending())
+                .build();
     }
 
     /**

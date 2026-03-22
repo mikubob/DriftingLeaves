@@ -65,4 +65,16 @@ public interface IMessageService extends IService<Messages> {
      * 访客删除留言
      */
     void visitorDeleteMessage(Long id, Long visitorId);
+
+    /**
+     * 统计总留言数
+     * @return 总留言数
+     */
+    Integer countTotal();
+
+    /**
+     * 统计待审核留言数
+     * @return 待审核留言数
+     */
+    Integer countPending();
 }

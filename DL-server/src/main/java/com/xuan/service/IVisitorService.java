@@ -54,6 +54,12 @@ public interface  IVisitorService extends IService<Visitors> {
     Integer countTotal();
 
     /**
+     * 统计今日新增访客数
+     * @return 今日新增访客数
+     */
+    Integer countToday();
+
+    /**
      * 统计今日访客数
      * @param begin 起始时间
      * @param end 结束时间

@@ -72,4 +72,16 @@ public interface IArticleCommentService extends IService<ArticleComments> {
      * 访客删除评论
      */
     void visitorDeleteComment(Long id, Long visitorId);
+
+    /**
+     * 统计总评论数
+     * @return 总评论数
+     */
+    Integer countTotal();
+
+    /**
+     * 统计待审核评论数
+     * @return 待审核评论数
+     */
+    Integer countPending();
 }

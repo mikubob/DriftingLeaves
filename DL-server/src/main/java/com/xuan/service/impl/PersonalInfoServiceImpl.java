@@ -2,6 +2,7 @@ package com.xuan.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xuan.dto.PersonalInfoDTO;
 import com.xuan.entity.PersonalInfo;
@@ -27,7 +28,7 @@ public class PersonalInfoServiceImpl extends ServiceImpl<PersonalInfoMapper, Per
      * @return 个人信息
      */
     @Override
-    @Cacheable(value = "personalInfo", key = "'all'")
+    @Cacheable(value = "personalInfo", key = "'all'", unless = "#result == null")
     public PersonalInfo getAllPersonalInfo() {
         //1.构建查询条件
         LambdaQueryWrapper<PersonalInfo> queryWrapper = new LambdaQueryWrapper<>();
@@ -45,8 +46,33 @@ public class PersonalInfoServiceImpl extends ServiceImpl<PersonalInfoMapper, Per
     @Override
     @CacheEvict(value = "personalInfo", allEntries = true)
     public void updatePersonalInfo(PersonalInfoDTO personalInfoDTO) {
-        PersonalInfo info = BeanUtil.copyProperties(personalInfoDTO, PersonalInfo.class);
-        updateById(info);
+        LambdaUpdateWrapper<PersonalInfo> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(PersonalInfo::getId, personalInfoDTO.getId());
+        if (personalInfoDTO.getNickname() != null) {
+            updateWrapper.set(PersonalInfo::getNickname, personalInfoDTO.getNickname());
+        }
+        if (personalInfoDTO.getTag() != null) {
+            updateWrapper.set(PersonalInfo::getTag, personalInfoDTO.getTag());
+        }
+        if (personalInfoDTO.getDescription() != null) {
+            updateWrapper.set(PersonalInfo::getDescription, personalInfoDTO.getDescription());
+        }
+        if (personalInfoDTO.getAvatar() != null) {
+            updateWrapper.set(PersonalInfo::getAvatar, personalInfoDTO.getAvatar());
+        }
+        if (personalInfoDTO.getWebsite() != null) {
+            updateWrapper.set(PersonalInfo::getWebsite, personalInfoDTO.getWebsite());
+        }
+        if (personalInfoDTO.getEmail() != null) {
+            updateWrapper.set(PersonalInfo::getEmail, personalInfoDTO.getEmail());
+        }
+        if (personalInfoDTO.getGithub() != null) {
+            updateWrapper.set(PersonalInfo::getGithub, personalInfoDTO.getGithub());
+        }
+        if (personalInfoDTO.getLocation() != null) {
+            updateWrapper.set(PersonalInfo::getLocation, personalInfoDTO.getLocation());
+        }
+        update(updateWrapper);
     }
 
     /**
@@ -54,7 +80,7 @@ public class PersonalInfoServiceImpl extends ServiceImpl<PersonalInfoMapper, Per
      * @return 个人信息
      */
     @Override
-    @Cacheable(value = "personalInfo", key = "'vo'")
+    @Cacheable(value = "personalInfo", key = "'vo'", unless = "#result == null")
     public PersonalInfoVO getPersonalInfo() {
         //1.构建查询条件
         LambdaQueryWrapper<PersonalInfo> queryWrapper = new LambdaQueryWrapper<>();

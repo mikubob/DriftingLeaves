@@ -1,6 +1,7 @@
 package com.xuan.entity;
 
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -80,16 +81,20 @@ public class Articles extends BaseEntity {
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime publishTime;
 
-    // 发布年份
+    // 发布年份（数据库生成列，不可更新）
+    @TableField(updateStrategy = FieldStrategy.NEVER)
     private Integer publishYear;
 
-    // 发布月份
+    // 发布月份（数据库生成列，不可更新）
+    @TableField(updateStrategy = FieldStrategy.NEVER)
     private Integer publishMonth;
 
-    // 发布日期
+    // 发布日期（数据库生成列，不可更新）
+    @TableField(updateStrategy = FieldStrategy.NEVER)
     private Integer publishDay;
 
-    // 发布日期（去掉时间）
+    // 发布日期（去掉时间，数据库生成列，不可更新）
+    @TableField(updateStrategy = FieldStrategy.NEVER)
     private LocalDate publishDate;
 
     // 标签 ID 列表（非数据库字段，管理端返回时填充）

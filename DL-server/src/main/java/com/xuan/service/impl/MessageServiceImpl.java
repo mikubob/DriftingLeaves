@@ -77,7 +77,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Messages> imp
             messages.setContentHtml(messageDTO.getContent());
         }
         //4.设置访客id
-        messages.setVisitorId(messages.getVisitorId());
+        messages.setVisitorId(messageDTO.getVisitorId());
 
         //5.获取ip地址信息
         String clientIp = IpUtil.getClientIp(request);
@@ -88,7 +88,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Messages> imp
         String city = geoInfo.getOrDefault("city", "");
         String location = province.isEmpty() && city.isEmpty() ? null
                 : province.equals(city) ? province
-                : String.format("%s-%s", province, city).replace("^-|-$", "");
+                : String.format("%s-%s", province, city).replaceAll("^-|-$", "");
         if (location != null && !location.isEmpty()) {
             messages.setLocation(location);
         }
@@ -179,7 +179,19 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Messages> imp
     @Override
     @Transactional
     public void batchDelete(List<Long> ids) {
-        //1.批量删除留言
+        //1.如果是根留言，级联删除所有子留言
+        for (Long id : ids) {
+            Messages message = getById(id);
+            if (message != null && (message.getRootId() == null || message.getRootId() == 0)) {
+                LambdaQueryWrapper<Messages> wrapper = new LambdaQueryWrapper<>();
+                wrapper.eq(Messages::getRootId, id);
+                long childCount = count(wrapper);
+                if (childCount > 0) {
+                    remove(wrapper);
+                }
+            }
+        }
+        //2.批量删除留言
         removeBatchByIds(ids);
     }
 
@@ -216,7 +228,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Messages> imp
             String city = geoInfo.getOrDefault("city", "");
             String location = province.isEmpty() && city.isEmpty() ? null
                     : province.equals(city) ? province
-                    : String.format("%s-%s", province, city).replace("^-|-$", "");
+                    : String.format("%s-%s", province, city).replaceAll("^-|-$", "");
             if (location != null && !location.isEmpty()) {
                 messages.setLocation(location);
             }
@@ -431,5 +443,25 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Messages> imp
         } catch (Exception e) {
             log.error("发送留言回复通知邮件异常: parentId={}, ex={}", parentId, e.getMessage());
         }
+    }
+
+    /**
+     * 统计总留言数
+     * @return 总留言数
+     */
+    @Override
+    public Integer countTotal() {
+        return Math.toIntExact(count());
+    }
+
+    /**
+     * 统计待审核留言数
+     * @return 待审核留言数
+     */
+    @Override
+    public Integer countPending() {
+        LambdaQueryWrapper<Messages> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Messages::getIsApproved, StatusConstant.DISABLE);
+        return Math.toIntExact(count(wrapper));
     }
 }

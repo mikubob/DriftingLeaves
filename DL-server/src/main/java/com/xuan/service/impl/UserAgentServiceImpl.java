@@ -75,6 +75,16 @@ public class UserAgentServiceImpl implements UserAgentService {
             return "Android";
         }
 
+        // 处理 FreeBSD（需在 Linux 之前判断）
+        if (osName.contains("FreeBSD") || userAgent.toLowerCase().contains("freebsd")) {
+            return "FreeBSD";
+        }
+
+        // 处理 Ubuntu（需在 Linux 之前判断）
+        if (osName.contains("Ubuntu") || userAgent.toLowerCase().contains("ubuntu")) {
+            return "Ubuntu";
+        }
+
         // 处理 Linux (排除 Android)
         if (osName.contains("Linux")) {
             return "Linux";

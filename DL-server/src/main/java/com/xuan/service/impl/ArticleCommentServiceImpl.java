@@ -349,21 +349,20 @@ public class ArticleCommentServiceImpl extends ServiceImpl<ArticleCommentMapper,
             throw new ValidationException("无权编辑此评论");
         }
 
-        //3.更新内容
-        comment.setContent(editDTO.getContent());
+        //3.构建更新对象
+        ArticleComments updateComment = new ArticleComments();
+        updateComment.setId(editDTO.getId());
+        updateComment.setContent(editDTO.getContent());
 
         //4.处理 Markdown 内容
         if (editDTO.getIsMarkdown() != null && editDTO.getIsMarkdown() == 1) {
-            comment.setContentHtml(MarkdownUtil.toHtml(editDTO.getContent()));
+            updateComment.setContentHtml(MarkdownUtil.toHtml(editDTO.getContent()));
         } else {
-            comment.setContentHtml(editDTO.getContent());
+            updateComment.setContentHtml(editDTO.getContent());
         }
 
-        //5.设置编辑标识
-        comment.setIsEdited(StatusConstant.ENABLE);
-
-        //6.更新评论
-        this.updateById(comment);
+        //5.更新评论
+        this.updateById(updateComment);
 
         log.info("访客编辑评论成功：id={}, visitorId={}", editDTO.getId(), editDTO.getVisitorId());
     }
@@ -522,5 +521,25 @@ public class ArticleCommentServiceImpl extends ServiceImpl<ArticleCommentMapper,
         if (!emailOrQq.matches(emailRegex) && !emailOrQq.matches(qqRegex)) {
             throw new ValidationException(MessageConstant.INVALID_EMAIL_FORMAT);
         }
+    }
+
+    /**
+     * 统计总评论数
+     * @return 总评论数
+     */
+    @Override
+    public Integer countTotal() {
+        return Math.toIntExact(count());
+    }
+
+    /**
+     * 统计待审核评论数
+     * @return 待审核评论数
+     */
+    @Override
+    public Integer countPending() {
+        LambdaQueryWrapper<ArticleComments> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ArticleComments::getIsApproved, StatusConstant.DISABLE);
+        return Math.toIntExact(count(wrapper));
     }
 }

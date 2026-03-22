@@ -9,7 +9,6 @@
         FROM article_tags t
         LEFT JOIN article_tag_relations atr ON t.id = atr.tag_id
         LEFT JOIN articles a ON atr.article_id = a.id AND a.is_published = 1
-        WHERE t.is_deleted = 0 AND t.visible = 1
         GROUP BY t.id
         ORDER BY t.id
     </select>
@@ -41,6 +40,13 @@
     <delete id="batchDeleteRelationsByArticleIds">
         delete from article_tag_relations where article_id in
         <foreach collection="articleIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteRelationsByTagIds">
+        delete from article_tag_relations where tag_id in
+        <foreach collection="tagIds" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
     </delete>

@@ -90,7 +90,10 @@ public class ArticleTagServiceImpl extends ServiceImpl<ArticleTagMapper, Article
             @CacheEvict(value = "blogReport", allEntries = true)
     })
     public void batchDeleteTags(List<Long> ids) {
-        // 1. 批量删除标签
+        // 1. 先删除关联关系中涉及这些标签的记录
+        baseMapper.deleteRelationsByTagIds(ids);
+
+        // 2. 批量删除标签
         removeBatchByIds(ids);
     }
 

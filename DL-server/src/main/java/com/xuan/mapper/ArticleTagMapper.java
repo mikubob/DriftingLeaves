@@ -22,4 +22,6 @@ public interface ArticleTagMapper extends BaseMapper<ArticleTags> {
     int batchInsertRelations(@Param("relations") List<ArticleTagRelations> relations);
 
     int batchDeleteRelationsByArticleIds(@Param("articleIds") List<Long> articleIds);
+
+    int deleteRelationsByTagIds(@Param("tagIds") List<Long> tagIds);
 }

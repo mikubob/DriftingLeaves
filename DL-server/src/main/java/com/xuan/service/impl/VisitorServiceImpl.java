@@ -17,6 +17,7 @@ import com.xuan.service.BlockService;
 import com.xuan.service.FingerprintService;
 import com.xuan.service.IVisitorService;
 import com.xuan.utils.IpUtil;
+import com.xuan.vo.VisitorQueryVO;
 import com.xuan.vo.VisitorRecordVO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -103,8 +104,12 @@ public class VisitorServiceImpl extends ServiceImpl<VisitorMapper, Visitors> imp
         Page<Visitors> page=new Page<>(visitorPageQueryDTO.getPage(), visitorPageQueryDTO.getPageSize());
         //2.创建查询条件
         Page<Visitors> vistorsPage = page(page, buildQueryWrapper(visitorPageQueryDTO));
-        //3.封装结果并返回
-        return PageResult.fromIPage(vistorsPage);
+        //3.转换为 QueryVO 并返回
+        Page<VisitorQueryVO> voPage = new Page<>(vistorsPage.getCurrent(), vistorsPage.getSize(), vistorsPage.getTotal());
+        voPage.setRecords(vistorsPage.getRecords().stream()
+                .map(v -> cn.hutool.core.bean.BeanUtil.copyProperties(v, VisitorQueryVO.class))
+                .toList());
+        return PageResult.fromIPage(voPage);
     }
 
     /**

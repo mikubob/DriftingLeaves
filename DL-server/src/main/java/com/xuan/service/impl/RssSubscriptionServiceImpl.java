@@ -11,6 +11,7 @@ import com.xuan.exception.RssSubscriptionException;
 import com.xuan.mapper.RssSubscriptionMapper;
 import com.xuan.result.PageResult;
 import com.xuan.service.IRssSubscriptionService;
+import com.xuan.vo.RssSubscriptionQueryVO;
 import com.xuan.vo.RssSubscriptionStatusVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,8 +84,12 @@ public class RssSubscriptionServiceImpl extends ServiceImpl<RssSubscriptionMappe
         // 执行分页查询
         Page<RssSubscriptions> result = page(page, wrapper);
 
-        // 转换结果
-        return PageResult.fromIPage(result);
+        // 转换为 QueryVO 并返回
+        Page<RssSubscriptionQueryVO> voPage = new Page<>(result.getCurrent(), result.getSize(), result.getTotal());
+        voPage.setRecords(result.getRecords().stream()
+                .map(sub -> cn.hutool.core.bean.BeanUtil.copyProperties(sub, RssSubscriptionQueryVO.class))
+                .toList());
+        return PageResult.fromIPage(voPage);
     }
 
     /**

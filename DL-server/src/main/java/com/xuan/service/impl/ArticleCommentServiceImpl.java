@@ -23,6 +23,7 @@ import com.xuan.service.IArticleService;
 import com.xuan.service.UserAgentService;
 import com.xuan.utils.IpUtil;
 import com.xuan.utils.MarkdownUtil;
+import com.xuan.vo.ArticleCommentQueryVO;
 import com.xuan.vo.ArticleCommentVO;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +59,7 @@ public class ArticleCommentServiceImpl extends ServiceImpl<ArticleCommentMapper,
     @Override
     public PageResult pageQuery(ArticleCommentPageQueryDTO articleCommentPageQueryDTO) {
         Page<ArticleComments> page = new Page<>(articleCommentPageQueryDTO.getPage(), articleCommentPageQueryDTO.getPageSize());
-        IPage<ArticleComments> resultPage = articleCommentMapper.pageQueryWithArticleTitle(page, articleCommentPageQueryDTO);
+        IPage<ArticleCommentQueryVO> resultPage = articleCommentMapper.pageQueryWithArticleTitle(page, articleCommentPageQueryDTO);
         return PageResult.fromIPage(resultPage);
     }
 

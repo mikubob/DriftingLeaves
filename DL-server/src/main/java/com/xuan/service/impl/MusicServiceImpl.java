@@ -12,6 +12,7 @@ import com.xuan.entity.Music;
 import com.xuan.mapper.MusicMapper;
 import com.xuan.result.PageResult;
 import com.xuan.service.IMusicService;
+import com.xuan.vo.MusicQueryVO;
 import com.xuan.vo.MusicVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,9 +52,13 @@ public class MusicServiceImpl extends ServiceImpl<MusicMapper, Music> implements
         //1.创建分页对象
         Page<Music> page=new Page<>(musicPageQueryDTO.getPage(),musicPageQueryDTO.getPageSize());
         //2.创建查询条件
-        Page<Music> articlePage = page(page, buildQueryWrapper(musicPageQueryDTO));
-        //3.转换为自定义的 PageResult并且返回
-        return PageResult.fromIPage(articlePage);
+        Page<Music> musicPage = page(page, buildQueryWrapper(musicPageQueryDTO));
+        //3.转换为 QueryVO 并返回
+        Page<MusicQueryVO> voPage = new Page<>(musicPage.getCurrent(), musicPage.getSize(), musicPage.getTotal());
+        voPage.setRecords(musicPage.getRecords().stream()
+                .map(music -> BeanUtil.copyProperties(music, MusicQueryVO.class))
+                .toList());
+        return PageResult.fromIPage(voPage);
     }
 
     /**

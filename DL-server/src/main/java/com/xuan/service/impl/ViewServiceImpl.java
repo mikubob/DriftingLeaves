@@ -10,6 +10,7 @@ import com.xuan.entity.Views;
 import com.xuan.mapper.ViewMapper;
 import com.xuan.result.PageResult;
 import com.xuan.service.IViewService;
+import com.xuan.vo.ViewQueryVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,8 +40,12 @@ public class ViewServiceImpl extends ServiceImpl<ViewMapper, Views> implements I
         Page<Views> page = new Page<>(viewPageQueryDTO.getPage(), viewPageQueryDTO.getPageSize());
         //2.创建查询条件
         Page<Views> viewPage = page(page, buildQueryWrapper(viewPageQueryDTO));
-        //3.转换为自定义的 PageResult并且返回
-        return PageResult.fromIPage(viewPage);
+        //3.转换为 QueryVO 并返回
+        Page<ViewQueryVO> voPage = new Page<>(viewPage.getCurrent(), viewPage.getSize(), viewPage.getTotal());
+        voPage.setRecords(viewPage.getRecords().stream()
+                .map(view -> cn.hutool.core.bean.BeanUtil.copyProperties(view, ViewQueryVO.class))
+                .toList());
+        return PageResult.fromIPage(voPage);
     }
 
     /**

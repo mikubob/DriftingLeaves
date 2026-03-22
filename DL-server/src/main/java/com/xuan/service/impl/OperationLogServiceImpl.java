@@ -8,6 +8,7 @@ import com.xuan.entity.OperationLogs;
 import com.xuan.mapper.OperationLogMapper;
 import com.xuan.result.PageResult;
 import com.xuan.service.IOperationLogService;
+import com.xuan.vo.OperationLogQueryVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -43,8 +44,12 @@ public class OperationLogServiceImpl extends ServiceImpl<OperationLogMapper, Ope
         Page<OperationLogs> page=new Page<>(operationLogPageQueryDTO.getPage(),operationLogPageQueryDTO.getPageSize());
         //2.创建查询条件
         Page<OperationLogs> opPage = page(page, builderQueryWrapper(operationLogPageQueryDTO));
-        //3.转换为自定义的pageResult并返回
-        return PageResult.fromIPage(opPage);
+        //3.转换为 QueryVO 并返回
+        Page<OperationLogQueryVO> voPage = new Page<>(opPage.getCurrent(), opPage.getSize(), opPage.getTotal());
+        voPage.setRecords(opPage.getRecords().stream()
+                .map(log -> cn.hutool.core.bean.BeanUtil.copyProperties(log, OperationLogQueryVO.class))
+                .toList());
+        return PageResult.fromIPage(voPage);
     }
 
     /**

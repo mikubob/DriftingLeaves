@@ -21,6 +21,7 @@ import com.xuan.service.IMessageService;
 import com.xuan.service.UserAgentService;
 import com.xuan.utils.IpUtil;
 import com.xuan.utils.MarkdownUtil;
+import com.xuan.vo.MessageQueryVO;
 import com.xuan.vo.MessageVO;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -151,8 +152,12 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Messages> imp
         Page<Messages> page = new Page<>(messagePageQueryDTO.getPage(), messagePageQueryDTO.getPageSize());
         page(page, queryWrapper);
 
-        //3.转换为 PageResult
-        return PageResult.fromIPage(page);
+        //3.转换为 QueryVO 并返回
+        Page<MessageQueryVO> voPage = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
+        voPage.setRecords(page.getRecords().stream()
+                .map(msg -> BeanUtil.copyProperties(msg, MessageQueryVO.class))
+                .toList());
+        return PageResult.fromIPage(voPage);
     }
 
     /**

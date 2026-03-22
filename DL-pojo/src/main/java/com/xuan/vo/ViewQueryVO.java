@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 /**
  * 浏览记录分页查询返回VO
  * 基于前端 ViewRecord/index.vue 实际使用字段设计
- * 
+ * <p>
  * 注意：ipAddress 字段保留，因为前端表格需要显示
  * 移除敏感字段：visitorId, userAgent
  */

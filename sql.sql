@@ -1,17 +1,4 @@
--- FeiTwnd个人网站数据库
--- 包含四个网站的后端数据库
--- 主页home.feitwnd.cc
--- 管理admin.feitwnd.cc
--- 简历cv.feitwnd.cc
--- 博客blog.feitwnd.cc
 
-drop database if exists FeiTwnd;
-create database FeiTwnd;
-
-use FeiTwnd;
-
--- ===========管理端(admin.feitwnd.cc)相关表====================
--- 管理员表
 create table admin(
                       id int primary key auto_increment,
                       username varchar(20) not null comment '用户名',
@@ -372,16 +359,16 @@ create table music(
 -- xxx为需要替换的内容
 
 -- 管理员账号username是登录时用的，nickname是在管理端登录后显示的昵称，盐值用随机字符串就行，不要太简单，这里的密码要插入根据盐值加密后的密码
--- 密码需要到测试类中生成，在/src/test/java/cc/feitwnd/FeiTwndBackendApplicationTests.java
+-- 密码需要到测试类中生成
 -- 运行测试方法会在控制台打印出加密后的密码，将加密后的密码和盐值填入以下插入语句
 -- 邮箱填写自己的邮箱，作为管理端登录验证码的接受邮箱
 insert into admin(username, password, salt, nickname, email, role, create_time, update_time)
-values('xxx', 'xxx', 'xxx', 'xxx', 'xxx', 1, now(), now());
+values('xxx', 'xxx', 'xxx', '管理员', 'xxx', 1, now(), now());
 
 -- 游客账号（可选）
 -- 游客的账号名和盐值自己来定，密码同样去测试类生成，邮箱不用填，因为配置文件里可以固定游客填的邮箱验证码
 insert into admin(username, password, salt, nickname, email, role, create_time, update_time)
-values('xxx', 'xxx', 'xxx', '游客', '',0, now(), now());
+values('xxx', 'xxx', 'xxx', '游客', '', 0, now(), now());
 
 -- 系统配置项
 -- 请不要改变下列配置的键，跟前端有对应的。需要自行填入值，网站建立时间请用2025-10-31这种格式

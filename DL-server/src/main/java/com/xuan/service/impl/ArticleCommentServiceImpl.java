@@ -239,7 +239,7 @@ public class ArticleCommentServiceImpl extends ServiceImpl<ArticleCommentMapper,
         //2.转换为 VO
         List<ArticleCommentVO> allVOs = allComments.stream()
                 .map(this::convertToVO)
-                .collect(Collectors.toList());
+                .toList();
 
         //3.构建树形结构：根评论作为一级，子评论挂到根评论下
         List<ArticleCommentVO> rootComments = new ArrayList<>();

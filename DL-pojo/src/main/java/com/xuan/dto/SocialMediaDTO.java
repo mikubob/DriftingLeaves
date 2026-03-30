@@ -26,7 +26,7 @@ public class SocialMediaDTO implements Serializable {
     private String name;
 
     // 图标类名
-    @Size(max = 50, message = "图标类名不能超过50字")
+    @Size(max = 50, message = "图标类名不能超过 50 字")
     private String icon;
 
     // 链接

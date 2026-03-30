@@ -222,6 +222,33 @@ public class VisitorServiceImpl extends ServiceImpl<VisitorMapper, Visitors> imp
     }
 
     /**
+     * 批量删除访客
+     * <p>
+     * 删除指定访客记录，同时清除Redis中的相关缓存。
+     * 删除操作会：
+     * <ul>
+     *     <li>清除Redis中的封禁缓存标记（BLOCKED_KEY）</li>
+     *     <li>清除访客信息缓存（VISITOR_KEY）</li>
+     *     <li>从数据库中删除访客记录</li>
+     * </ul>
+     * </p>
+     *
+     * @param ids 访客ID列表，不能为空
+     */
+    @Override
+    public void batchDeleteVisitors(List<Long> ids) {
+        for (Long id : ids) {
+            Visitors visitor = getById(id);
+            if (visitor != null && visitor.getFingerprint() != null) {
+                String blockedKey = BLOCKED_KEY + visitor.getFingerprint();
+                redisTemplate.delete(blockedKey);
+                redisTemplate.delete(VISITOR_KEY + visitor.getFingerprint());
+            }
+        }
+        removeByIds(ids);
+    }
+
+    /**
      * 获取或创建会话ID
      * <p>
      * 如果当前请求已有关联的会话，则返回现有会话ID；

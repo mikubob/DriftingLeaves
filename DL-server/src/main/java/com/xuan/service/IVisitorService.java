@@ -72,4 +72,10 @@ public interface  IVisitorService extends IService<Visitors> {
      * @return 访客省份分布
      */
     List<ProvinceCountDTO> getProvinceDistribution();
+
+    /**
+     * 批量删除访客
+     * @param ids 访客ID列表
+     */
+    void batchDeleteVisitors(List<Long> ids);
 }

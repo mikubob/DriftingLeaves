@@ -58,7 +58,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         }
 
         // 2. 游客无须邮箱验证码
-        if (admin.getRole() == StatusConstant.DISABLE) {
+        if (admin.getRole().equals(StatusConstant.DISABLE)) {
             throw new VisitorSendCodeException(MessageConstant.VISITOR_VERIFY_CODE_ERROR
                     + visitorProperties.getVerifyCode());
         }

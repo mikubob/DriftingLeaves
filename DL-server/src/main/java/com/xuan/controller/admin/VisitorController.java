@@ -62,4 +62,16 @@ public class VisitorController {
         return Result.success();
     }
 
+    /**
+     * 批量删除访客
+     * @param ids
+     * @return
+     */
+    @DeleteMapping
+    @OperationLog(value = OperationType.DELETE, target = "visitor", targetId = "#ids")
+    public Result<String> batchDelete(@RequestParam List<Long> ids) {
+        log.info("批量删除访客: {}", ids);
+        visitorService.batchDeleteVisitors(ids);
+        return Result.success();
+    }
 }

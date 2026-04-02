@@ -19,9 +19,4 @@ public interface IArticleLikeService extends IService<ArticleLikes> {
      * 检查是否已点赞
      */
     boolean hasLiked(Long articleId, Long visitorId);
-
-    /**
-     * 获取文章点赞数（Redis 增量 + MySQL 基础值）
-     */
-    long getLikeCount(Long articleId, long mysqlLikeCount);
 }

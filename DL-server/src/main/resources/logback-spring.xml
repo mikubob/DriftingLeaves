@@ -8,20 +8,16 @@
     <property name="MAX_FILE_SIZE" value="10MB" />
     <property name="TOTAL_SIZE_CAP" value="1GB" />
 
-    <!-- 安全日志特有变量 -->
-    <property name="SECURITY_MAX_HISTORY" value="90" />
-    <property name="SECURITY_TOTAL_SIZE_CAP" value="2GB" />
-
-    <!-- 彩色日志依赖的渲染类 -->
+    <!-- 彩色日志依赖 -->
     <conversionRule conversionWord="clr" class="org.springframework.boot.logging.logback.ColorConverter" />
     <conversionRule conversionWord="wex" class="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
-    <conversionRule conversionWord="wEx" class="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
 
-    <!-- 彩色日志格式 -->
     <property name="CONSOLE_LOG_PATTERN"
-              value="${CONSOLE_LOG_PATTERN:-%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
+              value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wex"/>
 
-    <!-- 控制台输出（所有环境通用） -->
+    <!-- ==================== Appenders (输出目的地) ==================== -->
+
+    <!-- 控制台 (所有环境通用) -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>${CONSOLE_LOG_PATTERN}</pattern>
@@ -29,10 +25,9 @@
         </encoder>
     </appender>
 
-    <!-- ==================== 生产环境：文件 Appender ==================== -->
+    <!-- 生产环境专用 Appenders -->
     <springProfile name="prod">
-
-        <!-- 主应用日志文件 -->
+        <!-- 主日志文件 -->
         <appender name="APPLICATION_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <file>${LOG_HOME}/${APP_NAME}-application.log</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
@@ -42,12 +37,11 @@
                 <totalSizeCap>${TOTAL_SIZE_CAP}</totalSizeCap>
             </rollingPolicy>
             <encoder>
-                <!-- [%X{ip:-}] 会自动读取 Java 代码中 MDC.put("ip", ...) 的值 -->
-                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{ip:-}] %-5level %logger{36} - %msg%n</pattern>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
             </encoder>
         </appender>
 
-        <!-- 错误日志单独文件 -->
+        <!-- 错误日志文件 (只收 ERROR) -->
         <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <file>${LOG_HOME}/${APP_NAME}-error.log</file>
             <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -60,25 +54,11 @@
                 <totalSizeCap>500MB</totalSizeCap>
             </rollingPolicy>
             <encoder>
-                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{ip:-}] %-5level %logger{36} - %msg%n</pattern>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
             </encoder>
         </appender>
 
-        <!-- 安全扫描日志单独文件 -->
-        <appender name="SECURITY_SCAN_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>${LOG_HOME}/${APP_NAME}-security-scan.log</file>
-            <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-                <fileNamePattern>${LOG_HOME}/${APP_NAME}-security-scan-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
-                <maxHistory>${SECURITY_MAX_HISTORY}</maxHistory>
-                <maxFileSize>${MAX_FILE_SIZE}</maxFileSize>
-                <totalSizeCap>${SECURITY_TOTAL_SIZE_CAP}</totalSizeCap>
-            </rollingPolicy>
-            <encoder>
-                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{ip:-}] %-5level %logger{36} - %msg%n</pattern>
-            </encoder>
-        </appender>
-
-        <!-- SQL慢查询日志 -->
+        <!-- 慢SQL日志文件 -->
         <appender name="SQL_SLOW_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <file>${LOG_HOME}/${APP_NAME}-sql-slow.log</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
@@ -90,62 +70,40 @@
                 <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
             </encoder>
         </appender>
+    </springProfile>
 
-        <!-- 【优化点】安全扫描日志器：生产环境只写文件，不刷控制台，防止日志风暴 -->
-        <logger name="SECURITY_SCAN" level="WARN" additivity="false">
-            <appender-ref ref="SECURITY_SCAN_FILE" />
-            <!-- 生产环境建议注释掉下面这行，除非你需要实时在终端看攻击 -->
-            <!-- <appender-ref ref="CONSOLE" /> -->
-        </logger>
+    <!-- ==================== Loggers (路由规则) ==================== -->
 
-        <!-- MyBatis SQL日志 (生产环境通常关闭或只记慢SQL) -->
-        <logger name="com.xuan.mapper" level="WARN">
-            <appender-ref ref="APPLICATION_FILE" />
-        </logger>
+    <!-- 抑制 Tomcat 噪音 -->
+    <logger name="org.apache.tomcat" level="ERROR" />
+    <logger name="org.apache.coyote" level="ERROR" />
+    <logger name="org.apache.catalina" level="ERROR" />
 
-        <!-- 慢SQL日志 -->
+    <!-- 开发环境配置 -->
+    <springProfile name="dev">
+        <!-- 开启 Mapper 的 DEBUG，查看 SQL -->
+        <logger name="com.xuan.mapper" level="DEBUG" />
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE" />
+        </root>
+    </springProfile>
+
+    <!-- 生产环境配置 -->
+    <springProfile name="prod">
+        <!-- 生产环境关闭 Mapper 日志 (设为 WARN 或 ERROR)，防止 SQL 刷屏 -->
+        <logger name="com.xuan.mapper" level="WARN" />
+
+        <!-- 慢SQL监听 (需配合 Druid 配置) -->
         <logger name="com.xuan.mapper.slow" level="DEBUG" additivity="false">
             <appender-ref ref="SQL_SLOW_FILE" />
         </logger>
 
-        <!-- 404错误处理：重定向到安全日志，且不传递到 error.log (additivity=false) -->
-        <logger name="org.springframework.web.servlet.PageNotFound" level="WARN" additivity="false">
-            <appender-ref ref="SECURITY_SCAN_FILE" />
-        </logger>
-
-        <!-- 根日志 -->
         <root level="INFO">
-            <appender-ref ref="CONSOLE" />
+            <!-- 生产环境只写文件，不打印控制台，提升性能 -->
             <appender-ref ref="APPLICATION_FILE" />
             <appender-ref ref="ERROR_FILE" />
         </root>
-
     </springProfile>
-
-    <!-- ==================== 开发环境：仅控制台 ==================== -->
-    <springProfile name="dev">
-        <!-- 安全扫描日志器（开发环境仅输出到控制台，方便调试） -->
-        <logger name="SECURITY_SCAN" level="WARN" additivity="false">
-            <appender-ref ref="CONSOLE" />
-        </logger>
-
-        <!-- MyBatis SQL日志（开发环境显示 SQL） -->
-        <logger name="com.xuan.mapper" level="DEBUG" />
-
-        <!-- 404错误处理 -->
-        <logger name="org.springframework.web.servlet.PageNotFound" level="WARN" additivity="false">
-            <appender-ref ref="CONSOLE" />
-        </logger>
-
-        <!-- 根日志 -->
-        <root level="INFO">
-            <appender-ref ref="CONSOLE" />
-        </root>
-    </springProfile>
-
-    <!-- ==================== 所有环境通用：抑制 Tomcat 噪音 ==================== -->
-    <logger name="org.apache.tomcat" level="ERROR" />
-    <logger name="org.apache.coyote" level="ERROR" />
-    <logger name="org.apache.catalina" level="ERROR" />
 
 </configuration>

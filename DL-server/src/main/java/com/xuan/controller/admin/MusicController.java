@@ -53,7 +53,7 @@ public class MusicController {
 
     /**
      * 添加音乐
-     * @param music
+     * @param musicDTO
      * @return
      */
     @PostMapping
@@ -66,7 +66,7 @@ public class MusicController {
 
     /**
      * 更新音乐
-     * @param music
+     * @param musicDTO
      * @return
      */
     @PutMapping

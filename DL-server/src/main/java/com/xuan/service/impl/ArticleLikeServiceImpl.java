@@ -1,29 +1,25 @@
 package com.xuan.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.xuan.constant.RedisConstant;
 import com.xuan.entity.ArticleLikes;
-import com.xuan.entity.Articles;
 import com.xuan.mapper.ArticleLikeMapper;
-import com.xuan.mapper.ArticleMapper;
 import com.xuan.service.IArticleLikeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 /**
  * 文章点赞服务实现类
+ * 优化：使用 Redis ZSet 存储点赞用户信息，Redis Hash 存储点赞数
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ArticleLikeServiceImpl extends ServiceImpl<ArticleLikeMapper, ArticleLikes> implements IArticleLikeService {
 
-    private final ArticleMapper articleMapper;
+    private final StringRedisTemplate stringRedisTemplate;
 
     /**
      * 点赞文章
@@ -32,27 +28,17 @@ public class ArticleLikeServiceImpl extends ServiceImpl<ArticleLikeMapper, Artic
      * @param visitorId 访客 ID
      */
     @Override
-    @Transactional
     public void likeArticle(Long articleId, Long visitorId) {
-        LambdaQueryWrapper<ArticleLikes> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ArticleLikes::getArticleId, articleId)
-                .eq(ArticleLikes::getVisitorId, visitorId);
-
-        if (this.count(wrapper) > 0) {
+        String key = RedisConstant.ARTICLE_LIKE_USER_SET + articleId;
+        Double score = stringRedisTemplate.opsForZSet().score(key, visitorId.toString());
+        
+        if (score != null) {
             return;
         }
-
-        ArticleLikes articleLikes = ArticleLikes.builder()
-                .articleId(articleId)
-                .visitorId(visitorId)
-                .likeTime(LocalDateTime.now())
-                .build();
-        this.save(articleLikes);
-
-        LambdaUpdateWrapper<Articles> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(Articles::getId, articleId)
-                .setSql("like_count = like_count + 1");
-        articleMapper.update(null, updateWrapper);
+        
+        stringRedisTemplate.opsForZSet().add(key, visitorId.toString(), System.currentTimeMillis());
+        
+        stringRedisTemplate.opsForHash().increment(RedisConstant.ARTICLE_LIKE_COUNT, articleId.toString(), 1);
     }
 
     /**
@@ -62,22 +48,17 @@ public class ArticleLikeServiceImpl extends ServiceImpl<ArticleLikeMapper, Artic
      * @param visitorId 访客 ID
      */
     @Override
-    @Transactional
     public void unlikeArticle(Long articleId, Long visitorId) {
-        LambdaQueryWrapper<ArticleLikes> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ArticleLikes::getArticleId, articleId)
-                .eq(ArticleLikes::getVisitorId, visitorId);
-
-        if (this.count(wrapper) == 0) {
+        String key = RedisConstant.ARTICLE_LIKE_USER_SET + articleId;
+        Double score = stringRedisTemplate.opsForZSet().score(key, visitorId.toString());
+        
+        if (score == null) {
             return;
         }
-
-        this.remove(wrapper);
-
-        LambdaUpdateWrapper<Articles> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(Articles::getId, articleId)
-                .setSql("like_count = like_count - 1");
-        articleMapper.update(null, updateWrapper);
+        
+        stringRedisTemplate.opsForZSet().remove(key, visitorId.toString());
+        
+        stringRedisTemplate.opsForHash().increment(RedisConstant.ARTICLE_LIKE_COUNT, articleId.toString(), -1);
     }
 
     /**
@@ -89,9 +70,8 @@ public class ArticleLikeServiceImpl extends ServiceImpl<ArticleLikeMapper, Artic
      */
     @Override
     public boolean hasLiked(Long articleId, Long visitorId) {
-        LambdaQueryWrapper<ArticleLikes> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(ArticleLikes::getArticleId, articleId)
-                .eq(ArticleLikes::getVisitorId, visitorId);
-        return count(wrapper) > 0;
+        String key = RedisConstant.ARTICLE_LIKE_USER_SET + articleId;
+        Double score = stringRedisTemplate.opsForZSet().score(key, visitorId.toString());
+        return score != null;
     }
 }

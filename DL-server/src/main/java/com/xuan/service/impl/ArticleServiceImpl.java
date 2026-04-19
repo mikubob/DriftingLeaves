@@ -96,6 +96,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     })
     public void createArticle(ArticleDTO articleDTO) {
         Articles articles = BeanUtil.copyProperties(articleDTO, Articles.class);
+
+        boolean firstPublishNow = StatusConstant.ENABLE.equals(articleDTO.getIsPublished());
+
         //1.判断前端是否进行了md->html的渲染，如果没有则后端进行转换
         if (StrUtil.isNotBlank(articles.getContentHtml())) {
             articles.setContentHtml(articleDTO.getContentHtml());
@@ -110,13 +113,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
         //2.计算字数得阅读的时间
         String plainText = articleDTO.getContentMarkdown();
         long wordCount = countWords(plainText);
-        long readingTime = Math.max(1, wordCount / VIEWS);//阅读时间,以每分钟阅读300字为例，最少为1分钟
+        long readingTime = Math.max(1, wordCount / VIEWS);
         articles.setWordCount(wordCount);
         articles.setReadingTime(readingTime);
 
         //3.设置发布信息
-        Integer isPublished = articleDTO.getIsPublished();
-        if (isPublished != null && isPublished.equals(StatusConstant.ENABLE)) {
+        if (firstPublishNow) {
             articles.setPublishTime(LocalDateTime.now());
         }
 
@@ -134,6 +136,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
         //6.保存文章-标签关联
         if (articleDTO.getTagIds() != null && !articleDTO.getTagIds().isEmpty()) {
             articleTagService.batchInsertRelations(articles.getId(), articleDTO.getTagIds());
+        }
+
+        //7.仅首次发布时通知RSS订阅者
+        if (firstPublishNow) {
+            notifyRssSubscribers(articles);
         }
     }
 
@@ -175,12 +182,13 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
             throw new ArticleException(MessageConstant.ARTICLE_NOT_FOUND);
         }
 
+        boolean firstPublishNow = articles.getPublishTime() == null
+                && StatusConstant.ENABLE.equals(articleDTO.getIsPublished());
+
         BeanUtil.copyProperties(articleDTO, articles);
 
         //1.如果文章状态由草稿变为发布，且没有发布时间，则设置发布时间
-        if (articleDTO.getIsPublished() != null
-                && articleDTO.getIsPublished().equals(StatusConstant.ENABLE)
-                && articles.getPublishTime() == null) {
+        if (firstPublishNow) {
             articles.setPublishTime(LocalDateTime.now());
         }
 
@@ -214,6 +222,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
             if (!articleDTO.getTagIds().isEmpty()) {
                 articleTagService.batchInsertRelations(articleDTO.getId(), articleDTO.getTagIds());
             }
+        }
+
+        //6.仅首次发布时通知RSS订阅者
+        if (firstPublishNow) {
+            notifyRssSubscribers(articles);
         }
     }
 
@@ -255,6 +268,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
             throw new ArticleException(MessageConstant.ARTICLE_NOT_FOUND);
         }
 
+        boolean firstPublishNow = StatusConstant.ENABLE.equals(isPublished) && articles.getPublishTime() == null;
+
         //2.设置发布状态
         Articles updateArticle = Articles.builder()
                 .id(id)
@@ -262,19 +277,17 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
                 .build();
 
         //3.如果为首次发布，则设置发布时间
-        if (isPublished.equals(StatusConstant.ENABLE) && articles.getPublishTime() == null) {
+        if (firstPublishNow) {
             updateArticle.setPublishTime(LocalDateTime.now());
         }
 
         //4.更新文章状态
         updateById(updateArticle);
 
-        //5.发布时通知RSS订阅者
-        if (isPublished.equals(StatusConstant.ENABLE)) {
+        //5.仅首次发布时通知RSS订阅者
+        if (firstPublishNow) {
             notifyRssSubscribers(articles);
         }
-
-
     }
 
     /**

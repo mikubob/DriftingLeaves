@@ -79,8 +79,8 @@
     <logger name="org.apache.coyote" level="ERROR" />
     <logger name="org.apache.catalina" level="ERROR" />
 
-    <!-- 开发环境配置 -->
-    <springProfile name="dev">
+    <!-- 开发/测试环境配置 -->
+    <springProfile name="dev,test">
         <!-- 开启 Mapper 的 DEBUG，查看 SQL -->
         <logger name="com.xuan.mapper" level="DEBUG" />
 
@@ -103,6 +103,13 @@
             <!-- 生产环境只写文件，不打印控制台，提升性能 -->
             <appender-ref ref="APPLICATION_FILE" />
             <appender-ref ref="ERROR_FILE" />
+        </root>
+    </springProfile>
+
+    <!-- 未命中 profile 时的兜底配置 -->
+    <springProfile name="default">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE" />
         </root>
     </springProfile>
 

@@ -124,11 +124,27 @@ public interface IArticleService extends IService<Articles> {
      */
     List<ArticleTitleViewCountDTO> getViewTop10();
 
+    /**
+     * 获取本月热门文章点赞榜（前 5 篇）
+     * @return 本月点赞数最高的已发布文章列表
+     */
     List<HotArticleVO> getMonthHotArticlesByLike();
 
+    /**
+     * 获取本月热门文章浏览榜（前 5 篇）
+     * @return 本月浏览量最高的已发布文章列表
+     */
     List<HotArticleVO> getMonthHotArticlesByView();
 
+    /**
+     * 获取全站热门文章点赞榜（前 5 篇）
+     * @return 全站总点赞数最高的已发布文章列表
+     */
     List<HotArticleVO> getSiteHotArticlesByLike();
 
+    /**
+     * 获取全站热门文章浏览榜（前 5 篇）
+     * @return 全站总浏览量最高的已发布文章列表
+     */
     List<HotArticleVO> getSiteHotArticlesByView();
 }

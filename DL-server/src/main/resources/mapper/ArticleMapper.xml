@@ -259,6 +259,7 @@
         LIMIT 10
     </select>
 
+    <!-- 获取本月热门文章点赞榜（前 5 篇） -->
     <select id="getMonthHotArticlesByLike" resultType="com.xuan.vo.HotArticleVO">
         SELECT
             a.id,
@@ -285,6 +286,7 @@
         LIMIT 5
     </select>
 
+    <!-- 获取本月热门文章浏览榜（前 5 篇） -->
     <select id="getMonthHotArticlesByView" resultType="com.xuan.vo.HotArticleVO">
         SELECT
             a.id,
@@ -311,6 +313,7 @@
         LIMIT 5
     </select>
 
+    <!-- 获取全站热门文章点赞榜（前 5 篇） -->
     <select id="getSiteHotArticlesByLike" resultType="com.xuan.vo.HotArticleVO">
         SELECT
             a.id,
@@ -335,6 +338,7 @@
         LIMIT 5
     </select>
 
+    <!-- 获取全站热门文章浏览榜（前 5 篇） -->
     <select id="getSiteHotArticlesByView" resultType="com.xuan.vo.HotArticleVO">
         SELECT
             a.id,

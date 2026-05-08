@@ -521,6 +521,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     /**
      * 构建查询条件
      */
+    /**
+     * 获取本月热门文章点赞榜（前 5 篇）
+     * @return 本月点赞数最高的已发布文章列表
+     */
     @Override
     @Cacheable(value = "hotArticles", key = "'month:like'")
     public List<HotArticleVO> getMonthHotArticlesByLike() {
@@ -528,6 +532,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
         return baseMapper.getMonthHotArticlesByLike(begin, begin.plusMonths(1));
     }
 
+    /**
+     * 获取本月热门文章浏览榜（前 5 篇）
+     * @return 本月浏览量最高的已发布文章列表
+     */
     @Override
     @Cacheable(value = "hotArticles", key = "'month:view'")
     public List<HotArticleVO> getMonthHotArticlesByView() {
@@ -535,12 +543,20 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
         return baseMapper.getMonthHotArticlesByView(begin, begin.plusMonths(1));
     }
 
+    /**
+     * 获取全站热门文章点赞榜（前 5 篇）
+     * @return 全站总点赞数最高的已发布文章列表
+     */
     @Override
     @Cacheable(value = "hotArticles", key = "'site:like'")
     public List<HotArticleVO> getSiteHotArticlesByLike() {
         return baseMapper.getSiteHotArticlesByLike();
     }
 
+    /**
+     * 获取全站热门文章浏览榜（前 5 篇）
+     * @return 全站总浏览量最高的已发布文章列表
+     */
     @Override
     @Cacheable(value = "hotArticles", key = "'site:view'")
     public List<HotArticleVO> getSiteHotArticlesByView() {

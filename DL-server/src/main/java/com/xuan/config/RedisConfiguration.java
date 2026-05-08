@@ -160,6 +160,7 @@ public class RedisConfiguration {
         cacheConfigurations.put("articleList", defaultConfig.entryTtl(Duration.ofMinutes(10)));
         cacheConfigurations.put("articleDetail", defaultConfig.entryTtl(Duration.ofMinutes(15)));
         cacheConfigurations.put("articleArchive", defaultConfig.entryTtl(Duration.ofMinutes(30)));
+        cacheConfigurations.put("hotArticles", defaultConfig.entryTtl(Duration.ofMinutes(5)));
 
         // 统计数据：变化频繁，短时间缓存
         cacheConfigurations.put("blogReport", defaultConfig.entryTtl(Duration.ofMinutes(5)));

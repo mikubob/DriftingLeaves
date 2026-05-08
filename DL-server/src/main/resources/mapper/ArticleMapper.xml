@@ -259,4 +259,104 @@
         LIMIT 10
     </select>
 
+    <select id="getMonthHotArticlesByLike" resultType="com.xuan.vo.HotArticleVO">
+        SELECT
+            a.id,
+            a.title,
+            a.slug,
+            a.summary,
+            a.cover_image,
+            a.category_id,
+            ac.name AS category_name,
+            a.view_count,
+            a.like_count,
+            a.comment_count,
+            a.word_count,
+            a.reading_time,
+            a.is_top,
+            a.publish_time,
+            a.like_count AS hot_value
+        FROM articles a
+        LEFT JOIN article_categories ac ON a.category_id = ac.id
+        WHERE a.is_published = 1
+          AND COALESCE(a.publish_time, a.create_time) >= #{begin}
+          AND COALESCE(a.publish_time, a.create_time) &lt; #{end}
+        ORDER BY a.like_count DESC, COALESCE(a.publish_time, a.create_time) DESC, a.id DESC
+        LIMIT 5
+    </select>
+
+    <select id="getMonthHotArticlesByView" resultType="com.xuan.vo.HotArticleVO">
+        SELECT
+            a.id,
+            a.title,
+            a.slug,
+            a.summary,
+            a.cover_image,
+            a.category_id,
+            ac.name AS category_name,
+            a.view_count,
+            a.like_count,
+            a.comment_count,
+            a.word_count,
+            a.reading_time,
+            a.is_top,
+            a.publish_time,
+            a.view_count AS hot_value
+        FROM articles a
+        LEFT JOIN article_categories ac ON a.category_id = ac.id
+        WHERE a.is_published = 1
+          AND COALESCE(a.publish_time, a.create_time) >= #{begin}
+          AND COALESCE(a.publish_time, a.create_time) &lt; #{end}
+        ORDER BY a.view_count DESC, COALESCE(a.publish_time, a.create_time) DESC, a.id DESC
+        LIMIT 5
+    </select>
+
+    <select id="getSiteHotArticlesByLike" resultType="com.xuan.vo.HotArticleVO">
+        SELECT
+            a.id,
+            a.title,
+            a.slug,
+            a.summary,
+            a.cover_image,
+            a.category_id,
+            ac.name AS category_name,
+            a.view_count,
+            a.like_count,
+            a.comment_count,
+            a.word_count,
+            a.reading_time,
+            a.is_top,
+            a.publish_time,
+            a.like_count AS hot_value
+        FROM articles a
+        LEFT JOIN article_categories ac ON a.category_id = ac.id
+        WHERE a.is_published = 1
+        ORDER BY a.like_count DESC, a.publish_time DESC, a.id DESC
+        LIMIT 5
+    </select>
+
+    <select id="getSiteHotArticlesByView" resultType="com.xuan.vo.HotArticleVO">
+        SELECT
+            a.id,
+            a.title,
+            a.slug,
+            a.summary,
+            a.cover_image,
+            a.category_id,
+            ac.name AS category_name,
+            a.view_count,
+            a.like_count,
+            a.comment_count,
+            a.word_count,
+            a.reading_time,
+            a.is_top,
+            a.publish_time,
+            a.view_count AS hot_value
+        FROM articles a
+        LEFT JOIN article_categories ac ON a.category_id = ac.id
+        WHERE a.is_published = 1
+        ORDER BY a.view_count DESC, a.publish_time DESC, a.id DESC
+        LIMIT 5
+    </select>
+
 </mapper>

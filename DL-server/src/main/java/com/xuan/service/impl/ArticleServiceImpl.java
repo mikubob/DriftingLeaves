@@ -29,6 +29,7 @@ import com.xuan.vo.ArticleArchiveVO;
 import com.xuan.vo.ArticleVO;
 import com.xuan.vo.BlogArticleDetailVO;
 import com.xuan.vo.BlogArticleVO;
+import com.xuan.vo.HotArticleVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -92,7 +93,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
             @CacheEvict(value = "articleList", allEntries = true),
             @CacheEvict(value = "articleDetail", allEntries = true),
             @CacheEvict(value = "articleArchive", allEntries = true),
-            @CacheEvict(value = "blogReport", allEntries = true)
+            @CacheEvict(value = "blogReport", allEntries = true),
+            @CacheEvict(value = "hotArticles", allEntries = true)
     })
     public void createArticle(ArticleDTO articleDTO) {
         Articles articles = BeanUtil.copyProperties(articleDTO, Articles.class);
@@ -174,7 +176,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
             @CacheEvict(value = "articleList", allEntries = true),
             @CacheEvict(value = "articleDetail", allEntries = true),
             @CacheEvict(value = "articleArchive", allEntries = true),
-            @CacheEvict(value = "blogReport", allEntries = true)
+            @CacheEvict(value = "blogReport", allEntries = true),
+            @CacheEvict(value = "hotArticles", allEntries = true)
     })
     public void updateArticle(ArticleDTO articleDTO) {
         Articles articles = getById(articleDTO.getId());
@@ -240,7 +243,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
             @CacheEvict(value = "articleList", allEntries = true),
             @CacheEvict(value = "articleDetail", allEntries = true),
             @CacheEvict(value = "articleArchive", allEntries = true),
-            @CacheEvict(value = "blogReport", allEntries = true)
+            @CacheEvict(value = "blogReport", allEntries = true),
+            @CacheEvict(value = "hotArticles", allEntries = true)
     })
     public void batchDelete(List<Long> ids) {
         //1.批量删除文章-标签关联
@@ -259,7 +263,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
             @CacheEvict(value = "articleList", allEntries = true),
             @CacheEvict(value = "articleDetail", allEntries = true),
             @CacheEvict(value = "articleArchive", allEntries = true),
-            @CacheEvict(value = "blogReport", allEntries = true)
+            @CacheEvict(value = "blogReport", allEntries = true),
+            @CacheEvict(value = "hotArticles", allEntries = true)
     })
     public void publishOrCancel(Long id, Integer isPublished) {
         //1.查询文章是否存在
@@ -299,6 +304,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     @Caching(evict = {
             @CacheEvict(value = "articleList", allEntries = true),
             @CacheEvict(value = "articleDetail", allEntries = true),
+            @CacheEvict(value = "hotArticles", allEntries = true)
     })
     public void toggleTop(Long id, Integer isTop) {
         //1.根据id获取当前文章
@@ -515,6 +521,32 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     /**
      * 构建查询条件
      */
+    @Override
+    @Cacheable(value = "hotArticles", key = "'month:like'")
+    public List<HotArticleVO> getMonthHotArticlesByLike() {
+        LocalDateTime begin = LocalDateTime.now().withDayOfMonth(1).toLocalDate().atStartOfDay();
+        return baseMapper.getMonthHotArticlesByLike(begin, begin.plusMonths(1));
+    }
+
+    @Override
+    @Cacheable(value = "hotArticles", key = "'month:view'")
+    public List<HotArticleVO> getMonthHotArticlesByView() {
+        LocalDateTime begin = LocalDateTime.now().withDayOfMonth(1).toLocalDate().atStartOfDay();
+        return baseMapper.getMonthHotArticlesByView(begin, begin.plusMonths(1));
+    }
+
+    @Override
+    @Cacheable(value = "hotArticles", key = "'site:like'")
+    public List<HotArticleVO> getSiteHotArticlesByLike() {
+        return baseMapper.getSiteHotArticlesByLike();
+    }
+
+    @Override
+    @Cacheable(value = "hotArticles", key = "'site:view'")
+    public List<HotArticleVO> getSiteHotArticlesByView() {
+        return baseMapper.getSiteHotArticlesByView();
+    }
+
     private LambdaQueryWrapper<Articles> buildQueryWrapper(ArticlePageQueryDTO dto) {
         LambdaQueryWrapper<Articles> wrapper = new LambdaQueryWrapper<>();
 

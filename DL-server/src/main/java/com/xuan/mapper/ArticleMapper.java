@@ -8,9 +8,11 @@ import com.xuan.vo.ArticleArchiveItemVO;
 import com.xuan.vo.ArticleVO;
 import com.xuan.vo.BlogArticleDetailVO;
 import com.xuan.vo.BlogArticleVO;
+import com.xuan.vo.HotArticleVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -99,4 +101,14 @@ public interface ArticleMapper extends BaseMapper<Articles> {
      * @return 文章浏览量 top10 列表
      */
     List<ArticleTitleViewCountDTO> getViewTop10();
+
+    List<HotArticleVO> getMonthHotArticlesByLike(@Param("begin") LocalDateTime begin,
+                                                 @Param("end") LocalDateTime end);
+
+    List<HotArticleVO> getMonthHotArticlesByView(@Param("begin") LocalDateTime begin,
+                                                 @Param("end") LocalDateTime end);
+
+    List<HotArticleVO> getSiteHotArticlesByLike();
+
+    List<HotArticleVO> getSiteHotArticlesByView();
 }

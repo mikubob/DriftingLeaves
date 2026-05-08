@@ -11,6 +11,7 @@ import com.xuan.vo.ArticleArchiveVO;
 import com.xuan.vo.ArticleVO;
 import com.xuan.vo.BlogArticleDetailVO;
 import com.xuan.vo.BlogArticleVO;
+import com.xuan.vo.HotArticleVO;
 
 import java.util.List;
 
@@ -122,4 +123,12 @@ public interface IArticleService extends IService<Articles> {
      * @return 文章浏览量top10
      */
     List<ArticleTitleViewCountDTO> getViewTop10();
+
+    List<HotArticleVO> getMonthHotArticlesByLike();
+
+    List<HotArticleVO> getMonthHotArticlesByView();
+
+    List<HotArticleVO> getSiteHotArticlesByLike();
+
+    List<HotArticleVO> getSiteHotArticlesByView();
 }

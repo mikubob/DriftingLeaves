@@ -31,13 +31,13 @@ public class ArticleLikeServiceImpl extends ServiceImpl<ArticleLikeMapper, Artic
     public void likeArticle(Long articleId, Long visitorId) {
         String key = RedisConstant.ARTICLE_LIKE_USER_SET + articleId;
         Double score = stringRedisTemplate.opsForZSet().score(key, visitorId.toString());
-        
+
         if (score != null) {
             return;
         }
-        
+
         stringRedisTemplate.opsForZSet().add(key, visitorId.toString(), System.currentTimeMillis());
-        
+
         stringRedisTemplate.opsForHash().increment(RedisConstant.ARTICLE_LIKE_COUNT, articleId.toString(), 1);
     }
 
@@ -51,13 +51,13 @@ public class ArticleLikeServiceImpl extends ServiceImpl<ArticleLikeMapper, Artic
     public void unlikeArticle(Long articleId, Long visitorId) {
         String key = RedisConstant.ARTICLE_LIKE_USER_SET + articleId;
         Double score = stringRedisTemplate.opsForZSet().score(key, visitorId.toString());
-        
+
         if (score == null) {
             return;
         }
-        
+
         stringRedisTemplate.opsForZSet().remove(key, visitorId.toString());
-        
+
         stringRedisTemplate.opsForHash().increment(RedisConstant.ARTICLE_LIKE_COUNT, articleId.toString(), -1);
     }
 

@@ -65,7 +65,7 @@ public class RedisConfiguration {
         PolymorphicTypeValidator validator = LaissezFaireSubTypeValidator.instance;
         objectMapper.activateDefaultTyping(
                 validator,
-                ObjectMapper.DefaultTyping.NON_FINAL,
+                ObjectMapper.DefaultTyping.EVERYTHING,
                 JsonTypeInfo.As.PROPERTY
         );
 

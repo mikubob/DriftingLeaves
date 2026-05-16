@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * 省份访客数量DTO
  */
@@ -12,7 +15,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProvinceCountDTO {
+public class ProvinceCountDTO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     // 省份
     private String province;

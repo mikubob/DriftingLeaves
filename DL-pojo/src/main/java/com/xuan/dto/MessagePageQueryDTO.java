@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -18,8 +19,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class MessagePageQueryDTO implements Serializable {
 
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    // 页码
     private Integer page;
 
+    // 每页显示数量
     private Integer pageSize;
 
     // 是否审核通过，0-否，1-是

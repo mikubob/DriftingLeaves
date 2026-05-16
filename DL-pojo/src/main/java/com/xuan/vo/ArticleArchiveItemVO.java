@@ -20,10 +20,20 @@ import java.time.LocalDateTime;
 public class ArticleArchiveItemVO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
+
+    // 文章ID
     private Long id;
+
+    // 文章标题
     private String title;
+
+    // 文章别名
     private String slug;
+
+    // 发布日期（日）
     private Integer publishDay;
+
+    // 发布时间
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime publishTime;
 }

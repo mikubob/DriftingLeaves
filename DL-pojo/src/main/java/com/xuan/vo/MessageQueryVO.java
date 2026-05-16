@@ -23,6 +23,7 @@ public class MessageQueryVO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    // 留言ID
     private Long id;
 
     // 根留言ID

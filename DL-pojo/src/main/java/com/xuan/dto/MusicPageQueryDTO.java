@@ -5,11 +5,20 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
+
+/**
+ * 音乐分页查询DTO
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MusicPageQueryDTO {
+public class MusicPageQueryDTO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     // 页码
     private int page;

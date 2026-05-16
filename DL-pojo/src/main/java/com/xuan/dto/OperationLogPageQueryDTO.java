@@ -6,13 +6,21 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
+/**
+ * 操作日志分页查询DTO
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class OperationLogPageQueryDTO {
+public class OperationLogPageQueryDTO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     // 页码
     private int page;

@@ -19,7 +19,13 @@ import java.util.List;
 public class ArticleArchiveVO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
+
+    // 年份
     private Integer year;
+
+    // 月份
     private Integer month;
+
+    // 文章列表
     private List<ArticleArchiveItemVO> articles;
 }

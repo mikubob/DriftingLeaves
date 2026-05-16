@@ -26,6 +26,7 @@ public class ViewQueryVO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    // 浏览记录ID
     private Long id;
 
     // 页面标题

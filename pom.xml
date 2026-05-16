@@ -41,29 +41,28 @@
         <ip2region.version>2.7.0</ip2region.version>
         <cache-api>1.1.1</cache-api>
         <caffeine.version>3.1.6</caffeine.version>
+        <oshi.version>7.1.0</oshi.version>
 
     </properties>
 
     <dependencyManagement>
         <dependencies>
 
-            <!--mysql-->
+            <!-- mysql -->
             <dependency>
                 <groupId>com.mysql</groupId>
                 <artifactId>mysql-connector-j</artifactId>
                 <version>${mysql.version}</version>
             </dependency>
 
-            <!--mybatis-plus-->
+            <!-- mybatis-plus -->
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
 
-
-
-            <!-- JWT for Spring Boot 3.x -->
+            <!-- Spring Boot 3.x 的 JWT -->
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt-api</artifactId>
@@ -82,13 +81,12 @@
                 <scope>runtime</scope>
             </dependency>
 
-            <!-- 阿里云OSS -->
+            <!-- 阿里云 OSS -->
             <dependency>
                 <groupId>com.aliyun.oss</groupId>
                 <artifactId>aliyun-sdk-oss</artifactId>
                 <version>${aliyun-sdk-oss}</version>
             </dependency>
-
 
             <!-- Druid -->
             <dependency>
@@ -104,21 +102,21 @@
                 <version>${thumbnailator}</version>
             </dependency>
 
-            <!-- 处理WebP格式 -->
+            <!-- 处理 WebP 格式 -->
             <dependency>
                 <groupId>com.twelvemonkeys.imageio</groupId>
                 <artifactId>imageio-webp</artifactId>
                 <version>${imageio-webp}</version>
             </dependency>
 
-            <!-- WebP支持sejda -->
+            <!-- WebP 支持 sejda -->
             <dependency>
                 <groupId>org.sejda.imageio</groupId>
                 <artifactId>webp-imageio</artifactId>
                 <version>${webp-imageio}</version>
             </dependency>
 
-            <!-- CommonMark核心 -->
+            <!-- CommonMark 核心 -->
             <dependency>
                 <groupId>org.commonmark</groupId>
                 <artifactId>commonmark</artifactId>
@@ -146,7 +144,7 @@
                 <version>${commonmark.version}</version>
             </dependency>
 
-            <!-- Jsoup HTML清理 -->
+            <!-- Jsoup HTML 清理 -->
             <dependency>
                 <groupId>org.jsoup</groupId>
                 <artifactId>jsoup</artifactId>
@@ -166,35 +164,21 @@
                 <version>${bucket4j-jcache}</version>
             </dependency>
 
-            <!--hutool-->
+            <!-- hutool -->
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
                 <version>${hutool.version}</version>
             </dependency>
 
-            <!-- fastjson2-->
+            <!-- fastjson2 -->
             <dependency>
                 <groupId>com.alibaba.fastjson2</groupId>
                 <artifactId>fastjson2</artifactId>
                 <version>${fastjson2.version}</version>
             </dependency>
 
-            <!-- 令牌桶限流 -->
-            <dependency>
-                <groupId>com.bucket4j</groupId>
-                <artifactId>bucket4j-core</artifactId>
-                <version>${bucket4j-core}</version>
-            </dependency>
-
-            <!-- Bucket4j JCache集成 - 分布式限流支持 -->
-            <dependency>
-                <groupId>com.bucket4j</groupId>
-                <artifactId>bucket4j-jcache</artifactId>
-                <version>${bucket4j-jcache}</version>
-            </dependency>
-
-            <!-- ip2region IP地址解析-->
+            <!-- ip2region IP 地址解析 -->
             <dependency>
                 <groupId>org.lionsoul</groupId>
                 <artifactId>ip2region</artifactId>
@@ -208,11 +192,18 @@
                 <version>${cache-api}</version>
             </dependency>
 
-            <!-- Caffeine JCache实现 - 高性能内存缓存 -->
+            <!-- Caffeine JCache 实现 - 高性能内存缓存 -->
             <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>jcache</artifactId>
                 <version>${caffeine.version}</version>
+            </dependency>
+
+            <!-- OSHI 系统信息获取 -->
+            <dependency>
+                <groupId>com.github.oshi</groupId>
+                <artifactId>oshi-core</artifactId>
+                <version>${oshi.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -220,7 +211,7 @@
     <build>
         <pluginManagement>
             <plugins>
-                <!-- Maven编译插件配置 -->
+                <!-- Maven 编译插件配置 -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -238,7 +229,7 @@
                     </configuration>
                 </plugin>
 
-                <!-- Spring Boot Maven插件 -->
+                <!-- Spring Boot Maven 插件 -->
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>

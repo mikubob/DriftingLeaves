@@ -5,11 +5,22 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
+
+/**
+ * 社交媒体VO
+ */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SocialMediaVO {
+public class SocialMediaVO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    // 社交媒体ID
     private Long id;
 
     // 名称

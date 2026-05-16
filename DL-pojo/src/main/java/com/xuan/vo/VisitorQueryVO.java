@@ -26,6 +26,7 @@ public class VisitorQueryVO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    // 访客ID
     private Long id;
 
     // IP地址

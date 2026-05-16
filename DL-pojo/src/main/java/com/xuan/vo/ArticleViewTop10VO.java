@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -14,7 +16,10 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ArticleViewTop10VO {
+public class ArticleViewTop10VO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     // 文章标题列表
     private List<String> titleList;

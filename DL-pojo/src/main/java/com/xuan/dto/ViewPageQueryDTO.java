@@ -5,11 +5,20 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
+
+/**
+ * 页面浏览记录分页查询DTO
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ViewPageQueryDTO {
+public class ViewPageQueryDTO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     // 页码
     private int page;

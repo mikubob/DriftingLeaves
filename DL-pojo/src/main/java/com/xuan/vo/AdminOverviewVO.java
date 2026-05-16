@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * 管理端总览统计VO
  */
@@ -12,7 +15,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AdminOverviewVO {
+public class AdminOverviewVO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     // 总浏览量
     private Integer totalViewCount;

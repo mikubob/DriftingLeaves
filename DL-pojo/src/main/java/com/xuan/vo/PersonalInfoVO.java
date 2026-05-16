@@ -5,14 +5,22 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ * 个人信息VO
+ */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class PersonalInfoVO implements Serializable {
 
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    // 个人信息ID
     private Long id;
 
     // 昵称

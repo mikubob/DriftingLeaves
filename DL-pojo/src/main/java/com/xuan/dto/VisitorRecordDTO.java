@@ -7,6 +7,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * 访客访问记录DTO
  */
@@ -14,7 +17,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class VisitorRecordDTO {
+public class VisitorRecordDTO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     // 访问路径
     @NotBlank(message = "访问路径不能为空")
@@ -44,7 +50,7 @@ public class VisitorRecordDTO {
 
     // 设备信息
 
-    // 设备内存
+    // 设备内存（GB）
     private Integer deviceMemory;
     // CPU核心数
     private Integer hardwareConcurrency;

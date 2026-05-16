@@ -26,6 +26,7 @@ public class RssSubscriptionQueryVO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    // 订阅ID
     private Long id;
 
     // 昵称

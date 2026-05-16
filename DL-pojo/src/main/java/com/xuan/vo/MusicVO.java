@@ -5,13 +5,22 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
 
+/**
+ * 音乐VO
+ */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MusicVO {
-    
+public class MusicVO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    // 音乐ID
     private Long id;
 
     // 音乐标题

@@ -21,6 +21,7 @@ public class MusicQueryVO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    // 音乐ID
     private Long id;
 
     // 音乐标题

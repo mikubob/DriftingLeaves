@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
 
@@ -20,6 +21,10 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class ExperienceDTO implements Serializable {
 
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    // ID
     private Long id;
 
     // 类型，0-教育经历，1-实习及工作经历,2-项目经历

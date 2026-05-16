@@ -23,6 +23,7 @@ public class ArticleCommentQueryVO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    // 评论ID
     private Long id;
 
     // 文章ID

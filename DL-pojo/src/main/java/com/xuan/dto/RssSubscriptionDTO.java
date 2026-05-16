@@ -9,6 +9,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * RSS订阅DTO
  */
@@ -16,7 +19,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RssSubscriptionDTO {
+public class RssSubscriptionDTO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     // 访客ID
     @NotNull(message = "访客ID不能为空")

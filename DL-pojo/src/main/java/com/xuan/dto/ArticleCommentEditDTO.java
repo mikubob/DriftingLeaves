@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -18,6 +19,9 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ArticleCommentEditDTO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     // 评论ID
     @NotNull(message = "评论ID不能为空")

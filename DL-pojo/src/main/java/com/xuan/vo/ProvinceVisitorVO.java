@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * 访客省份分布统计VO
  */
@@ -12,7 +15,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProvinceVisitorVO {
+public class ProvinceVisitorVO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     // 省份，以逗号分隔，例如：广东,北京,浙江
     private String provinceList;

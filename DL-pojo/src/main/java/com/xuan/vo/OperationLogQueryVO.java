@@ -23,6 +23,7 @@ public class OperationLogQueryVO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    // 日志ID
     private Long id;
 
     // 操作类型

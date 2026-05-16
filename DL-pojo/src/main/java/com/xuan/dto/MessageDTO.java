@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -18,6 +19,9 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MessageDTO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     // 留言内容
     @NotBlank(message = "留言内容不能为空")

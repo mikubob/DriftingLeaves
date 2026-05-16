@@ -22,6 +22,7 @@ public class ArticleVO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    // 文章ID
     private Long id;
 
     // 文章标题

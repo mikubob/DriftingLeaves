@@ -5,15 +5,23 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
 
+/**
+ * 经历VO
+ */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ExperienceVO implements Serializable {
 
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    // 经历ID
     private Long id;
 
     // 类型，0-教育经历，1-实习及工作经历,2-项目经历

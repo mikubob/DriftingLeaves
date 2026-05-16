@@ -45,24 +45,46 @@ public class ServerMonitorServiceImpl implements IServerMonitorService {
      */
     private final ServerMonitorEnvironmentUtil environmentUtil;
 
+    /**
+     * 从 Redis 读取服务概览 current 快照
+     *
+     * @return 服务概览
+     */
     @Override
     public ServerMonitorOverviewVO getOverview() {
         return readCurrent(RedisConstant.SERVER_MONITOR_CURRENT_OVERVIEW, ServerMonitorOverviewVO.class,
                 ServerMonitorOverviewVO.builder().build());
     }
 
+    /**
+     * 从 Redis 读取负载详情 current 快照
+     *
+     * @return 负载详情
+     */
     @Override
     public LoadDetailVO getLoadDetail() {
         return readCurrent(RedisConstant.SERVER_MONITOR_CURRENT_LOAD, LoadDetailVO.class,
                 LoadDetailVO.builder().topProcesses(Collections.emptyList()).build());
     }
 
+    /**
+     * 从 Redis 读取 CPU 详情 current 快照
+     *
+     * @return CPU 详情
+     */
     @Override
     public CpuDetailVO getCpuDetail() {
         return readCurrent(RedisConstant.SERVER_MONITOR_CURRENT_CPU, CpuDetailVO.class,
                 CpuDetailVO.builder().coreUsages(Collections.emptyList()).topProcesses(Collections.emptyList()).build());
     }
 
+    /**
+     * 从 Redis 读取内存详情 current 快照
+     * <p>
+     * 容器模式下会屏蔽 shared / buffer cache 等语义不准确的字段。
+     *
+     * @return 内存详情
+     */
     @Override
     public MemoryDetailVO getMemoryDetail() {
         MemoryDetailVO detailVO = readCurrent(RedisConstant.SERVER_MONITOR_CURRENT_MEMORY, MemoryDetailVO.class,
@@ -79,12 +101,25 @@ public class ServerMonitorServiceImpl implements IServerMonitorService {
         return detailVO;
     }
 
+    /**
+     * 获取磁盘资源选项列表
+     * <p>
+     * 容器模式下会额外过滤掉容器运行时注入的噪音挂载点。
+     *
+     * @return 磁盘资源选项列表
+     */
     @Override
     public List<OptionVO> getDiskOptions() {
         // 容器模式下会额外过滤掉 /etc/hosts 等典型噪音挂载点
         return filterDiskOptions(cacheReader.readOptions(RedisConstant.SERVER_MONITOR_DISK_OPTIONS));
     }
 
+    /**
+     * 根据查询条件获取磁盘详情
+     *
+     * @param queryDTO 查询参数
+     * @return 磁盘详情
+     */
     @Override
     public DiskDetailVO getDiskDetail(ServerMonitorQueryDTO queryDTO) {
         String resourceName = normalizeDiskResourceName(queryDTO);
@@ -98,11 +133,22 @@ public class ServerMonitorServiceImpl implements IServerMonitorService {
         return detailVO;
     }
 
+    /**
+     * 获取网络资源选项列表
+     *
+     * @return 网络资源选项列表
+     */
     @Override
     public List<OptionVO> getNetworkOptions() {
         return cacheReader.readOptions(RedisConstant.SERVER_MONITOR_NETWORK_OPTIONS);
     }
 
+    /**
+     * 根据查询条件获取网络详情（含趋势点）
+     *
+     * @param queryDTO 查询参数
+     * @return 网络详情
+     */
     @Override
     public NetworkDetailVO getNetworkDetail(ServerMonitorQueryDTO queryDTO) {
         String resourceName = normalizeNetworkResourceName(queryDTO);
@@ -112,11 +158,22 @@ public class ServerMonitorServiceImpl implements IServerMonitorService {
         return detailVO;
     }
 
+    /**
+     * 获取磁盘 IO 资源选项列表
+     *
+     * @return 磁盘 IO 资源选项列表
+     */
     @Override
     public List<OptionVO> getDiskIoOptions() {
         return cacheReader.readOptions(RedisConstant.SERVER_MONITOR_DISK_IO_OPTIONS);
     }
 
+    /**
+     * 根据查询条件获取磁盘 IO 详情（含趋势点）
+     *
+     * @param queryDTO 查询参数
+     * @return 磁盘 IO 详情
+     */
     @Override
     public DiskIoDetailVO getDiskIoDetail(ServerMonitorQueryDTO queryDTO) {
         String resourceName = normalizeDiskIoResourceName(queryDTO);
@@ -126,6 +183,15 @@ public class ServerMonitorServiceImpl implements IServerMonitorService {
         return detailVO;
     }
 
+    /**
+     * 获取监控聚合快照
+     * <p>
+     * 一次性拉取 overview/load/cpu/memory/disk/network/diskIo 全部快照，
+     * 按当前部署模式组装语义正确的聚合结果，方便前端主消费。
+     *
+     * @param queryDTO 查询参数
+     * @return 监控聚合快照
+     */
     @Override
     public ServerMonitorSnapshotVO getSnapshot(ServerMonitorQueryDTO queryDTO) {
         // 1. 先解析当前部署模式，后续所有提示文案都围绕这个模式组装

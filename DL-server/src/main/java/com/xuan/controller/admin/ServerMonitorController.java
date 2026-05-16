@@ -20,6 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * 管理端服务器监控相关接口
+ */
 @Slf4j
 @RestController
 @RequestMapping("/admin/server-monitor")
@@ -28,69 +31,117 @@ public class ServerMonitorController {
 
     private final IServerMonitorService serverMonitorService;
 
+    /**
+     * 获取服务器监控概览数据
+     * @return 概览数据
+     */
     @GetMapping("/overview")
     public Result<ServerMonitorOverviewVO> overview() {
-        log.info("get server monitor overview");
+        log.info("获取服务器监控概览数据");
         return Result.success(serverMonitorService.getOverview());
     }
 
+    /**
+     * 获取服务器负载详情
+     * @return 负载详情
+     */
     @GetMapping("/load")
     public Result<LoadDetailVO> load() {
-        log.info("get server monitor load detail");
+        log.info("获取服务器负载详情");
         return Result.success(serverMonitorService.getLoadDetail());
     }
 
+    /**
+     * 获取服务器CPU详情
+     * @return CPU详情
+     */
     @GetMapping("/cpu")
     public Result<CpuDetailVO> cpu() {
-        log.info("get server monitor cpu detail");
+        log.info("获取服务器CPU详情");
         return Result.success(serverMonitorService.getCpuDetail());
     }
 
+    /**
+     * 获取服务器内存详情
+     * @return 内存详情
+     */
     @GetMapping("/memory")
     public Result<MemoryDetailVO> memory() {
-        log.info("get server monitor memory detail");
+        log.info("获取服务器内存详情");
         return Result.success(serverMonitorService.getMemoryDetail());
     }
 
+    /**
+     * 获取服务器磁盘选项
+     * @return 磁盘选项
+     */
     @GetMapping("/disk/options")
     public Result<List<OptionVO>> diskOptions() {
-        log.info("get server monitor disk options");
+        log.info("获取服务器磁盘选项");
         return Result.success(serverMonitorService.getDiskOptions());
     }
 
+    /**
+     * 获取服务器磁盘详情
+     * @param queryDTO 查询条件
+     * @return 磁盘详情
+     */
     @GetMapping("/disk")
     public Result<DiskDetailVO> disk(ServerMonitorQueryDTO queryDTO) {
-        log.info("get server monitor disk detail: {}", queryDTO);
+        log.info("获取服务器磁盘详情, {}", queryDTO);
         return Result.success(serverMonitorService.getDiskDetail(queryDTO));
     }
 
+    /**
+     * 获取服务器网络选项
+     * @return 网络选项
+     */
     @GetMapping("/network/options")
     public Result<List<OptionVO>> networkOptions() {
-        log.info("get server monitor network options");
+        log.info("获取服务器网络选项");
         return Result.success(serverMonitorService.getNetworkOptions());
     }
 
+    /**
+     * 获取服务器网络详情
+     * @param queryDTO 查询条件
+     * @return 网络详情
+     */
     @GetMapping("/network")
     public Result<NetworkDetailVO> network(ServerMonitorQueryDTO queryDTO) {
-        log.info("get server monitor network detail: {}", queryDTO);
+        log.info("获取服务器网络详情, {}", queryDTO);
         return Result.success(serverMonitorService.getNetworkDetail(queryDTO));
     }
 
+    /**
+     * 获取服务器磁盘IO选项
+     * @return 磁盘IO选项
+     */
     @GetMapping("/disk-io/options")
     public Result<List<OptionVO>> diskIoOptions() {
-        log.info("get server monitor disk io options");
+        log.info("获取服务器磁盘IO选项");
         return Result.success(serverMonitorService.getDiskIoOptions());
     }
 
+    /**
+     * 获取服务器磁盘IO详情
+     * @param queryDTO 查询条件
+     * @return 磁盘IO详情
+     */
     @GetMapping("/disk-io")
     public Result<DiskIoDetailVO> diskIo(ServerMonitorQueryDTO queryDTO) {
-        log.info("get server monitor disk io detail: {}", queryDTO);
+        log.info("获取服务器磁盘IO详情, {}", queryDTO);
         return Result.success(serverMonitorService.getDiskIoDetail(queryDTO));
     }
 
+    /**
+     * 获取服务器监控聚合快照
+     * @param queryDTO 查询条件
+     * @return 聚合快照
+     */
     @GetMapping("/snapshot")
     public Result<ServerMonitorSnapshotVO> snapshot(ServerMonitorQueryDTO queryDTO) {
-        log.info("get server monitor snapshot: {}", queryDTO);
+        log.info("获取服务器监控聚合快照, {}", queryDTO);
         return Result.success(serverMonitorService.getSnapshot(queryDTO));
     }
 }

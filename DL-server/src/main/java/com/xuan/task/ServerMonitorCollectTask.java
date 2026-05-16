@@ -1,7 +1,8 @@
-package com.xuan.service.impl.monitor;
+package com.xuan.task;
 
 import com.xuan.constant.MonitorConstant;
 import com.xuan.constant.RedisConstant;
+import com.xuan.service.impl.monitor.ServerMonitorUtil;
 import com.xuan.utils.MetricFormatUtil;
 import com.xuan.vo.DiskDetailVO;
 import com.xuan.vo.DiskIoDetailVO;
@@ -53,6 +54,9 @@ public class ServerMonitorCollectTask {
 
     /**
      * 周期性采集监控快照
+     * <p>
+     * 采集到的 overview/load/cpu/memory 全局快照与各资源维度拆分详情，
+     * 统一写入 Redis current 层缓存，并维护网络与磁盘 IO 的趋势点列表。
      */
     @Scheduled(fixedRate = MonitorConstant.DEFAULT_SAMPLE_INTERVAL_SECONDS * 1000L, initialDelay = 3000L)
     public void collectTrendMetrics() {
@@ -91,6 +95,10 @@ public class ServerMonitorCollectTask {
 
     /**
      * 追加网络趋势点
+     * <p>
+     * 将网络详情中的上下行速率转换为 KB/s 后追加到 Redis 趋势列表。
+     *
+     * @param detailVO 网络详情
      */
     private void appendNetworkPoint(NetworkDetailVO detailVO) {
         MetricPointVO pointVO = MetricPointVO.builder()
@@ -103,6 +111,10 @@ public class ServerMonitorCollectTask {
 
     /**
      * 追加磁盘 IO 趋势点
+     * <p>
+     * 将磁盘 IO 详情中的读写速率转换为 KB/s 后追加到 Redis 趋势列表。
+     *
+     * @param detailVO 磁盘 IO 详情
      */
     private void appendDiskIoPoint(DiskIoDetailVO detailVO) {
         MetricPointVO pointVO = MetricPointVO.builder()
@@ -115,6 +127,9 @@ public class ServerMonitorCollectTask {
 
     /**
      * 向指定趋势列表尾部追加一个点位，并裁剪到最大长度
+     *
+     * @param key     Redis Key
+     * @param pointVO 趋势点数据
      */
     private void appendPoint(String key, MetricPointVO pointVO) {
         Object value = redisTemplate.opsForValue().get(key);

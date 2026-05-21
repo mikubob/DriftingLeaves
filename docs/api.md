@@ -3611,7 +3611,7 @@ GET /blog/article/page
 |---|---|---|---|
 |200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[ResultPageResultBlogArticleVO](#schemaresultpageresultblogarticlevo)|
 
-## GET 根据slug获取文章详情（浏览量+1）
+## GET 根据 slug 获取文章详情（浏览量 +1）
 
 GET /blog/article/detail/{slug}
 
@@ -3709,7 +3709,7 @@ GET /blog/article/detail/{slug}
 |---|---|---|---|
 |200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[ResultBlogArticleDetailVO](#schemaresultblogarticledetailvo)|
 
-## GET 根据分类ID获取文章列表（分页）
+## GET 根据分类 ID 获取文章列表（分页）
 
 GET /blog/article/category/{categoryId}
 
@@ -3762,7 +3762,7 @@ GET /blog/article/category/{categoryId}
 |---|---|---|---|
 |200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[ResultPageResultBlogArticleVO](#schemaresultpageresultblogarticlevo)|
 
-## GET 获取文章归档（按年月分组）
+## GET 获取文章归档
 
 GET /blog/article/archive
 
@@ -3797,6 +3797,246 @@ GET /blog/article/archive
 |状态码|状态码含义|说明|数据模型|
 |---|---|---|---|
 |200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[ResultListArticleArchiveVO](#schemaresultlistarticlearchivevo)|
+
+## GET 获取本月热门文章点赞榜（前 5 篇）
+
+GET /blog/article/hot/month/like
+
+> 返回示例
+
+> 200 Response
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": [
+    {
+      "id": 0,
+      "title": "string",
+      "slug": "string",
+      "summary": "string",
+      "coverImage": "string",
+      "categoryId": 0,
+      "categoryName": "string",
+      "viewCount": 0,
+      "likeCount": 0,
+      "commentCount": 0,
+      "wordCount": 0,
+      "readingTime": 0,
+      "isTop": 0,
+      "publishTime": "string",
+      "hotValue": 0
+    }
+  ]
+}
+```
+
+### 返回结果
+
+|状态码|状态码含义|说明|数据模型|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[ResultListHotArticleVO](#schemaresultlisthotarticlevo)|
+
+## GET 获取当月热门文章
+
+GET /blog/article/hot/month
+
+> 返回示例
+
+> 200 Response
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": [
+    {
+      "id": 0,
+      "title": "string",
+      "slug": "string",
+      "summary": "string",
+      "coverImage": "string",
+      "categoryId": 0,
+      "categoryName": "string",
+      "viewCount": 0,
+      "likeCount": 0,
+      "commentCount": 0,
+      "wordCount": 0,
+      "readingTime": 0,
+      "isTop": 0,
+      "publishTime": "string",
+      "hotScore": 0
+    }
+  ]
+}
+```
+
+### 返回结果
+
+|状态码|状态码含义|说明|数据模型|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[ResultListBlogHotArticleVO](#schemaresultlistbloghotarticlevo)|
+
+## GET 获取本月热门文章浏览榜（前 5 篇）
+
+GET /blog/article/hot/month/view
+
+> 返回示例
+
+> 200 Response
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": [
+    {
+      "id": 0,
+      "title": "string",
+      "slug": "string",
+      "summary": "string",
+      "coverImage": "string",
+      "categoryId": 0,
+      "categoryName": "string",
+      "viewCount": 0,
+      "likeCount": 0,
+      "commentCount": 0,
+      "wordCount": 0,
+      "readingTime": 0,
+      "isTop": 0,
+      "publishTime": "string",
+      "hotValue": 0
+    }
+  ]
+}
+```
+
+### 返回结果
+
+|状态码|状态码含义|说明|数据模型|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[ResultListHotArticleVO](#schemaresultlisthotarticlevo)|
+
+## GET 获取全站热门文章
+
+GET /blog/article/hot/site
+
+> 返回示例
+
+> 200 Response
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": [
+    {
+      "id": 0,
+      "title": "string",
+      "slug": "string",
+      "summary": "string",
+      "coverImage": "string",
+      "categoryId": 0,
+      "categoryName": "string",
+      "viewCount": 0,
+      "likeCount": 0,
+      "commentCount": 0,
+      "wordCount": 0,
+      "readingTime": 0,
+      "isTop": 0,
+      "publishTime": "string",
+      "hotScore": 0
+    }
+  ]
+}
+```
+
+### 返回结果
+
+|状态码|状态码含义|说明|数据模型|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[ResultListBlogHotArticleVO](#schemaresultlistbloghotarticlevo)|
+
+## GET 获取全站热门文章点赞榜（前 5 篇）
+
+GET /blog/article/hot/site/like
+
+> 返回示例
+
+> 200 Response
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": [
+    {
+      "id": 0,
+      "title": "string",
+      "slug": "string",
+      "summary": "string",
+      "coverImage": "string",
+      "categoryId": 0,
+      "categoryName": "string",
+      "viewCount": 0,
+      "likeCount": 0,
+      "commentCount": 0,
+      "wordCount": 0,
+      "readingTime": 0,
+      "isTop": 0,
+      "publishTime": "string",
+      "hotValue": 0
+    }
+  ]
+}
+```
+
+### 返回结果
+
+|状态码|状态码含义|说明|数据模型|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[ResultListHotArticleVO](#schemaresultlisthotarticlevo)|
+
+## GET 获取全站热门文章浏览榜（前 5 篇）
+
+GET /blog/article/hot/site/view
+
+> 返回示例
+
+> 200 Response
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": [
+    {
+      "id": 0,
+      "title": "string",
+      "slug": "string",
+      "summary": "string",
+      "coverImage": "string",
+      "categoryId": 0,
+      "categoryName": "string",
+      "viewCount": 0,
+      "likeCount": 0,
+      "commentCount": 0,
+      "wordCount": 0,
+      "readingTime": 0,
+      "isTop": 0,
+      "publishTime": "string",
+      "hotValue": 0
+    }
+  ]
+}
+```
+
+### 返回结果
+
+|状态码|状态码含义|说明|数据模型|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[ResultListHotArticleVO](#schemaresultlisthotarticlevo)|
 
 ## GET 文章搜索（仅已发布）
 
@@ -4860,6 +5100,615 @@ GET /cv/personalInfo
 |状态码|状态码含义|说明|数据模型|
 |---|---|---|---|
 |200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[ResultPersonalInfoVO](#schemaresultpersonalinfovo)|
+
+# 管理端服务器监控相关接口
+
+## GET 获取服务器监控概览数据
+
+GET /admin/server-monitor/overview
+
+> 返回示例
+
+> 200 Response
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": {
+    "loadPercent": 0,
+    "loadStatusText": "string",
+    "cpuPercent": 0,
+    "cpuCoreCount": 0,
+    "memoryUsedText": "string",
+    "memoryTotalText": "string",
+    "memoryPercent": 0,
+    "diskUsedText": "string",
+    "diskTotalText": "string",
+    "diskPercent": 0,
+    "collectTime": "string"
+  }
+}
+```
+
+### 返回结果
+
+|状态码|状态码含义|说明|数据模型|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[ResultServerMonitorOverviewVO](#schemaresultservermonitoroverviewvo)|
+
+## GET 获取服务器负载详情
+
+GET /admin/server-monitor/load
+
+> 返回示例
+
+> 200 Response
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": {
+    "loadPercent": 0,
+    "statusText": "string",
+    "loadAverage1m": 0,
+    "loadAverage5m": 0,
+    "loadAverage15m": 0,
+    "runningProcessCount": 0,
+    "totalProcessCount": 0,
+    "userPercent": 0,
+    "nicePercent": 0,
+    "systemPercent": 0,
+    "idlePercent": 0,
+    "iowaitPercent": 0,
+    "irqPercent": 0,
+    "softirqPercent": 0,
+    "stealPercent": 0,
+    "guestPercent": 0,
+    "guestNicePercent": 0,
+    "topProcesses": [
+      {
+        "pid": 0,
+        "processName": "string",
+        "cpuPercent": 0,
+        "memoryPercent": 0
+      }
+    ],
+    "collectTime": "string"
+  }
+}
+```
+
+### 返回结果
+
+|状态码|状态码含义|说明|数据模型|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[ResultLoadDetailVO](#schemaresultloaddetailvo)|
+
+## GET 获取服务器CPU详情
+
+GET /admin/server-monitor/cpu
+
+> 返回示例
+
+> 200 Response
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": {
+    "cpuPercent": 0,
+    "cpuModel": "string",
+    "physicalPackageCount": 0,
+    "physicalCoreCount": 0,
+    "logicalCoreCount": 0,
+    "coreUsages": [
+      {
+        "coreLabel": "string",
+        "usagePercent": 0
+      }
+    ],
+    "topProcesses": [
+      {
+        "pid": 0,
+        "processName": "string",
+        "cpuPercent": 0,
+        "memoryPercent": 0
+      }
+    ],
+    "collectTime": "string"
+  }
+}
+```
+
+### 返回结果
+
+|状态码|状态码含义|说明|数据模型|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[ResultCpuDetailVO](#schemaresultcpudetailvo)|
+
+## GET 获取服务器内存详情
+
+GET /admin/server-monitor/memory
+
+> 返回示例
+
+> 200 Response
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": {
+    "memoryPercent": 0,
+    "usedBytes": 0,
+    "totalBytes": 0,
+    "availableBytes": 0,
+    "freeBytes": 0,
+    "sharedBytes": 0,
+    "bufferCacheBytes": 0,
+    "swapUsedBytes": 0,
+    "swapTotalBytes": 0,
+    "usedText": "string",
+    "totalText": "string",
+    "availableText": "string",
+    "freeText": "string",
+    "sharedText": "string",
+    "bufferCacheText": "string",
+    "swapText": "string",
+    "topProcesses": [
+      {
+        "pid": 0,
+        "processName": "string",
+        "cpuPercent": 0,
+        "memoryPercent": 0
+      }
+    ],
+    "collectTime": "string"
+  }
+}
+```
+
+### 返回结果
+
+|状态码|状态码含义|说明|数据模型|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[ResultMemoryDetailVO](#schemaresultmemorydetailvo)|
+
+## GET 获取服务器磁盘选项
+
+GET /admin/server-monitor/disk/options
+
+> 返回示例
+
+> 200 Response
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": [
+    {
+      "label": "string",
+      "value": "string"
+    }
+  ]
+}
+```
+
+### 返回结果
+
+|状态码|状态码含义|说明|数据模型|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[ResultListOptionVO](#schemaresultlistoptionvo)|
+
+## GET 获取服务器磁盘详情
+
+GET /admin/server-monitor/disk
+
+### 请求参数
+
+|名称|位置|类型|必选|说明|
+|---|---|---|---|---|
+|resourceName|query|string| 否 |none|
+|diskResourceName|query|string| 否 |none|
+|networkResourceName|query|string| 否 |none|
+|diskIoResourceName|query|string| 否 |none|
+|limit|query|integer| 否 |none|
+
+> 返回示例
+
+> 200 Response
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": {
+    "resourceName": "string",
+    "mount": "string",
+    "fileSystem": "string",
+    "type": "string",
+    "totalText": "string",
+    "usedText": "string",
+    "availableText": "string",
+    "diskSizeText": "string",
+    "usagePercent": 0,
+    "inode": {
+      "total": 0,
+      "used": 0,
+      "available": 0,
+      "usagePercent": 0
+    },
+    "collectTime": "string"
+  }
+}
+```
+
+### 返回结果
+
+|状态码|状态码含义|说明|数据模型|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[ResultDiskDetailVO](#schemaresultdiskdetailvo)|
+
+## GET 获取服务器网络选项
+
+GET /admin/server-monitor/network/options
+
+> 返回示例
+
+> 200 Response
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": [
+    {
+      "label": "string",
+      "value": "string"
+    }
+  ]
+}
+```
+
+### 返回结果
+
+|状态码|状态码含义|说明|数据模型|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[ResultListOptionVO](#schemaresultlistoptionvo)|
+
+## GET 获取服务器网络详情
+
+GET /admin/server-monitor/network
+
+### 请求参数
+
+|名称|位置|类型|必选|说明|
+|---|---|---|---|---|
+|resourceName|query|string| 否 |none|
+|diskResourceName|query|string| 否 |none|
+|networkResourceName|query|string| 否 |none|
+|diskIoResourceName|query|string| 否 |none|
+|limit|query|integer| 否 |none|
+
+> 返回示例
+
+> 200 Response
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": {
+    "resourceName": "string",
+    "upBytesPerSec": 0,
+    "downBytesPerSec": 0,
+    "upText": "string",
+    "downText": "string",
+    "totalSentText": "string",
+    "totalRecvText": "string",
+    "points": [
+      {
+        "time": "string",
+        "inValue": 0,
+        "outValue": 0,
+        "readValue": 0,
+        "writeValue": 0
+      }
+    ],
+    "collectTime": "string"
+  }
+}
+```
+
+### 返回结果
+
+|状态码|状态码含义|说明|数据模型|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[ResultNetworkDetailVO](#schemaresultnetworkdetailvo)|
+
+## GET 获取服务器磁盘IO选项
+
+GET /admin/server-monitor/disk-io/options
+
+> 返回示例
+
+> 200 Response
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": [
+    {
+      "label": "string",
+      "value": "string"
+    }
+  ]
+}
+```
+
+### 返回结果
+
+|状态码|状态码含义|说明|数据模型|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[ResultListOptionVO](#schemaresultlistoptionvo)|
+
+## GET 获取服务器磁盘IO详情
+
+GET /admin/server-monitor/disk-io
+
+### 请求参数
+
+|名称|位置|类型|必选|说明|
+|---|---|---|---|---|
+|resourceName|query|string| 否 |none|
+|diskResourceName|query|string| 否 |none|
+|networkResourceName|query|string| 否 |none|
+|diskIoResourceName|query|string| 否 |none|
+|limit|query|integer| 否 |none|
+
+> 返回示例
+
+> 200 Response
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": {
+    "resourceName": "string",
+    "readBytesPerSec": 0,
+    "writeBytesPerSec": 0,
+    "readText": "string",
+    "writeText": "string",
+    "opsPerSec": 0,
+    "awaitMs": 0,
+    "points": [
+      {
+        "time": "string",
+        "inValue": 0,
+        "outValue": 0,
+        "readValue": 0,
+        "writeValue": 0
+      }
+    ],
+    "collectTime": "string"
+  }
+}
+```
+
+### 返回结果
+
+|状态码|状态码含义|说明|数据模型|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[ResultDiskIoDetailVO](#schemaresultdiskiodetailvo)|
+
+## GET 获取服务器监控聚合快照
+
+GET /admin/server-monitor/snapshot
+
+### 请求参数
+
+|名称|位置|类型|必选|说明|
+|---|---|---|---|---|
+|resourceName|query|string| 否 |none|
+|diskResourceName|query|string| 否 |none|
+|networkResourceName|query|string| 否 |none|
+|diskIoResourceName|query|string| 否 |none|
+|limit|query|integer| 否 |none|
+
+> 返回示例
+
+> 200 Response
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": {
+    "collectTime": "string",
+    "deploymentMode": "string",
+    "deploymentModeText": "string",
+    "deploymentTips": [
+      "string"
+    ],
+    "overview": {
+      "loadPercent": 0,
+      "loadStatusText": "string",
+      "cpuPercent": 0,
+      "cpuCoreCount": 0,
+      "memoryUsedText": "string",
+      "memoryTotalText": "string",
+      "memoryPercent": 0,
+      "diskUsedText": "string",
+      "diskTotalText": "string",
+      "diskPercent": 0,
+      "collectTime": "string"
+    },
+    "load": {
+      "loadPercent": 0,
+      "statusText": "string",
+      "loadAverage1m": 0,
+      "loadAverage5m": 0,
+      "loadAverage15m": 0,
+      "runningProcessCount": 0,
+      "totalProcessCount": 0,
+      "userPercent": 0,
+      "nicePercent": 0,
+      "systemPercent": 0,
+      "idlePercent": 0,
+      "iowaitPercent": 0,
+      "irqPercent": 0,
+      "softirqPercent": 0,
+      "stealPercent": 0,
+      "guestPercent": 0,
+      "guestNicePercent": 0,
+      "topProcesses": [
+        {
+          "pid": 0,
+          "processName": "string",
+          "cpuPercent": 0,
+          "memoryPercent": 0
+        }
+      ],
+      "collectTime": "string"
+    },
+    "cpu": {
+      "cpuPercent": 0,
+      "cpuModel": "string",
+      "physicalPackageCount": 0,
+      "physicalCoreCount": 0,
+      "logicalCoreCount": 0,
+      "coreUsages": [
+        {
+          "coreLabel": "string",
+          "usagePercent": 0
+        }
+      ],
+      "topProcesses": [
+        {
+          "pid": 0,
+          "processName": "string",
+          "cpuPercent": 0,
+          "memoryPercent": 0
+        }
+      ],
+      "collectTime": "string"
+    },
+    "memory": {
+      "memoryPercent": 0,
+      "usedBytes": 0,
+      "totalBytes": 0,
+      "availableBytes": 0,
+      "freeBytes": 0,
+      "sharedBytes": 0,
+      "bufferCacheBytes": 0,
+      "swapUsedBytes": 0,
+      "swapTotalBytes": 0,
+      "usedText": "string",
+      "totalText": "string",
+      "availableText": "string",
+      "freeText": "string",
+      "sharedText": "string",
+      "bufferCacheText": "string",
+      "swapText": "string",
+      "topProcesses": [
+        {
+          "pid": 0,
+          "processName": "string",
+          "cpuPercent": 0,
+          "memoryPercent": 0
+        }
+      ],
+      "collectTime": "string"
+    },
+    "diskOptions": [
+      {
+        "label": "string",
+        "value": "string"
+      }
+    ],
+    "networkOptions": [
+      {
+        "label": "string",
+        "value": "string"
+      }
+    ],
+    "diskIoOptions": [
+      {
+        "label": "string",
+        "value": "string"
+      }
+    ],
+    "disk": {
+      "resourceName": "string",
+      "mount": "string",
+      "fileSystem": "string",
+      "type": "string",
+      "totalText": "string",
+      "usedText": "string",
+      "availableText": "string",
+      "diskSizeText": "string",
+      "usagePercent": 0,
+      "inode": {
+        "total": 0,
+        "used": 0,
+        "available": 0,
+        "usagePercent": 0
+      },
+      "collectTime": "string"
+    },
+    "network": {
+      "resourceName": "string",
+      "upBytesPerSec": 0,
+      "downBytesPerSec": 0,
+      "upText": "string",
+      "downText": "string",
+      "totalSentText": "string",
+      "totalRecvText": "string",
+      "points": [
+        {
+          "time": "string",
+          "inValue": 0,
+          "outValue": 0,
+          "readValue": 0,
+          "writeValue": 0
+        }
+      ],
+      "collectTime": "string"
+    },
+    "diskIo": {
+      "resourceName": "string",
+      "readBytesPerSec": 0,
+      "writeBytesPerSec": 0,
+      "readText": "string",
+      "writeText": "string",
+      "opsPerSec": 0,
+      "awaitMs": 0,
+      "points": [
+        {
+          "time": "string",
+          "inValue": 0,
+          "outValue": 0,
+          "readValue": 0,
+          "writeValue": 0
+        }
+      ],
+      "collectTime": "string"
+    }
+  }
+}
+```
+
+### 返回结果
+
+|状态码|状态码含义|说明|数据模型|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[ResultServerMonitorSnapshotVO](#schemaresultservermonitorsnapshotvo)|
 
 # 数据模型
 
@@ -6604,6 +7453,1206 @@ GET /cv/personalInfo
 |configType|string|false|none||配置类型|
 |description|string|false|none||配置描述|
 
+<h2 id="tocS_ServerMonitorOverviewVO">ServerMonitorOverviewVO</h2>
+
+<a id="schemaservermonitoroverviewvo"></a>
+<a id="schema_ServerMonitorOverviewVO"></a>
+<a id="tocSservermonitoroverviewvo"></a>
+<a id="tocsservermonitoroverviewvo"></a>
+
+```json
+{
+  "loadPercent": 0,
+  "loadStatusText": "string",
+  "cpuPercent": 0,
+  "cpuCoreCount": 0,
+  "memoryUsedText": "string",
+  "memoryTotalText": "string",
+  "memoryPercent": 0,
+  "diskUsedText": "string",
+  "diskTotalText": "string",
+  "diskPercent": 0,
+  "collectTime": "string"
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|loadPercent|number|false|none||负载百分比|
+|loadStatusText|string|false|none||负载状态文本|
+|cpuPercent|number|false|none||CPU使用率|
+|cpuCoreCount|integer|false|none||CPU核心数|
+|memoryUsedText|string|false|none||内存已用文本|
+|memoryTotalText|string|false|none||内存总量文本|
+|memoryPercent|number|false|none||内存使用率|
+|diskUsedText|string|false|none||磁盘已用文本|
+|diskTotalText|string|false|none||磁盘总量文本|
+|diskPercent|number|false|none||磁盘使用率|
+|collectTime|string|false|none||采集时间|
+
+<h2 id="tocS_ResultServerMonitorOverviewVO">ResultServerMonitorOverviewVO</h2>
+
+<a id="schemaresultservermonitoroverviewvo"></a>
+<a id="schema_ResultServerMonitorOverviewVO"></a>
+<a id="tocSresultservermonitoroverviewvo"></a>
+<a id="tocsresultservermonitoroverviewvo"></a>
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": {
+    "loadPercent": 0,
+    "loadStatusText": "string",
+    "cpuPercent": 0,
+    "cpuCoreCount": 0,
+    "memoryUsedText": "string",
+    "memoryTotalText": "string",
+    "memoryPercent": 0,
+    "diskUsedText": "string",
+    "diskTotalText": "string",
+    "diskPercent": 0,
+    "collectTime": "string"
+  }
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|code|integer|false|none||编码：1成功，0和其它数字为失败|
+|msg|string|false|none||错误信息|
+|data|[ServerMonitorOverviewVO](#schemaservermonitoroverviewvo)|false|none||数据|
+
+<h2 id="tocS_ProcessMetricVO">ProcessMetricVO</h2>
+
+<a id="schemaprocessmetricvo"></a>
+<a id="schema_ProcessMetricVO"></a>
+<a id="tocSprocessmetricvo"></a>
+<a id="tocsprocessmetricvo"></a>
+
+```json
+{
+  "pid": 0,
+  "processName": "string",
+  "cpuPercent": 0,
+  "memoryPercent": 0
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|pid|integer(int64)|false|none||进程ID|
+|processName|string|false|none||进程名称|
+|cpuPercent|number|false|none||CPU使用率|
+|memoryPercent|number|false|none||内存使用率|
+
+<h2 id="tocS_LoadDetailVO">LoadDetailVO</h2>
+
+<a id="schemaloaddetailvo"></a>
+<a id="schema_LoadDetailVO"></a>
+<a id="tocSloaddetailvo"></a>
+<a id="tocsloaddetailvo"></a>
+
+```json
+{
+  "loadPercent": 0,
+  "statusText": "string",
+  "loadAverage1m": 0,
+  "loadAverage5m": 0,
+  "loadAverage15m": 0,
+  "runningProcessCount": 0,
+  "totalProcessCount": 0,
+  "userPercent": 0,
+  "nicePercent": 0,
+  "systemPercent": 0,
+  "idlePercent": 0,
+  "iowaitPercent": 0,
+  "irqPercent": 0,
+  "softirqPercent": 0,
+  "stealPercent": 0,
+  "guestPercent": 0,
+  "guestNicePercent": 0,
+  "topProcesses": [
+    {
+      "pid": 0,
+      "processName": "string",
+      "cpuPercent": 0,
+      "memoryPercent": 0
+    }
+  ],
+  "collectTime": "string"
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|loadPercent|number|false|none||负载百分比|
+|statusText|string|false|none||状态文本|
+|loadAverage1m|number|false|none||1分钟平均负载|
+|loadAverage5m|number|false|none||5分钟平均负载|
+|loadAverage15m|number|false|none||15分钟平均负载|
+|runningProcessCount|integer|false|none||运行中进程数|
+|totalProcessCount|integer|false|none||总进程数|
+|userPercent|number|false|none||用户态CPU占比|
+|nicePercent|number|false|none||nice态CPU占比|
+|systemPercent|number|false|none||系统态CPU占比|
+|idlePercent|number|false|none||空闲CPU占比|
+|iowaitPercent|number|false|none||IO等待CPU占比|
+|irqPercent|number|false|none||硬中断CPU占比|
+|softirqPercent|number|false|none||软中断CPU占比|
+|stealPercent|number|false|none||steal时间占比|
+|guestPercent|number|false|none||guest时间占比|
+|guestNicePercent|number|false|none||guest nice时间占比|
+|topProcesses|[[ProcessMetricVO](#schemaprocessmetricvo)]|false|none||占用资源最高的进程列表|
+|collectTime|string|false|none||采集时间|
+
+<h2 id="tocS_ResultLoadDetailVO">ResultLoadDetailVO</h2>
+
+<a id="schemaresultloaddetailvo"></a>
+<a id="schema_ResultLoadDetailVO"></a>
+<a id="tocSresultloaddetailvo"></a>
+<a id="tocsresultloaddetailvo"></a>
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": {
+    "loadPercent": 0,
+    "statusText": "string",
+    "loadAverage1m": 0,
+    "loadAverage5m": 0,
+    "loadAverage15m": 0,
+    "runningProcessCount": 0,
+    "totalProcessCount": 0,
+    "userPercent": 0,
+    "nicePercent": 0,
+    "systemPercent": 0,
+    "idlePercent": 0,
+    "iowaitPercent": 0,
+    "irqPercent": 0,
+    "softirqPercent": 0,
+    "stealPercent": 0,
+    "guestPercent": 0,
+    "guestNicePercent": 0,
+    "topProcesses": [
+      {
+        "pid": 0,
+        "processName": "string",
+        "cpuPercent": 0,
+        "memoryPercent": 0
+      }
+    ],
+    "collectTime": "string"
+  }
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|code|integer|false|none||编码：1成功，0和其它数字为失败|
+|msg|string|false|none||错误信息|
+|data|[LoadDetailVO](#schemaloaddetailvo)|false|none||数据|
+
+<h2 id="tocS_CpuCoreUsageVO">CpuCoreUsageVO</h2>
+
+<a id="schemacpucoreusagevo"></a>
+<a id="schema_CpuCoreUsageVO"></a>
+<a id="tocScpucoreusagevo"></a>
+<a id="tocscpucoreusagevo"></a>
+
+```json
+{
+  "coreLabel": "string",
+  "usagePercent": 0
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|coreLabel|string|false|none||核心标签|
+|usagePercent|number|false|none||使用率|
+
+<h2 id="tocS_CpuDetailVO">CpuDetailVO</h2>
+
+<a id="schemacpudetailvo"></a>
+<a id="schema_CpuDetailVO"></a>
+<a id="tocScpudetailvo"></a>
+<a id="tocscpudetailvo"></a>
+
+```json
+{
+  "cpuPercent": 0,
+  "cpuModel": "string",
+  "physicalPackageCount": 0,
+  "physicalCoreCount": 0,
+  "logicalCoreCount": 0,
+  "coreUsages": [
+    {
+      "coreLabel": "string",
+      "usagePercent": 0
+    }
+  ],
+  "topProcesses": [
+    {
+      "pid": 0,
+      "processName": "string",
+      "cpuPercent": 0,
+      "memoryPercent": 0
+    }
+  ],
+  "collectTime": "string"
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|cpuPercent|number|false|none||CPU使用率|
+|cpuModel|string|false|none||CPU型号|
+|physicalPackageCount|integer|false|none||物理CPU个数|
+|physicalCoreCount|integer|false|none||物理核心数|
+|logicalCoreCount|integer|false|none||逻辑核心数|
+|coreUsages|[[CpuCoreUsageVO](#schemacpucoreusagevo)]|false|none||各核心使用率列表|
+|topProcesses|[[ProcessMetricVO](#schemaprocessmetricvo)]|false|none||占用CPU最高的进程列表|
+|collectTime|string|false|none||采集时间|
+
+<h2 id="tocS_ResultCpuDetailVO">ResultCpuDetailVO</h2>
+
+<a id="schemaresultcpudetailvo"></a>
+<a id="schema_ResultCpuDetailVO"></a>
+<a id="tocSresultcpudetailvo"></a>
+<a id="tocsresultcpudetailvo"></a>
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": {
+    "cpuPercent": 0,
+    "cpuModel": "string",
+    "physicalPackageCount": 0,
+    "physicalCoreCount": 0,
+    "logicalCoreCount": 0,
+    "coreUsages": [
+      {
+        "coreLabel": "string",
+        "usagePercent": 0
+      }
+    ],
+    "topProcesses": [
+      {
+        "pid": 0,
+        "processName": "string",
+        "cpuPercent": 0,
+        "memoryPercent": 0
+      }
+    ],
+    "collectTime": "string"
+  }
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|code|integer|false|none||编码：1成功，0和其它数字为失败|
+|msg|string|false|none||错误信息|
+|data|[CpuDetailVO](#schemacpudetailvo)|false|none||数据|
+
+<h2 id="tocS_MemoryDetailVO">MemoryDetailVO</h2>
+
+<a id="schemamemorydetailvo"></a>
+<a id="schema_MemoryDetailVO"></a>
+<a id="tocSmemorydetailvo"></a>
+<a id="tocsmemorydetailvo"></a>
+
+```json
+{
+  "memoryPercent": 0,
+  "usedBytes": 0,
+  "totalBytes": 0,
+  "availableBytes": 0,
+  "freeBytes": 0,
+  "sharedBytes": 0,
+  "bufferCacheBytes": 0,
+  "swapUsedBytes": 0,
+  "swapTotalBytes": 0,
+  "usedText": "string",
+  "totalText": "string",
+  "availableText": "string",
+  "freeText": "string",
+  "sharedText": "string",
+  "bufferCacheText": "string",
+  "swapText": "string",
+  "topProcesses": [
+    {
+      "pid": 0,
+      "processName": "string",
+      "cpuPercent": 0,
+      "memoryPercent": 0
+    }
+  ],
+  "collectTime": "string"
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|memoryPercent|number|false|none||none|
+|usedBytes|integer(int64)|false|none||none|
+|totalBytes|integer(int64)|false|none||none|
+|availableBytes|integer(int64)|false|none||none|
+|freeBytes|integer(int64)|false|none||none|
+|sharedBytes|integer(int64)|false|none||none|
+|bufferCacheBytes|integer(int64)|false|none||none|
+|swapUsedBytes|integer(int64)|false|none||none|
+|swapTotalBytes|integer(int64)|false|none||none|
+|usedText|string|false|none||none|
+|totalText|string|false|none||none|
+|availableText|string|false|none||none|
+|freeText|string|false|none||none|
+|sharedText|string|false|none||none|
+|bufferCacheText|string|false|none||none|
+|swapText|string|false|none||none|
+|topProcesses|[[ProcessMetricVO](#schemaprocessmetricvo)]|false|none||none|
+|collectTime|string|false|none||none|
+
+<h2 id="tocS_ResultMemoryDetailVO">ResultMemoryDetailVO</h2>
+
+<a id="schemaresultmemorydetailvo"></a>
+<a id="schema_ResultMemoryDetailVO"></a>
+<a id="tocSresultmemorydetailvo"></a>
+<a id="tocsresultmemorydetailvo"></a>
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": {
+    "memoryPercent": 0,
+    "usedBytes": 0,
+    "totalBytes": 0,
+    "availableBytes": 0,
+    "freeBytes": 0,
+    "sharedBytes": 0,
+    "bufferCacheBytes": 0,
+    "swapUsedBytes": 0,
+    "swapTotalBytes": 0,
+    "usedText": "string",
+    "totalText": "string",
+    "availableText": "string",
+    "freeText": "string",
+    "sharedText": "string",
+    "bufferCacheText": "string",
+    "swapText": "string",
+    "topProcesses": [
+      {
+        "pid": 0,
+        "processName": "string",
+        "cpuPercent": 0,
+        "memoryPercent": 0
+      }
+    ],
+    "collectTime": "string"
+  }
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|code|integer|false|none||编码：1成功，0和其它数字为失败|
+|msg|string|false|none||错误信息|
+|data|[MemoryDetailVO](#schemamemorydetailvo)|false|none||数据|
+
+<h2 id="tocS_OptionVO">OptionVO</h2>
+
+<a id="schemaoptionvo"></a>
+<a id="schema_OptionVO"></a>
+<a id="tocSoptionvo"></a>
+<a id="tocsoptionvo"></a>
+
+```json
+{
+  "label": "string",
+  "value": "string"
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|label|string|false|none||标签|
+|value|string|false|none||值|
+
+<h2 id="tocS_ResultListOptionVO">ResultListOptionVO</h2>
+
+<a id="schemaresultlistoptionvo"></a>
+<a id="schema_ResultListOptionVO"></a>
+<a id="tocSresultlistoptionvo"></a>
+<a id="tocsresultlistoptionvo"></a>
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": [
+    {
+      "label": "string",
+      "value": "string"
+    }
+  ]
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|code|integer|false|none||编码：1成功，0和其它数字为失败|
+|msg|string|false|none||错误信息|
+|data|[[OptionVO](#schemaoptionvo)]|false|none||数据|
+
+<h2 id="tocS_InodeUsageVO">InodeUsageVO</h2>
+
+<a id="schemainodeusagevo"></a>
+<a id="schema_InodeUsageVO"></a>
+<a id="tocSinodeusagevo"></a>
+<a id="tocsinodeusagevo"></a>
+
+```json
+{
+  "total": 0,
+  "used": 0,
+  "available": 0,
+  "usagePercent": 0
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|total|integer(int64)|false|none||Inode总数|
+|used|integer(int64)|false|none||已用Inode数|
+|available|integer(int64)|false|none||可用Inode数|
+|usagePercent|number|false|none||Inode使用率|
+
+<h2 id="tocS_DiskDetailVO">DiskDetailVO</h2>
+
+<a id="schemadiskdetailvo"></a>
+<a id="schema_DiskDetailVO"></a>
+<a id="tocSdiskdetailvo"></a>
+<a id="tocsdiskdetailvo"></a>
+
+```json
+{
+  "resourceName": "string",
+  "mount": "string",
+  "fileSystem": "string",
+  "type": "string",
+  "totalText": "string",
+  "usedText": "string",
+  "availableText": "string",
+  "diskSizeText": "string",
+  "usagePercent": 0,
+  "inode": {
+    "total": 0,
+    "used": 0,
+    "available": 0,
+    "usagePercent": 0
+  },
+  "collectTime": "string"
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|resourceName|string|false|none||资源名称|
+|mount|string|false|none||挂载点|
+|fileSystem|string|false|none||文件系统|
+|type|string|false|none||类型|
+|totalText|string|false|none||总容量文本|
+|usedText|string|false|none||已用容量文本|
+|availableText|string|false|none||可用容量文本|
+|diskSizeText|string|false|none||磁盘大小文本|
+|usagePercent|number|false|none||使用率|
+|inode|[InodeUsageVO](#schemainodeusagevo)|false|none||Inode使用情况|
+|collectTime|string|false|none||采集时间|
+
+<h2 id="tocS_ResultDiskDetailVO">ResultDiskDetailVO</h2>
+
+<a id="schemaresultdiskdetailvo"></a>
+<a id="schema_ResultDiskDetailVO"></a>
+<a id="tocSresultdiskdetailvo"></a>
+<a id="tocsresultdiskdetailvo"></a>
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": {
+    "resourceName": "string",
+    "mount": "string",
+    "fileSystem": "string",
+    "type": "string",
+    "totalText": "string",
+    "usedText": "string",
+    "availableText": "string",
+    "diskSizeText": "string",
+    "usagePercent": 0,
+    "inode": {
+      "total": 0,
+      "used": 0,
+      "available": 0,
+      "usagePercent": 0
+    },
+    "collectTime": "string"
+  }
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|code|integer|false|none||编码：1成功，0和其它数字为失败|
+|msg|string|false|none||错误信息|
+|data|[DiskDetailVO](#schemadiskdetailvo)|false|none||数据|
+
+<h2 id="tocS_MetricPointVO">MetricPointVO</h2>
+
+<a id="schemametricpointvo"></a>
+<a id="schema_MetricPointVO"></a>
+<a id="tocSmetricpointvo"></a>
+<a id="tocsmetricpointvo"></a>
+
+```json
+{
+  "time": "string",
+  "inValue": 0,
+  "outValue": 0,
+  "readValue": 0,
+  "writeValue": 0
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|time|string|false|none||时间|
+|inValue|number|false|none||输入值|
+|outValue|number|false|none||输出值|
+|readValue|number|false|none||读取值|
+|writeValue|number|false|none||写入值|
+
+<h2 id="tocS_NetworkDetailVO">NetworkDetailVO</h2>
+
+<a id="schemanetworkdetailvo"></a>
+<a id="schema_NetworkDetailVO"></a>
+<a id="tocSnetworkdetailvo"></a>
+<a id="tocsnetworkdetailvo"></a>
+
+```json
+{
+  "resourceName": "string",
+  "upBytesPerSec": 0,
+  "downBytesPerSec": 0,
+  "upText": "string",
+  "downText": "string",
+  "totalSentText": "string",
+  "totalRecvText": "string",
+  "points": [
+    {
+      "time": "string",
+      "inValue": 0,
+      "outValue": 0,
+      "readValue": 0,
+      "writeValue": 0
+    }
+  ],
+  "collectTime": "string"
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|resourceName|string|false|none||资源名称|
+|upBytesPerSec|integer(int64)|false|none||每秒上传字节数|
+|downBytesPerSec|integer(int64)|false|none||每秒下载字节数|
+|upText|string|false|none||上传速度文本|
+|downText|string|false|none||下载速度文本|
+|totalSentText|string|false|none||总发送量文本|
+|totalRecvText|string|false|none||总接收量文本|
+|points|[[MetricPointVO](#schemametricpointvo)]|false|none||指标点列表|
+|collectTime|string|false|none||采集时间|
+
+<h2 id="tocS_ResultNetworkDetailVO">ResultNetworkDetailVO</h2>
+
+<a id="schemaresultnetworkdetailvo"></a>
+<a id="schema_ResultNetworkDetailVO"></a>
+<a id="tocSresultnetworkdetailvo"></a>
+<a id="tocsresultnetworkdetailvo"></a>
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": {
+    "resourceName": "string",
+    "upBytesPerSec": 0,
+    "downBytesPerSec": 0,
+    "upText": "string",
+    "downText": "string",
+    "totalSentText": "string",
+    "totalRecvText": "string",
+    "points": [
+      {
+        "time": "string",
+        "inValue": 0,
+        "outValue": 0,
+        "readValue": 0,
+        "writeValue": 0
+      }
+    ],
+    "collectTime": "string"
+  }
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|code|integer|false|none||编码：1成功，0和其它数字为失败|
+|msg|string|false|none||错误信息|
+|data|[NetworkDetailVO](#schemanetworkdetailvo)|false|none||数据|
+
+<h2 id="tocS_DiskIoDetailVO">DiskIoDetailVO</h2>
+
+<a id="schemadiskiodetailvo"></a>
+<a id="schema_DiskIoDetailVO"></a>
+<a id="tocSdiskiodetailvo"></a>
+<a id="tocsdiskiodetailvo"></a>
+
+```json
+{
+  "resourceName": "string",
+  "readBytesPerSec": 0,
+  "writeBytesPerSec": 0,
+  "readText": "string",
+  "writeText": "string",
+  "opsPerSec": 0,
+  "awaitMs": 0,
+  "points": [
+    {
+      "time": "string",
+      "inValue": 0,
+      "outValue": 0,
+      "readValue": 0,
+      "writeValue": 0
+    }
+  ],
+  "collectTime": "string"
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|resourceName|string|false|none||资源名称|
+|readBytesPerSec|integer(int64)|false|none||每秒读取字节数|
+|writeBytesPerSec|integer(int64)|false|none||每秒写入字节数|
+|readText|string|false|none||读取速度文本|
+|writeText|string|false|none||写入速度文本|
+|opsPerSec|integer|false|none||每秒操作数|
+|awaitMs|integer|false|none||平均等待时间（毫秒）|
+|points|[[MetricPointVO](#schemametricpointvo)]|false|none||指标点列表|
+|collectTime|string|false|none||采集时间|
+
+<h2 id="tocS_ResultDiskIoDetailVO">ResultDiskIoDetailVO</h2>
+
+<a id="schemaresultdiskiodetailvo"></a>
+<a id="schema_ResultDiskIoDetailVO"></a>
+<a id="tocSresultdiskiodetailvo"></a>
+<a id="tocsresultdiskiodetailvo"></a>
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": {
+    "resourceName": "string",
+    "readBytesPerSec": 0,
+    "writeBytesPerSec": 0,
+    "readText": "string",
+    "writeText": "string",
+    "opsPerSec": 0,
+    "awaitMs": 0,
+    "points": [
+      {
+        "time": "string",
+        "inValue": 0,
+        "outValue": 0,
+        "readValue": 0,
+        "writeValue": 0
+      }
+    ],
+    "collectTime": "string"
+  }
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|code|integer|false|none||编码：1成功，0和其它数字为失败|
+|msg|string|false|none||错误信息|
+|data|[DiskIoDetailVO](#schemadiskiodetailvo)|false|none||数据|
+
+<h2 id="tocS_ServerMonitorSnapshotVO">ServerMonitorSnapshotVO</h2>
+
+<a id="schemaservermonitorsnapshotvo"></a>
+<a id="schema_ServerMonitorSnapshotVO"></a>
+<a id="tocSservermonitorsnapshotvo"></a>
+<a id="tocsservermonitorsnapshotvo"></a>
+
+```json
+{
+  "collectTime": "string",
+  "deploymentMode": "string",
+  "deploymentModeText": "string",
+  "deploymentTips": [
+    "string"
+  ],
+  "overview": {
+    "loadPercent": 0,
+    "loadStatusText": "string",
+    "cpuPercent": 0,
+    "cpuCoreCount": 0,
+    "memoryUsedText": "string",
+    "memoryTotalText": "string",
+    "memoryPercent": 0,
+    "diskUsedText": "string",
+    "diskTotalText": "string",
+    "diskPercent": 0,
+    "collectTime": "string"
+  },
+  "load": {
+    "loadPercent": 0,
+    "statusText": "string",
+    "loadAverage1m": 0,
+    "loadAverage5m": 0,
+    "loadAverage15m": 0,
+    "runningProcessCount": 0,
+    "totalProcessCount": 0,
+    "userPercent": 0,
+    "nicePercent": 0,
+    "systemPercent": 0,
+    "idlePercent": 0,
+    "iowaitPercent": 0,
+    "irqPercent": 0,
+    "softirqPercent": 0,
+    "stealPercent": 0,
+    "guestPercent": 0,
+    "guestNicePercent": 0,
+    "topProcesses": [
+      {
+        "pid": 0,
+        "processName": "string",
+        "cpuPercent": 0,
+        "memoryPercent": 0
+      }
+    ],
+    "collectTime": "string"
+  },
+  "cpu": {
+    "cpuPercent": 0,
+    "cpuModel": "string",
+    "physicalPackageCount": 0,
+    "physicalCoreCount": 0,
+    "logicalCoreCount": 0,
+    "coreUsages": [
+      {
+        "coreLabel": "string",
+        "usagePercent": 0
+      }
+    ],
+    "topProcesses": [
+      {
+        "pid": 0,
+        "processName": "string",
+        "cpuPercent": 0,
+        "memoryPercent": 0
+      }
+    ],
+    "collectTime": "string"
+  },
+  "memory": {
+    "memoryPercent": 0,
+    "usedBytes": 0,
+    "totalBytes": 0,
+    "availableBytes": 0,
+    "freeBytes": 0,
+    "sharedBytes": 0,
+    "bufferCacheBytes": 0,
+    "swapUsedBytes": 0,
+    "swapTotalBytes": 0,
+    "usedText": "string",
+    "totalText": "string",
+    "availableText": "string",
+    "freeText": "string",
+    "sharedText": "string",
+    "bufferCacheText": "string",
+    "swapText": "string",
+    "topProcesses": [
+      {
+        "pid": 0,
+        "processName": "string",
+        "cpuPercent": 0,
+        "memoryPercent": 0
+      }
+    ],
+    "collectTime": "string"
+  },
+  "diskOptions": [
+    {
+      "label": "string",
+      "value": "string"
+    }
+  ],
+  "networkOptions": [
+    {
+      "label": "string",
+      "value": "string"
+    }
+  ],
+  "diskIoOptions": [
+    {
+      "label": "string",
+      "value": "string"
+    }
+  ],
+  "disk": {
+    "resourceName": "string",
+    "mount": "string",
+    "fileSystem": "string",
+    "type": "string",
+    "totalText": "string",
+    "usedText": "string",
+    "availableText": "string",
+    "diskSizeText": "string",
+    "usagePercent": 0,
+    "inode": {
+      "total": 0,
+      "used": 0,
+      "available": 0,
+      "usagePercent": 0
+    },
+    "collectTime": "string"
+  },
+  "network": {
+    "resourceName": "string",
+    "upBytesPerSec": 0,
+    "downBytesPerSec": 0,
+    "upText": "string",
+    "downText": "string",
+    "totalSentText": "string",
+    "totalRecvText": "string",
+    "points": [
+      {
+        "time": "string",
+        "inValue": 0,
+        "outValue": 0,
+        "readValue": 0,
+        "writeValue": 0
+      }
+    ],
+    "collectTime": "string"
+  },
+  "diskIo": {
+    "resourceName": "string",
+    "readBytesPerSec": 0,
+    "writeBytesPerSec": 0,
+    "readText": "string",
+    "writeText": "string",
+    "opsPerSec": 0,
+    "awaitMs": 0,
+    "points": [
+      {
+        "time": "string",
+        "inValue": 0,
+        "outValue": 0,
+        "readValue": 0,
+        "writeValue": 0
+      }
+    ],
+    "collectTime": "string"
+  }
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|collectTime|string|false|none||当前整批快照的统一采集时间|
+|deploymentMode|string|false|none||当前部署模式：<br />1. server：宿主机视角<br />2. container：容器视角|
+|deploymentModeText|string|false|none||部署模式可读文本|
+|deploymentTips|[string]|false|none||当前部署模式下的提示信息<br />前端可直接用于页面顶部说明或帮助文案展示|
+|overview|[ServerMonitorOverviewVO](#schemaservermonitoroverviewvo)|false|none||顶部概览信息|
+|load|[LoadDetailVO](#schemaloaddetailvo)|false|none||负载详情|
+|cpu|[CpuDetailVO](#schemacpudetailvo)|false|none||CPU 详情|
+|memory|[MemoryDetailVO](#schemamemorydetailvo)|false|none||内存详情|
+|diskOptions|[[OptionVO](#schemaoptionvo)]|false|none||磁盘资源下拉选项|
+|networkOptions|[[OptionVO](#schemaoptionvo)]|false|none||网络资源下拉选项|
+|diskIoOptions|[[OptionVO](#schemaoptionvo)]|false|none||磁盘 IO 资源下拉选项|
+|disk|[DiskDetailVO](#schemadiskdetailvo)|false|none||当前选中的磁盘详情|
+|network|[NetworkDetailVO](#schemanetworkdetailvo)|false|none||当前选中的网络详情|
+|diskIo|[DiskIoDetailVO](#schemadiskiodetailvo)|false|none||当前选中的磁盘 IO 详情|
+
+<h2 id="tocS_ResultServerMonitorSnapshotVO">ResultServerMonitorSnapshotVO</h2>
+
+<a id="schemaresultservermonitorsnapshotvo"></a>
+<a id="schema_ResultServerMonitorSnapshotVO"></a>
+<a id="tocSresultservermonitorsnapshotvo"></a>
+<a id="tocsresultservermonitorsnapshotvo"></a>
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": {
+    "collectTime": "string",
+    "deploymentMode": "string",
+    "deploymentModeText": "string",
+    "deploymentTips": [
+      "string"
+    ],
+    "overview": {
+      "loadPercent": 0,
+      "loadStatusText": "string",
+      "cpuPercent": 0,
+      "cpuCoreCount": 0,
+      "memoryUsedText": "string",
+      "memoryTotalText": "string",
+      "memoryPercent": 0,
+      "diskUsedText": "string",
+      "diskTotalText": "string",
+      "diskPercent": 0,
+      "collectTime": "string"
+    },
+    "load": {
+      "loadPercent": 0,
+      "statusText": "string",
+      "loadAverage1m": 0,
+      "loadAverage5m": 0,
+      "loadAverage15m": 0,
+      "runningProcessCount": 0,
+      "totalProcessCount": 0,
+      "userPercent": 0,
+      "nicePercent": 0,
+      "systemPercent": 0,
+      "idlePercent": 0,
+      "iowaitPercent": 0,
+      "irqPercent": 0,
+      "softirqPercent": 0,
+      "stealPercent": 0,
+      "guestPercent": 0,
+      "guestNicePercent": 0,
+      "topProcesses": [
+        {
+          "pid": 0,
+          "processName": "string",
+          "cpuPercent": 0,
+          "memoryPercent": 0
+        }
+      ],
+      "collectTime": "string"
+    },
+    "cpu": {
+      "cpuPercent": 0,
+      "cpuModel": "string",
+      "physicalPackageCount": 0,
+      "physicalCoreCount": 0,
+      "logicalCoreCount": 0,
+      "coreUsages": [
+        {
+          "coreLabel": "string",
+          "usagePercent": 0
+        }
+      ],
+      "topProcesses": [
+        {
+          "pid": 0,
+          "processName": "string",
+          "cpuPercent": 0,
+          "memoryPercent": 0
+        }
+      ],
+      "collectTime": "string"
+    },
+    "memory": {
+      "memoryPercent": 0,
+      "usedBytes": 0,
+      "totalBytes": 0,
+      "availableBytes": 0,
+      "freeBytes": 0,
+      "sharedBytes": 0,
+      "bufferCacheBytes": 0,
+      "swapUsedBytes": 0,
+      "swapTotalBytes": 0,
+      "usedText": "string",
+      "totalText": "string",
+      "availableText": "string",
+      "freeText": "string",
+      "sharedText": "string",
+      "bufferCacheText": "string",
+      "swapText": "string",
+      "topProcesses": [
+        {
+          "pid": 0,
+          "processName": "string",
+          "cpuPercent": 0,
+          "memoryPercent": 0
+        }
+      ],
+      "collectTime": "string"
+    },
+    "diskOptions": [
+      {
+        "label": "string",
+        "value": "string"
+      }
+    ],
+    "networkOptions": [
+      {
+        "label": "string",
+        "value": "string"
+      }
+    ],
+    "diskIoOptions": [
+      {
+        "label": "string",
+        "value": "string"
+      }
+    ],
+    "disk": {
+      "resourceName": "string",
+      "mount": "string",
+      "fileSystem": "string",
+      "type": "string",
+      "totalText": "string",
+      "usedText": "string",
+      "availableText": "string",
+      "diskSizeText": "string",
+      "usagePercent": 0,
+      "inode": {
+        "total": 0,
+        "used": 0,
+        "available": 0,
+        "usagePercent": 0
+      },
+      "collectTime": "string"
+    },
+    "network": {
+      "resourceName": "string",
+      "upBytesPerSec": 0,
+      "downBytesPerSec": 0,
+      "upText": "string",
+      "downText": "string",
+      "totalSentText": "string",
+      "totalRecvText": "string",
+      "points": [
+        {
+          "time": "string",
+          "inValue": 0,
+          "outValue": 0,
+          "readValue": 0,
+          "writeValue": 0
+        }
+      ],
+      "collectTime": "string"
+    },
+    "diskIo": {
+      "resourceName": "string",
+      "readBytesPerSec": 0,
+      "writeBytesPerSec": 0,
+      "readText": "string",
+      "writeText": "string",
+      "opsPerSec": 0,
+      "awaitMs": 0,
+      "points": [
+        {
+          "time": "string",
+          "inValue": 0,
+          "outValue": 0,
+          "readValue": 0,
+          "writeValue": 0
+        }
+      ],
+      "collectTime": "string"
+    }
+  }
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|code|integer|false|none||编码：1成功，0和其它数字为失败|
+|msg|string|false|none||错误信息|
+|data|[ServerMonitorSnapshotVO](#schemaservermonitorsnapshotvo)|false|none||数据|
+
 <h2 id="tocS_ArticleComments">ArticleComments</h2>
 
 <a id="schemaarticlecomments"></a>
@@ -6940,6 +8989,54 @@ GET /cv/personalInfo
 |msg|string|false|none||错误信息|
 |data|[RssSubscriptions](#schemarsssubscriptions)|false|none||数据|
 
+<h2 id="tocS_BlogHotArticleVO">BlogHotArticleVO</h2>
+
+<a id="schemabloghotarticlevo"></a>
+<a id="schema_BlogHotArticleVO"></a>
+<a id="tocSbloghotarticlevo"></a>
+<a id="tocsbloghotarticlevo"></a>
+
+```json
+{
+  "id": 0,
+  "title": "string",
+  "slug": "string",
+  "summary": "string",
+  "coverImage": "string",
+  "categoryId": 0,
+  "categoryName": "string",
+  "viewCount": 0,
+  "likeCount": 0,
+  "commentCount": 0,
+  "wordCount": 0,
+  "readingTime": 0,
+  "isTop": 0,
+  "publishTime": "string",
+  "hotScore": 0
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|id|integer(int64)|false|none||none|
+|title|string|false|none||none|
+|slug|string|false|none||none|
+|summary|string|false|none||none|
+|coverImage|string|false|none||none|
+|categoryId|integer(int64)|false|none||none|
+|categoryName|string|false|none||none|
+|viewCount|integer(int64)|false|none||none|
+|likeCount|integer(int64)|false|none||none|
+|commentCount|integer(int64)|false|none||none|
+|wordCount|integer(int64)|false|none||none|
+|readingTime|integer(int64)|false|none||none|
+|isTop|integer|false|none||none|
+|publishTime|string|false|none||none|
+|hotScore|integer(int64)|false|none||none|
+
 <h2 id="tocS_VisitorRecordVO">VisitorRecordVO</h2>
 
 <a id="schemavisitorrecordvo"></a>
@@ -6965,6 +9062,48 @@ GET /cv/personalInfo
 |sessionId|string|false|none||当前会话ID|
 |visitorId|integer(int64)|false|none||访客在数据库中的ID|
 |isNewVisitor|boolean|false|none||是否是新访客|
+
+<h2 id="tocS_ResultListBlogHotArticleVO">ResultListBlogHotArticleVO</h2>
+
+<a id="schemaresultlistbloghotarticlevo"></a>
+<a id="schema_ResultListBlogHotArticleVO"></a>
+<a id="tocSresultlistbloghotarticlevo"></a>
+<a id="tocsresultlistbloghotarticlevo"></a>
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": [
+    {
+      "id": 0,
+      "title": "string",
+      "slug": "string",
+      "summary": "string",
+      "coverImage": "string",
+      "categoryId": 0,
+      "categoryName": "string",
+      "viewCount": 0,
+      "likeCount": 0,
+      "commentCount": 0,
+      "wordCount": 0,
+      "readingTime": 0,
+      "isTop": 0,
+      "publishTime": "string",
+      "hotScore": 0
+    }
+  ]
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|code|integer|false|none||编码：1成功，0和其它数字为失败|
+|msg|string|false|none||错误信息|
+|data|[[BlogHotArticleVO](#schemabloghotarticlevo)]|false|none||数据|
 
 <h2 id="tocS_ResultVisitorRecordVO">ResultVisitorRecordVO</h2>
 
@@ -7784,6 +9923,96 @@ GET /cv/personalInfo
 |code|integer|false|none||编码：1成功，0和其它数字为失败|
 |msg|string|false|none||错误信息|
 |data|[[ArticleArchiveVO](#schemaarticlearchivevo)]|false|none||数据|
+
+<h2 id="tocS_HotArticleVO">HotArticleVO</h2>
+
+<a id="schemahotarticlevo"></a>
+<a id="schema_HotArticleVO"></a>
+<a id="tocShotarticlevo"></a>
+<a id="tocshotarticlevo"></a>
+
+```json
+{
+  "id": 0,
+  "title": "string",
+  "slug": "string",
+  "summary": "string",
+  "coverImage": "string",
+  "categoryId": 0,
+  "categoryName": "string",
+  "viewCount": 0,
+  "likeCount": 0,
+  "commentCount": 0,
+  "wordCount": 0,
+  "readingTime": 0,
+  "isTop": 0,
+  "publishTime": "string",
+  "hotValue": 0
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|id|integer(int64)|false|none||none|
+|title|string|false|none||none|
+|slug|string|false|none||none|
+|summary|string|false|none||none|
+|coverImage|string|false|none||none|
+|categoryId|integer(int64)|false|none||none|
+|categoryName|string|false|none||none|
+|viewCount|integer(int64)|false|none||none|
+|likeCount|integer(int64)|false|none||none|
+|commentCount|integer(int64)|false|none||none|
+|wordCount|integer(int64)|false|none||none|
+|readingTime|integer(int64)|false|none||none|
+|isTop|integer|false|none||none|
+|publishTime|string|false|none||none|
+|hotValue|integer(int64)|false|none||当前榜单排序值|
+
+<h2 id="tocS_ResultListHotArticleVO">ResultListHotArticleVO</h2>
+
+<a id="schemaresultlisthotarticlevo"></a>
+<a id="schema_ResultListHotArticleVO"></a>
+<a id="tocSresultlisthotarticlevo"></a>
+<a id="tocsresultlisthotarticlevo"></a>
+
+```json
+{
+  "code": 0,
+  "msg": "string",
+  "data": [
+    {
+      "id": 0,
+      "title": "string",
+      "slug": "string",
+      "summary": "string",
+      "coverImage": "string",
+      "categoryId": 0,
+      "categoryName": "string",
+      "viewCount": 0,
+      "likeCount": 0,
+      "commentCount": 0,
+      "wordCount": 0,
+      "readingTime": 0,
+      "isTop": 0,
+      "publishTime": "string",
+      "hotValue": 0
+    }
+  ]
+}
+
+```
+
+### 属性
+
+|名称|类型|必选|约束|中文名|说明|
+|---|---|---|---|---|---|
+|code|integer|false|none||编码：1成功，0和其它数字为失败|
+|msg|string|false|none||错误信息|
+|data|[[HotArticleVO](#schemahotarticlevo)]|false|none||数据|
 
 <h2 id="tocS_MessageDTO">MessageDTO</h2>
 

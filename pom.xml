@@ -38,7 +38,7 @@
         <mybatis-plus.version>3.5.7</mybatis-plus.version>
         <hutool.version>5.8.32</hutool.version>
         <fastjson2.version>2.0.54</fastjson2.version>
-        <ip2region.version>2.7.0</ip2region.version>
+        <ip2region.version>3.3.7</ip2region.version>
         <cache-api>1.1.1</cache-api>
         <caffeine.version>3.1.6</caffeine.version>
         <oshi.version>7.1.0</oshi.version>

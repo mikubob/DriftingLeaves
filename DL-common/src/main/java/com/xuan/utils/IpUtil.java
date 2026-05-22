@@ -2,7 +2,9 @@ package com.xuan.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.lionsoul.ip2region.xdb.Searcher;
+import org.lionsoul.ip2region.service.Config;
+import org.lionsoul.ip2region.service.Ip2Region;
+
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,19 +12,40 @@ import java.util.Map;
 @Slf4j
 public class IpUtil {
 
-    private static Searcher searcher;
+    private static Ip2Region ip2RegionV4;
+    private static Ip2Region ip2RegionV6;
 
-    // 静态加载 ip2region 数据库
+    // 静态加载 ip2region IPv4 数据库
     static {
-        try (InputStream inputStream = IpUtil.class.getClassLoader().getResourceAsStream("ip2region.xdb")) {
+        try (InputStream inputStream = IpUtil.class.getClassLoader().getResourceAsStream("ip2region_v4.xdb")) {
             if (inputStream != null) {
-                byte[] bytes = inputStream.readAllBytes();
-                searcher = Searcher.newWithBuffer(bytes);
+                Config v4Config = Config.custom()
+                        .setCachePolicy(Config.BufferCache)
+                        .setXdbInputStream(inputStream)
+                        .asV4();
+                ip2RegionV4 = Ip2Region.create(v4Config, null);
             } else {
-                log.error("无法找到 ip2region.xdb 文件");
+                log.error("无法找到 ip2region_v4.xdb 文件");
             }
         } catch (Exception e) {
-            log.error("ip2region 初始化失败", e);
+            log.error("ip2region IPv4 数据库初始化失败", e);
+        }
+    }
+
+    // 静态加载 ip2region IPv6 数据库
+    static {
+        try (InputStream inputStream = IpUtil.class.getClassLoader().getResourceAsStream("ip2region_v6.xdb")) {
+            if (inputStream != null) {
+                Config v6Config = Config.custom()
+                        .setCachePolicy(Config.BufferCache)
+                        .setXdbInputStream(inputStream)
+                        .asV6();
+                ip2RegionV6 = Ip2Region.create(v6Config, null);
+            } else {
+                log.error("无法找到 ip2region_v6.xdb 文件");
+            }
+        } catch (Exception e) {
+            log.error("ip2region IPv6 数据库初始化失败", e);
         }
     }
 
@@ -67,20 +90,25 @@ public class IpUtil {
      */
     public static String getIpLocation(String ip) {
         if (isInvalid(ip) || "127.0.0.1".equals(ip)) return "本地";
-        if (searcher == null) return "未知";
+
+        Ip2Region ip2Region = getIp2RegionByType(ip);
+        if (ip2Region == null) return "未知";
 
         try {
-            String region = searcher.search(ip);
+            String region = ip2Region.search(ip);
             if (region != null) {
-                String[] parts = region.split("\\|");
+                Map<String, String> geoInfo = parseGeoInfo(region);
                 StringBuilder sb = new StringBuilder();
-                // 格式: 国家|区域|省份|城市|ISP
-                if (parts.length > 2 && !"0".equals(parts[2])) sb.append(parts[2]);
-                if (parts.length > 3 && !"0".equals(parts[3])) {
-                    if (sb.length() > 0) sb.append(" ");
-                    sb.append(parts[3]);
+                String province = geoInfo.getOrDefault("province", "");
+                String city = geoInfo.getOrDefault("city", "");
+
+                // 格式: 省份 城市
+                if (!province.isEmpty()) sb.append(province);
+                if (!city.isEmpty()) {
+                    if (!sb.isEmpty()) sb.append(" ");
+                    sb.append(city);
                 }
-                return sb.length() > 0 ? sb.toString() : "未知";
+                return !sb.isEmpty() ? sb.toString() : "未知";
             }
         } catch (Exception e) {
             log.error("IP 地理位置解析失败", e);
@@ -99,30 +127,81 @@ public class IpUtil {
         if (isInvalid(ip) || "127.0.0.1".equals(ip)) {
             return createEmptyResult();
         }
-        
-        if (searcher == null) {
+
+        Ip2Region ip2Region = getIp2RegionByType(ip);
+        if (ip2Region == null) {
             return createEmptyResult();
         }
 
         try {
-            String region = searcher.search(ip);
+            String region = ip2Region.search(ip);
             if (region != null) {
-                String[] parts = region.split("\\|");
-                // 格式：国家|区域|省份|城市|ISP
-                String country = parts.length > 0 && !"0".equals(parts[0]) ? parts[0] : "";
-                String province = parts.length > 2 && !"0".equals(parts[2]) ? parts[2] : "";
-                String city = parts.length > 3 && !"0".equals(parts[3]) ? parts[3] : "";
-                
-                Map<String, String> result = new HashMap<>();
-                result.put("country", country);
-                result.put("province", province);
-                result.put("city", city);
-                return result;
+                return parseGeoInfo(region);
             }
         } catch (Exception e) {
             log.error("IP 地理位置解析失败", e);
         }
         return createEmptyResult();
+    }
+
+    /**
+     * 根据 IP 类型获取对应的 ip2region 查询服务
+     * IPv4 使用 v4 xdb，IPv6 使用 v6 xdb
+     *
+     * @param ip IP 地址
+     * @return 对应的 ip2region 查询服务
+     */
+    private static Ip2Region getIp2RegionByType(String ip) {
+        // IPv6 地址包含冒号，优先走 IPv6 数据库
+        if (ip != null && ip.contains(":")) {
+            return ip2RegionV6;
+        }
+
+        // 默认按 IPv4 处理
+        return ip2RegionV4;
+    }
+
+    /**
+     * 解析 ip2region 返回的地理位置信息
+     * 按照官方当前内置数据格式：国家|省份|城市|ISP|国家代码
+     *
+     * @param region ip2region 返回字符串
+     * @return 包含 country、province 和 city 的 Map
+     */
+    private static Map<String, String> parseGeoInfo(String region) {
+        Map<String, String> result = createEmptyResult();
+        if (region == null || region.isEmpty()) {
+            return result;
+        }
+
+        String[] parts = region.split("\\|");
+
+        // 官方当前内置数据格式：国家|省份|城市|ISP|国家代码
+        // 这里仍然只提取 country、province、city，保持项目原来的展示效果
+        String country = parts.length > 0 ? normalizePart(parts[0]) : "";
+        String province = parts.length > 1 ? normalizePart(parts[1]) : "";
+        String city = parts.length > 2 ? normalizePart(parts[2]) : "";
+
+        result.put("country", country);
+        result.put("province", province);
+        result.put("city", city);
+        return result;
+    }
+
+    /**
+     * 标准化 ip2region 字段值
+     * 过滤空串和 0，避免无效值参与展示
+     *
+     * @param value 原始字段值
+     * @return 标准化后的字段值
+     */
+    private static String normalizePart(String value) {
+        if (value == null) {
+            return "";
+        }
+
+        value = value.trim();
+        return "0".equals(value) ? "" : value;
     }
 
     // 提取公共方法避免重复代码
@@ -138,23 +217,31 @@ public class IpUtil {
         if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
             return true;
         }
-        // 简单 IPv4 验证
+        // 简单 IPv4/IPv6 验证
         if (!ip.matches("^\\d{1,3}(\\.\\d{1,3}){3}$") &&
-            !ip.matches("^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$")) {
+                !ip.matches("^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$")) {
             return true;
         }
         return false;
     }
 
     /**
-     * 关闭 ip2region searcher 资源
+     * 关闭 ip2region 查询服务资源
      */
     public static void close() {
-        if (searcher != null) {
+        if (ip2RegionV4 != null) {
             try {
-                searcher.close();
+                ip2RegionV4.close();
             } catch (Exception e) {
-                log.error("关闭 ip2region searcher 失败", e);
+                log.error("关闭 ip2region IPv4 查询服务失败", e);
+            }
+        }
+
+        if (ip2RegionV6 != null) {
+            try {
+                ip2RegionV6.close();
+            } catch (Exception e) {
+                log.error("关闭 ip2region IPv6 查询服务失败", e);
             }
         }
     }

@@ -2,6 +2,49 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.xuan.mapper.ArticleMapper">
 
+    <!--
+        管理端文章分页查询。
+        说明：管理后台列表需要展示分类名称，BaseMapper 默认分页只查 articles 表，
+        因此这里显式 LEFT JOIN article_categories，并将 ac.name 映射为 categoryName。
+    -->
+    <select id="pageQueryWithCategory" resultType="com.xuan.vo.ArticleVO">
+        SELECT
+            a.id,
+            a.title,
+            a.slug,
+            a.summary,
+            a.cover_image,
+            a.category_id,
+            ac.name AS category_name,
+            a.view_count,
+            a.like_count,
+            a.comment_count,
+            a.word_count,
+            a.reading_time,
+            a.is_published,
+            a.is_top,
+            a.publish_time,
+            a.create_time,
+            a.update_time
+        FROM articles a
+        LEFT JOIN article_categories ac ON a.category_id = ac.id
+        <where>
+            <!-- 标题模糊搜索，对应管理端列表顶部搜索框。 -->
+            <if test="dto.title != null and dto.title != ''">
+                AND a.title LIKE CONCAT('%', #{dto.title}, '%')
+            </if>
+            <!-- 分类筛选仍然按文章表 category_id 精确匹配。 -->
+            <if test="dto.categoryId != null">
+                AND a.category_id = #{dto.categoryId}
+            </if>
+            <!-- 发布状态筛选：0-草稿，1-已发布。 -->
+            <if test="dto.isPublished != null">
+                AND a.is_published = #{dto.isPublished}
+            </if>
+        </where>
+        ORDER BY a.is_top DESC, a.create_time DESC
+    </select>
+
     <!-- 全文搜索文章 -->
     <select id="searchWithFullText" resultType="com.xuan.vo.ArticleVO">
         SELECT 

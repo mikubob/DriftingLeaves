@@ -69,10 +69,10 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result exceptionHandler(MethodArgumentNotValidException ex){
         String errorMsg = ex.getBindingResult().getFieldErrors().stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .map(error -> error.getField() + "：" + error.getDefaultMessage())
                 .collect(Collectors.joining("; "));
         log.error("参数校验异常：{}", errorMsg);
-        return Result.error(errorMsg);
+        return Result.error("提交内容不完整或格式不正确，请检查：" + errorMsg);
     }
 
     @ExceptionHandler
@@ -90,7 +90,7 @@ public class GlobalExceptionHandler {
             return Result.error(errorMessage);
         }
         
-        return Result.error(MessageConstant.UNKNOWN_ERROR);
+        return Result.error("数据已存在或被其他记录引用，请检查后重试");
     }
 
     /**
@@ -100,7 +100,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     public Result exceptionHandler(HttpRequestMethodNotSupportedException ex){
         log.error("请求方法不支持：{}", ex.getMessage());
-        return Result.error("不支持的请求方法：" + ex.getMethod());
+        return Result.error("当前操作暂不支持，请刷新页面后重试");
     }
 
     /**
@@ -110,7 +110,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result exceptionHandler(MissingServletRequestParameterException ex){
         log.error("缺少请求参数：{}", ex.getMessage());
-        return Result.error("缺少必要参数：" + ex.getParameterName());
+        return Result.error("请求信息不完整，请检查 " + ex.getParameterName() + " 后重试");
     }
 
     /**
@@ -120,7 +120,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Result exceptionHandler(NoHandlerFoundException ex){
         log.warn("请求路径不存在：{} {}", ex.getHttpMethod(), ex.getRequestURL());
-        return Result.error("请求地址不存在");
+        return Result.error("请求地址不存在，请刷新页面后重试");
     }
 
     /**
@@ -130,7 +130,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Result exceptionHandler(NoResourceFoundException ex){
         log.debug("静态资源不存在：{}", ex.getResourcePath());
-        return Result.error("资源不存在");
+        return Result.error("资源不存在或已被删除，请刷新页面后重试");
     }
 
     /**
@@ -140,7 +140,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result exceptionHandler(MaxUploadSizeExceededException ex){
         log.error("文件上传大小超限：{}", ex.getMessage());
-        return Result.error("上传文件大小超过限制");
+        return Result.error("上传文件过大，请压缩后重新上传");
     }
 
     /**

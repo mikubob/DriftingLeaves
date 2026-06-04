@@ -69,14 +69,14 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
      * @return 分页结果
      */
     @Override
-    public PageResult<Articles> pageQuery(ArticlePageQueryDTO articlePageQueryDTO) {
-        // 构建 MP 分页对象
-        Page<Articles> page = new Page<>(articlePageQueryDTO.getPage(), articlePageQueryDTO.getPageSize());
+    public PageResult<ArticleVO> pageQuery(ArticlePageQueryDTO articlePageQueryDTO) {
+        // 构建管理端文章列表分页对象，列表不返回正文内容，避免管理列表接口传输过重。
+        Page<ArticleVO> page = new Page<>(articlePageQueryDTO.getPage(), articlePageQueryDTO.getPageSize());
 
-        // 构建查询条件
-        IPage<Articles> articlePage = this.page(page, buildQueryWrapper(articlePageQueryDTO));
+        // 管理端列表需要展示分类名称，因此通过自定义 SQL 关联分类表补齐 categoryName。
+        IPage<ArticleVO> articlePage = baseMapper.pageQueryWithCategory(page, articlePageQueryDTO);
 
-        // 转换为自定义的 PageResult
+        // 转换为统一分页响应结构，保持前端现有 records / total 读取方式不变。
         return PageResult.fromIPage(articlePage);
     }
 

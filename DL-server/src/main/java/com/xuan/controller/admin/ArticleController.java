@@ -9,6 +9,7 @@ import com.xuan.enumeration.OperationType;
 import com.xuan.result.PageResult;
 import com.xuan.result.Result;
 import com.xuan.service.IArticleService;
+import com.xuan.vo.ArticleVO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,9 +34,10 @@ public class ArticleController {
      * @return
      */
     @GetMapping("/page")
-    public Result<PageResult> pageQuery(ArticlePageQueryDTO articlePageQueryDTO) {
+    public Result<PageResult<ArticleVO>> pageQuery(ArticlePageQueryDTO articlePageQueryDTO) {
         log.info("分页条件查询文章列表: {}", articlePageQueryDTO);
-        PageResult pageResult = articleService.pageQuery(articlePageQueryDTO);
+        // 返回 ArticleVO，确保管理列表可以直接拿到 categoryName 等展示字段。
+        PageResult<ArticleVO> pageResult = articleService.pageQuery(articlePageQueryDTO);
         return Result.success(pageResult);
     }
 

@@ -31,7 +31,7 @@ public interface IArticleService extends IService<Articles> {
      * @param articlePageQueryDTO
      * @return
      */
-    PageResult pageQuery(ArticlePageQueryDTO articlePageQueryDTO);
+    PageResult<ArticleVO> pageQuery(ArticlePageQueryDTO articlePageQueryDTO);
 
     /**
      * 根据ID获取文章详情

@@ -100,9 +100,12 @@ public class TokenServiceImpl implements TokenService {
                 log.warn("用户 [{}] 创建 Token 失败：设备数量已达上限 ({})", userId, MAX_TOKEN_COUNT);
                 throw new TokenException("登录设备数量已达上限 (" + MAX_TOKEN_COUNT + ")，请先登出其他设备");
             }
+        } catch (TokenException e) {
+            // 业务异常直接抛出，保留给前端展示的友好提示
+            throw e;
         } catch (Exception e) {
             log.error("用户 [{}] Token 存入 Redis 失败", userId, e);
-            throw new TokenException("Token 服务异常", e);
+            throw new TokenException("登录服务暂时不可用，请稍后重试", e);
         }
     }
 

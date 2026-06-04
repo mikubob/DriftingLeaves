@@ -343,11 +343,11 @@ public class ArticleCommentServiceImpl extends ServiceImpl<ArticleCommentMapper,
         //1.查询评论
         ArticleComments comment = getById(editDTO.getId());
         if (comment == null) {
-            throw new ValidationException("评论不存在");
+            throw new ValidationException(MessageConstant.COMMENT_NOT_FOUND);
         }
         //2.验证身份
         if (!comment.getVisitorId().equals(editDTO.getVisitorId())) {
-            throw new ValidationException("无权编辑此评论");
+            throw new ValidationException(MessageConstant.COMMENT_NOT_EDIT);
         }
 
         //3.构建更新对象
@@ -380,11 +380,11 @@ public class ArticleCommentServiceImpl extends ServiceImpl<ArticleCommentMapper,
         //1.查询评论
         ArticleComments comment = getById(id);
         if (comment == null) {
-            throw new ValidationException("评论不存在");
+            throw new ValidationException(MessageConstant.COMMENT_NOT_FOUND);
         }
         //2.验证身份
         if (!comment.getVisitorId().equals(visitorId)) {
-            throw new ValidationException("无权删除此评论");
+            throw new ValidationException(MessageConstant.COMMENT_NOT_DELETE);
         }
 
         //3.如果是根评论，级联删除所有子评论

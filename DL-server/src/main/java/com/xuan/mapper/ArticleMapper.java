@@ -2,6 +2,7 @@ package com.xuan.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.xuan.dto.ArticlePageQueryDTO;
 import com.xuan.dto.ArticleTitleViewCountDTO;
 import com.xuan.entity.Articles;
 import com.xuan.vo.ArticleArchiveItemVO;
@@ -17,6 +18,18 @@ import java.util.List;
 
 @Mapper
 public interface ArticleMapper extends BaseMapper<Articles> {
+
+    /**
+     * 管理端分页查询文章列表。
+     * <p>
+     * 管理端列表需要展示分类名称，单纯使用 BaseMapper 分页只能查询 articles 表字段，
+     * 因此这里通过自定义 SQL 关联 article_categories 表补齐 categoryName。
+     *
+     * @param page 分页对象
+     * @param dto 查询条件
+     * @return 带分类名称的文章分页结果
+     */
+    IPage<ArticleVO> pageQueryWithCategory(IPage<ArticleVO> page, @Param("dto") ArticlePageQueryDTO dto);
     
     /**
      * 全文搜索文章（使用 MySQL FULLTEXT 索引）

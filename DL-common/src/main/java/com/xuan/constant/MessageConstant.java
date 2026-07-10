@@ -17,6 +17,7 @@ public class MessageConstant {
     public static final String VERIFY_CODE_ERROR = "邮件验证码不正确";
     public static final String VERIFY_CODE_LOCK = "验证码输入错误次数过多，已被锁定，请等待";
     public static final String LOGIN_CREDENTIAL_ERROR = "用户名或密码或验证码错误";
+    public static final String ACCOUNT_LOCKED = "登录失败次数过多，请等待";
     public static final String NOT_LOGIN = "请先登录后再继续操作";
     public static final String NOT_AUTHORIZED = "登录状态已失效，请重新登录";
     public static final String VISITOR_VERIFY_CODE_ERROR = "游客无须邮箱验证码，请输入：";

@@ -16,6 +16,9 @@ public class RedisConstant {
     public static final String KEY_LOCK_PREFIX = "verify:lock:";
     public static final String VISITOR_KEY = "visitor:fingerprint:";
 
+    public static final String KEY_LOGIN_ATTEMPT_PREFIX = "login:attempt:ip:";
+    public static final String KEY_LOGIN_LOCK_PREFIX = "login:lock:ip:";
+
     public static final String SERVER_MONITOR_OVERVIEW_TIMELINE = "server:monitor:overview:timeline";
     public static final String SERVER_MONITOR_CURRENT_OVERVIEW = "server:monitor:current:overview";
     public static final String SERVER_MONITOR_CURRENT_LOAD = "server:monitor:current:load";
@@ -24,11 +27,11 @@ public class RedisConstant {
     public static final String SERVER_MONITOR_CURRENT_DISK_PREFIX = "server:monitor:current:disk:";
     public static final String SERVER_MONITOR_CURRENT_NETWORK_PREFIX = "server:monitor:current:network:";
     public static final String SERVER_MONITOR_CURRENT_DISK_IO_PREFIX = "server:monitor:current:diskio:";
+    public static final String SERVER_MONITOR_NETWORK_TIMELINE_PREFIX = "server:monitor:network:timeline:";
+    public static final String SERVER_MONITOR_DISK_IO_TIMELINE_PREFIX = "server:monitor:diskio:timeline:";
     public static final String SERVER_MONITOR_DISK_OPTIONS = "server:monitor:current:options:disk";
     public static final String SERVER_MONITOR_NETWORK_OPTIONS = "server:monitor:current:options:network";
     public static final String SERVER_MONITOR_DISK_IO_OPTIONS = "server:monitor:current:options:diskio";
-    public static final String SERVER_MONITOR_NETWORK_TIMELINE_PREFIX = "server:monitor:network:timeline:";
-    public static final String SERVER_MONITOR_DISK_IO_TIMELINE_PREFIX = "server:monitor:diskio:timeline:";
 
     private RedisConstant() {
     }

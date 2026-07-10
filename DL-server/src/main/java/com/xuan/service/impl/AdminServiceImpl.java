@@ -10,6 +10,7 @@ import com.xuan.dto.AdminChangePasswordDTO;
 import com.xuan.dto.AdminLoginDTO;
 import com.xuan.dto.AdminLogoutDTO;
 import com.xuan.entity.Admin;
+import com.xuan.exception.AccountLockedException;
 import com.xuan.exception.AccountNotFoundException;
 import com.xuan.exception.LoginFailedException;
 import com.xuan.exception.PasswordErrorException;
@@ -22,6 +23,7 @@ import com.xuan.properties.VisitorProperties;
 import com.xuan.service.EmailService;
 import com.xuan.service.EncryptPasswordService;
 import com.xuan.service.IAdminService;
+import com.xuan.service.LoginLockService;
 import com.xuan.service.TokenService;
 import com.xuan.service.VerifyCodeService;
 import com.xuan.vo.AdminLoginVO;
@@ -43,6 +45,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
     private final TokenService tokenService;
     private final VisitorProperties visitorProperties;
     private final EncryptPasswordService encryptPasswordService;
+    private final LoginLockService loginLockService;
 
     /**
      * 发送验证码
@@ -86,16 +89,24 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
      * 管理员登录
      *
      * @param adminLoginDTO 登录参数
+     * @param ip            客户端 IP
      * @return 登录 VO
      */
     @Override
-    public AdminLoginVO login(AdminLoginDTO adminLoginDTO) throws Exception {
+    public AdminLoginVO login(AdminLoginDTO adminLoginDTO, String ip) throws Exception {
+        // 0. 检查该 IP 是否已被锁定
+        if (loginLockService.isLocked(ip)) {
+            Long lockRemainingMinutes = loginLockService.getLockRemainingMinutes(ip);
+            throw new AccountLockedException(MessageConstant.ACCOUNT_LOCKED + lockRemainingMinutes + "分钟");
+        }
+
         String username = adminLoginDTO.getUsername();
         String password = adminLoginDTO.getPassword();
 
         // 1. 验证用户是否存在
         Admin admin = getByUsername(username);
         if (admin == null) {
+            loginLockService.recordFailedLogin(ip);
             throw new LoginFailedException(MessageConstant.LOGIN_CREDENTIAL_ERROR);
         }
 
@@ -104,6 +115,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
 
         // 3. 验证密码是否正确
         if (!hashedPassword.equals(admin.getPassword())) {
+            loginLockService.recordFailedLogin(ip);
             throw new LoginFailedException(MessageConstant.LOGIN_CREDENTIAL_ERROR);
         }
 
@@ -114,23 +126,29 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
 
             // 检查是否可以校验验证码
             if (!verifyCodeService.canAttempt(adminId)) {
+                loginLockService.recordFailedLogin(ip);
                 throw new LoginFailedException(MessageConstant.LOGIN_CREDENTIAL_ERROR);
             }
 
             // 校验验证码是否正确
             boolean isValid = verifyCodeService.verifyCode(adminId, adminLoginDTO.getCode());
             if (!isValid) {
+                loginLockService.recordFailedLogin(ip);
                 throw new LoginFailedException(MessageConstant.LOGIN_CREDENTIAL_ERROR);
             }
 
         } else {
             // 游客直接校验固定验证码
             if (!adminLoginDTO.getCode().equals(visitorProperties.getVerifyCode())) {
+                loginLockService.recordFailedLogin(ip);
                 throw new LoginFailedException(MessageConstant.LOGIN_CREDENTIAL_ERROR);
             }
         }
 
-        // 5. 生成并存储 token
+        // 5. 登录成功，清空该 IP 的失败记录
+        loginLockService.clear(ip);
+
+        // 6. 生成并存储 token
         String token = tokenService.createAndStoreToken(admin.getId(), admin.getRole());
 
         log.info("管理员登录成功：username={}, id={}, role={}", username, admin.getId(), admin.getRole());

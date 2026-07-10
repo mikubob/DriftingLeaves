@@ -20,10 +20,11 @@ public interface IAdminService extends IService<Admin> {
 
     /**
      * 管理员登录
-     * @param adminLoginDTO
-     * @return
+     * @param adminLoginDTO 登录参数
+     * @param ip 客户端 IP
+     * @return 登录 VO
      */
-    AdminLoginVO login(AdminLoginDTO adminLoginDTO) throws Exception;
+    AdminLoginVO login(AdminLoginDTO adminLoginDTO, String ip) throws Exception;
 
     /**
      * 获取管理员信息

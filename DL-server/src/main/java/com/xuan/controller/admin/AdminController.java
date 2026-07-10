@@ -9,8 +9,10 @@ import com.xuan.dto.AdminLogoutDTO;
 import com.xuan.dto.SendCodeDTO;
 import com.xuan.result.Result;
 import com.xuan.service.IAdminService;
+import com.xuan.utils.IpUtil;
 import com.xuan.vo.AdminLoginVO;
 import com.xuan.vo.AdminVO;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,9 +48,11 @@ public class AdminController {
     @PostMapping("/login")
     @RateLimit(type = RateLimit.Type.IP, tokens = 5, burstCapacity = 8,
             timeWindow = 60, message = "操作过于频繁，请稍后再试")
-    public Result<AdminLoginVO> AdminLogin(@Valid @RequestBody AdminLoginDTO adminLoginDTO) throws Exception {
+    public Result<AdminLoginVO> AdminLogin(@Valid @RequestBody AdminLoginDTO adminLoginDTO,
+                                           HttpServletRequest request) throws Exception {
         log.info("管理员登录：{}", adminLoginDTO);
-        AdminLoginVO adminLoginVO = adminService.login(adminLoginDTO);
+        String ip = IpUtil.getClientIp(request);
+        AdminLoginVO adminLoginVO = adminService.login(adminLoginDTO, ip);
         return Result.success(adminLoginVO);
     }
 

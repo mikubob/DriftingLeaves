@@ -73,7 +73,7 @@ public class RssFeedServiceImpl implements IRssFeedService {
         xml.append("  </channel>\n");
         xml.append("</rss>\n");
         return xml.toString();
-    };
+    }
 
     /**
      * XML特殊字符转义

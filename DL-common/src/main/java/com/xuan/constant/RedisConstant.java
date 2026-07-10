@@ -10,10 +10,10 @@ public class RedisConstant {
     public static final String RATE_LIMIT_KEY = "visitor:rate:";
     public static final String BLOCKED_KEY = "visitor:blocked:";
     public static final String TOKEN_PREFIX = "token:active:";
-    public static final String KEY_VERIFY_CODE = "verify_code";
-    public static final String KEY_RATE_LIMIT = "rate_limit";
-    public static final String KEY_ATTEMPT_COUNT = "attempt_count";
-    public static final String KEY_LOCK = "lock";
+    public static final String KEY_VERIFY_CODE_PREFIX = "verify:code:";
+    public static final String KEY_RATE_LIMIT_PREFIX = "verify:rate:";
+    public static final String KEY_ATTEMPT_COUNT_PREFIX = "verify:attempt:";
+    public static final String KEY_LOCK_PREFIX = "verify:lock:";
     public static final String VISITOR_KEY = "visitor:fingerprint:";
 
     public static final String SERVER_MONITOR_OVERVIEW_TIMELINE = "server:monitor:overview:timeline";

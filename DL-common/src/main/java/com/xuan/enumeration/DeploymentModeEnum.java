@@ -1,5 +1,7 @@
 package com.xuan.enumeration;
 
+import lombok.Getter;
+
 /**
  * 服务监控部署模式枚举
  * <p>
@@ -9,6 +11,7 @@ package com.xuan.enumeration;
  * <p>
  * 前端会根据该枚举对应的 value/text 自动切换展示文案与提示信息。
  */
+@Getter
 public enum DeploymentModeEnum {
 
     /**
@@ -27,14 +30,6 @@ public enum DeploymentModeEnum {
     DeploymentModeEnum(String value, String text) {
         this.value = value;
         this.text = text;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public String getText() {
-        return text;
     }
 
     /**

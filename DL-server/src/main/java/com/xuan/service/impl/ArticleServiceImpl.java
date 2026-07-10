@@ -331,10 +331,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     public PageResult<ArticleVO> search(String keyword, int page, int pageSize) {
         // 1.创建分页对象
         Page<ArticleVO> mpPage = new Page<>(page, pageSize);
-        
+
         // 2.使用全文索引搜索（通过 Mapper XML）
         IPage<ArticleVO> resultPage = baseMapper.searchWithFullText(mpPage, keyword);
-        
+
         // 3.使用 PageResult.fromIPage() 构建分页结果
         return PageResult.fromIPage(resultPage);
     }
@@ -351,10 +351,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     public PageResult<BlogArticleVO> getPublishedPage(int page, int pageSize) {
         // 1. 创建分页对象
         Page<BlogArticleVO> mpPage = new Page<>(page, pageSize);
-        
+
         // 2. 查询已发布文章（使用自定义 SQL）
         IPage<BlogArticleVO> resultPage = baseMapper.getPublishedPage(mpPage);
-        
+
         // 3. 返回分页结果
         return PageResult.fromIPage(resultPage);
     }
@@ -415,10 +415,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     public PageResult<BlogArticleVO> getPublishedByCategoryId(Long categoryId, int page, int pageSize) {
         //1.创建分页对象
         Page<BlogArticleVO> mpPage = new Page<>(page, pageSize);
-        
+
         //2.执行分页查询（使用自定义 SQL）
         IPage<BlogArticleVO> resultPage = baseMapper.getPublishedByCategoryId(mpPage, categoryId);
-        
+
         //3.返回分页结果
         return PageResult.fromIPage(resultPage);
     }
@@ -432,19 +432,19 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     public List<ArticleArchiveVO> getArchive() {
         // 1. 查询所有已发布文章
         List<ArticleArchiveItemVO> allArticles = baseMapper.getArchiveList();
-        
+
         // 2. 按年月分组
         Map<String, ArticleArchiveVO> archiveMap = new LinkedHashMap<>();
-        
+
         for (ArticleArchiveItemVO item : allArticles) {
             if (item.getPublishTime() == null) {
                 continue;
             }
-            
+
             int year = item.getPublishTime().getYear();
             int month = item.getPublishTime().getMonthValue();
             String key = year + "-" + month;
-            
+
             ArticleArchiveVO archiveVO = archiveMap.computeIfAbsent(key, k ->
                     ArticleArchiveVO.builder()
                             .year(year)
@@ -454,7 +454,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
             );
             archiveVO.getArticles().add(item);
         }
-        
+
         // 3. 返回归档列表
         return new ArrayList<>(archiveMap.values());
     }
@@ -486,10 +486,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     public PageResult<BlogArticleVO> getPublishedByTagId(Long tagId, int page, int pageSize) {
         //1.创建分页对象
         Page<BlogArticleVO> mpPage = new Page<>(page, pageSize);
-        
+
         //2.执行分页查询（使用自定义 SQL）
         IPage<BlogArticleVO> resultPage = baseMapper.getPublishedByTagId(mpPage, tagId);
-        
+
         //3.返回分页结果
         return PageResult.fromIPage(resultPage);
     }
@@ -626,7 +626,19 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
             if (subscribers == null || subscribers.isEmpty()) {
                 return;
             }
-            String articleUrl = websiteProperties.getBlog() + "/article/" + article.getSlug();
+            String blogUrl = websiteProperties.getBlog();
+            if (blogUrl == null || blogUrl.isBlank()) {
+                log.warn("未配置 dl.website.blog，跳过发送新文章通知邮件");
+                return;
+            }
+            blogUrl = blogUrl.trim();
+            if (!blogUrl.startsWith("http://") && !blogUrl.startsWith("https://")) {
+                blogUrl = "https://" + blogUrl;
+            }
+            if (blogUrl.endsWith("/")) {
+                blogUrl = blogUrl.substring(0, blogUrl.length() - 1);
+            }
+            String articleUrl = blogUrl + "/article/" + article.getSlug();
             //2. 发送邮件
             for (RssSubscriptions subscriber : subscribers) {
                 asyncEmailService.sendNewArticleNotificationAsync(

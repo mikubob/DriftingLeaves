@@ -57,6 +57,8 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
             throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
         }
 
+        Long adminId = admin.getId();
+
         // 2. 游客无须邮箱验证码
         if (admin.getRole().equals(StatusConstant.DISABLE)) {
             throw new VisitorSendCodeException(MessageConstant.VISITOR_VERIFY_CODE_ERROR
@@ -64,8 +66,8 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         }
 
         // 3. 检查是否可以发送验证码
-        if (!verifyCodeService.canSendCode()) {
-            Long cooldown = verifyCodeService.getRemainingCooldown();
+        if (!verifyCodeService.canSendCode(adminId)) {
+            Long cooldown = verifyCodeService.getRemainingCooldown(adminId);
             throw new VerifyCodeCoolDownException("验证码冷却中，请等待" + cooldown + "秒后重试");
         }
 
@@ -73,7 +75,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         String code = verifyCodeService.generateCode();
         String email = admin.getEmail();
 
-        verifyCodeService.saveCode(code);
+        verifyCodeService.saveCode(adminId, code);
 
         // 5. 发送验证码
         emailService.sendVerifyCode(email, code);
@@ -109,17 +111,18 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         // 4. 区分游客和管理员校验验证码
         if (admin.getRole() == StatusConstant.ENABLE) {
             // 管理员需要校验邮箱验证码
+            Long adminId = admin.getId();
 
             // 检查是否可以校验验证码
-            if (!verifyCodeService.canAttempt()) {
-                Long lockRemainingMinutes = verifyCodeService.getLockRemainingMinutes();
+            if (!verifyCodeService.canAttempt(adminId)) {
+                Long lockRemainingMinutes = verifyCodeService.getLockRemainingMinutes(adminId);
                 throw new VerifyCodeLockException(MessageConstant.VERIFY_CODE_LOCK + lockRemainingMinutes + "分钟");
             }
 
             // 校验验证码是否正确
-            boolean isValid = verifyCodeService.verifyCode(adminLoginDTO.getCode());
+            boolean isValid = verifyCodeService.verifyCode(adminId, adminLoginDTO.getCode());
             if (!isValid) {
-                Long remainingAttempts = verifyCodeService.getRemainingAttempts();
+                Long remainingAttempts = verifyCodeService.getRemainingAttempts(adminId);
                 throw new VerifyCodeErrorException(MessageConstant.VERIFY_CODE_ERROR
                         + ",还可以试" + remainingAttempts + "次");
             }
@@ -268,15 +271,15 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         // 2. 校验邮箱验证码
 
         // 检查是否可以校验验证码
-        if (!verifyCodeService.canAttempt()) {
-            Long lockRemainingMinutes = verifyCodeService.getLockRemainingMinutes();
+        if (!verifyCodeService.canAttempt(adminId)) {
+            Long lockRemainingMinutes = verifyCodeService.getLockRemainingMinutes(adminId);
             throw new VerifyCodeLockException(MessageConstant.VERIFY_CODE_LOCK + lockRemainingMinutes + "分钟");
         }
 
         // 校验验证码是否正确
-        boolean isValid = verifyCodeService.verifyCode(adminChangeEmailDTO.getCode());
+        boolean isValid = verifyCodeService.verifyCode(adminId, adminChangeEmailDTO.getCode());
         if (!isValid) {
-            Long remainingAttempts = verifyCodeService.getRemainingAttempts();
+            Long remainingAttempts = verifyCodeService.getRemainingAttempts(adminId);
             throw new VerifyCodeErrorException(MessageConstant.VERIFY_CODE_ERROR
                     + ",还可以试" + remainingAttempts + "次");
         }

@@ -11,6 +11,7 @@ import com.xuan.dto.AdminLoginDTO;
 import com.xuan.dto.AdminLogoutDTO;
 import com.xuan.entity.Admin;
 import com.xuan.exception.AccountNotFoundException;
+import com.xuan.exception.LoginFailedException;
 import com.xuan.exception.PasswordErrorException;
 import com.xuan.exception.VerifyCodeCoolDownException;
 import com.xuan.exception.VerifyCodeErrorException;
@@ -50,11 +51,10 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
      */
     @Override
     public void sendVerifyCode(String username) {
-        // 1. 验证用户是否存在
+        // 1. 验证用户是否存在，不存在则静默返回，避免泄露账号存在性
         Admin admin = getByUsername(username);
         if (admin == null) {
-            // 账号不存在
-            throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
+            return;
         }
 
         Long adminId = admin.getId();
@@ -96,8 +96,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         // 1. 验证用户是否存在
         Admin admin = getByUsername(username);
         if (admin == null) {
-            // 账号不存在
-            throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
+            throw new LoginFailedException(MessageConstant.LOGIN_CREDENTIAL_ERROR);
         }
 
         // 2. 对密码进行加密
@@ -105,7 +104,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
 
         // 3. 验证密码是否正确
         if (!hashedPassword.equals(admin.getPassword())) {
-            throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
+            throw new LoginFailedException(MessageConstant.LOGIN_CREDENTIAL_ERROR);
         }
 
         // 4. 区分游客和管理员校验验证码
@@ -115,23 +114,19 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
 
             // 检查是否可以校验验证码
             if (!verifyCodeService.canAttempt(adminId)) {
-                Long lockRemainingMinutes = verifyCodeService.getLockRemainingMinutes(adminId);
-                throw new VerifyCodeLockException(MessageConstant.VERIFY_CODE_LOCK + lockRemainingMinutes + "分钟");
+                throw new LoginFailedException(MessageConstant.LOGIN_CREDENTIAL_ERROR);
             }
 
             // 校验验证码是否正确
             boolean isValid = verifyCodeService.verifyCode(adminId, adminLoginDTO.getCode());
             if (!isValid) {
-                Long remainingAttempts = verifyCodeService.getRemainingAttempts(adminId);
-                throw new VerifyCodeErrorException(MessageConstant.VERIFY_CODE_ERROR
-                        + ",还可以试" + remainingAttempts + "次");
+                throw new LoginFailedException(MessageConstant.LOGIN_CREDENTIAL_ERROR);
             }
 
         } else {
             // 游客直接校验固定验证码
             if (!adminLoginDTO.getCode().equals(visitorProperties.getVerifyCode())) {
-                throw new VerifyCodeErrorException(MessageConstant.VERIFY_CODE_ERROR
-                        + ",请输入:" + visitorProperties.getVerifyCode());
+                throw new LoginFailedException(MessageConstant.LOGIN_CREDENTIAL_ERROR);
             }
         }
 

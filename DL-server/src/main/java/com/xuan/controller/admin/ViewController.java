@@ -1,10 +1,13 @@
 package com.xuan.controller.admin;
 
 
+import com.xuan.constant.StatusConstant;
+import com.xuan.context.BaseContext;
 import com.xuan.dto.ViewPageQueryDTO;
 import com.xuan.result.PageResult;
 import com.xuan.result.Result;
 import com.xuan.service.IViewService;
+import com.xuan.vo.ViewQueryVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -27,10 +30,17 @@ public class ViewController {
      * @param viewPageQueryDTO
      * @return
      */
+    @SuppressWarnings("unchecked")
     @GetMapping("/page")
     public Result<PageResult> getViewList(ViewPageQueryDTO viewPageQueryDTO) {
         log.info("获取浏览记录列表,{}", viewPageQueryDTO);
-        PageResult pageResult = viewService.pageQuery(viewPageQueryDTO);
+        PageResult<ViewQueryVO> pageResult = viewService.pageQuery(viewPageQueryDTO);
+
+        // 游客角色隐藏IP地址
+        if (BaseContext.getCurrentRole().equals(StatusConstant.DISABLE)) {
+            pageResult.getRecords().forEach(v -> v.setIpAddress("游客账号无法查看"));
+        }
+
         return Result.success(pageResult);
     }
 

@@ -23,6 +23,6 @@ public class AdminLoginVO implements Serializable {
     // 管理员ID
     private Long id;
 
-    // 登录令牌
+    // 登录令牌（仅用于服务端写入 Cookie，不返回给前端）
     private String token;
 }

@@ -8,7 +8,6 @@ import com.xuan.dto.AdminChangeEmailDTO;
 import com.xuan.dto.AdminChangeNicknameDTO;
 import com.xuan.dto.AdminChangePasswordDTO;
 import com.xuan.dto.AdminLoginDTO;
-import com.xuan.dto.AdminLogoutDTO;
 import com.xuan.entity.Admin;
 import com.xuan.exception.AccountLockedException;
 import com.xuan.exception.AccountNotFoundException;
@@ -148,7 +147,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         // 5. 登录成功，清空该 IP 的失败记录
         loginLockService.clear(ip);
 
-        // 6. 生成并存储 token
+        // 6. 生成并存储 token（Token 将由 Controller 写入 HttpOnly Cookie）
         String token = tokenService.createAndStoreToken(admin.getId(), admin.getRole());
 
         log.info("管理员登录成功：username={}, id={}, role={}", username, admin.getId(), admin.getRole());
@@ -186,13 +185,14 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
     /**
      * 管理员退出登录
      *
-     * @param adminLogoutDTO 退出登录参数
+     * @param adminId 管理员 ID
+     * @param token   当前登录令牌
      */
     @Override
-    public void logout(AdminLogoutDTO adminLogoutDTO) {
+    public void logout(Long adminId, String token) {
         // 删除 Redis 中的 token
-        tokenService.logout(adminLogoutDTO.getId(), adminLogoutDTO.getToken());
-        log.info("管理员退出登录成功：id={}", adminLogoutDTO.getId());
+        tokenService.logout(adminId, token);
+        log.info("管理员退出登录成功：id={}", adminId);
     }
 
     /**

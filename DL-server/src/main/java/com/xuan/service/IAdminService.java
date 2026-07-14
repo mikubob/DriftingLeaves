@@ -6,7 +6,6 @@ import com.xuan.dto.AdminChangeEmailDTO;
 import com.xuan.dto.AdminChangeNicknameDTO;
 import com.xuan.dto.AdminChangePasswordDTO;
 import com.xuan.dto.AdminLoginDTO;
-import com.xuan.dto.AdminLogoutDTO;
 import com.xuan.entity.Admin;
 import com.xuan.vo.AdminLoginVO;
 import com.xuan.vo.AdminVO;
@@ -34,9 +33,10 @@ public interface IAdminService extends IService<Admin> {
 
     /**
      * 管理员退出登录
-     * @param adminLogoutDTO
+     * @param adminId 管理员 ID
+     * @param token 当前登录令牌
      */
-    void logout(AdminLogoutDTO adminLogoutDTO);
+    void logout(Long adminId, String token);
 
     /**
      * 管理员修改密码

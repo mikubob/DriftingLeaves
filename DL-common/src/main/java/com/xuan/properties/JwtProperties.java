@@ -14,4 +14,9 @@ public class JwtProperties {
     private String secretKey;
     private Long ttl;
     private String tokenName;
+
+    /**
+     * Cookie 相关配置
+     */
+    private String cookieName = "dL9xK2mP5vQ8";
 }

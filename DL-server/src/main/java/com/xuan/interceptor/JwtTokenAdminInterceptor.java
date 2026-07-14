@@ -12,13 +12,18 @@ import com.xuan.properties.JwtProperties;
 import com.xuan.service.TokenService;
 import com.xuan.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
+
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * jwt令牌校验的拦截器
@@ -33,21 +38,21 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
 
     /**
      * 校验jwt
-     * @param request
-     * @param response
-     * @param handler
-     * @return
-     * @throws Exception
+     * @param request 请求
+     * @param response 响应
+     * @param handler 处理器
+     * @return 拦截结果
+     * @throws Exception 抛出的异常
      */
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) throws Exception {
         //判断当前拦截到的是Controller的方法还是其他资源
         if (!(handler instanceof HandlerMethod)) {
             //当前拦截到的不是动态方法，直接放行
             return true;
         }
 
-        // 从请求头中获取令牌
-        String token = request.getHeader(jwtProperties.getTokenName());
+        // 从 Cookie 中获取令牌
+        String token = getTokenFromCookie(request);
 
         // 如果令牌为空，抛出未登录异常
         if(StrUtil.isBlank(token)){
@@ -82,6 +87,24 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
             // 校验失败，抛出未授权异常
             throw new UnauthorizedException(MessageConstant.NOT_AUTHORIZED);
         }
+    }
+
+    /**
+     * 从 Cookie 中读取 Token（自动 URL 解码）
+     * @param request
+     * @return Token 字符串，不存在则返回 null
+     */
+    private String getTokenFromCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return null;
+        }
+        for (Cookie cookie : cookies) {
+            if (jwtProperties.getCookieName().equals(cookie.getName())) {
+                return URLDecoder.decode(cookie.getValue(), StandardCharsets.UTF_8);
+            }
+        }
+        return null;
     }
 
     /**

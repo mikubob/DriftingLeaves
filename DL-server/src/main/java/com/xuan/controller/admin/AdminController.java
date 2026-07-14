@@ -45,7 +45,7 @@ public class AdminController {
     @PostMapping("/sendCode")
     @RateLimit(type = RateLimit.Type.IP, tokens = 5, burstCapacity = 8,
             timeWindow = 60, message = "操作过于频繁，请稍后再试")
-    public Result sendCode(@RequestBody SendCodeDTO sendCodeDTO) {
+    public Result sendCode(@Valid @RequestBody SendCodeDTO sendCodeDTO) {
         log.info("发送验证码, {}", sendCodeDTO);
         adminService.sendVerifyCode(sendCodeDTO.getUsername());
         return Result.success();

@@ -50,33 +50,28 @@ public class IpUtil {
     }
 
     /**
-     * 获取真实客户端 IP (融合了 CDN 支持)
+     * 获取真实客户端 IP
+     * 当前未使用 CDN，后端仅通过 Nginx 暴露，因此只信任 Nginx 设置的代理头
      */
     public static String getClientIp(HttpServletRequest request) {
         if (request == null) return "unknown";
 
-        // 1. CDN 专用头 (优先级最高)
-        String ip = request.getHeader("CF-Connecting-IP");
-        if (isInvalid(ip)) ip = request.getHeader("True-Client-IP");
-        if (isInvalid(ip)) ip = request.getHeader("Ali-CDN-Real-IP");
-        if (isInvalid(ip)) ip = request.getHeader("X-Real-IP");
-
-        // 2. 标准代理头
+        // 1. Nginx 等可信代理设置的请求头
+        String ip = request.getHeader("X-Real-IP");
         if (isInvalid(ip)) ip = request.getHeader("X-Forwarded-For");
         if (isInvalid(ip)) ip = request.getHeader("Proxy-Client-IP");
         if (isInvalid(ip)) ip = request.getHeader("WL-Proxy-Client-IP");
 
-        // 3. 直连 IP
+        // 2. 直连 IP
         if (isInvalid(ip)) ip = request.getRemoteAddr();
 
-        // 4. 处理多级代理 (取第一个)
+        // 3. 处理多级代理 (取第一个)
         if (ip != null && ip.contains(",")) {
             ip = ip.split(",")[0].trim();
         }
 
-        // 5. 本地回环处理 (可选，视业务需求而定，通常直接返回即可)
+        // 4. 本地回环处理
         if ("127.0.0.1".equals(ip) || "0:0:0:0:0:0:0:1".equals(ip)) {
-            // 这里不再尝试获取本机网卡 IP，避免在容器环境中获取错误 IP
             return "127.0.0.1";
         }
 

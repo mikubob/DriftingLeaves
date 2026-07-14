@@ -2,8 +2,8 @@ package com.xuan.interceptor;
 
 import cn.hutool.core.util.StrUtil;
 import com.xuan.constant.JwtClaimsConstant;
+import com.xuan.constant.AdminRoleConstant;
 import com.xuan.constant.MessageConstant;
-import com.xuan.constant.StatusConstant;
 import com.xuan.context.BaseContext;
 import com.xuan.exception.GuestReadOnlyException;
 import com.xuan.exception.NotLoginException;
@@ -72,7 +72,7 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
             }
 
             // 游客账号(role=0)只允许GET查询操作，禁止增删改
-            if(role.equals(StatusConstant.DISABLE) && !"GET".equalsIgnoreCase(request.getMethod())){
+            if(role.equals(AdminRoleConstant.VISITOR) && !"GET".equalsIgnoreCase(request.getMethod())){
                 throw new GuestReadOnlyException(MessageConstant.GUEST_READ_ONLY);
             }
 

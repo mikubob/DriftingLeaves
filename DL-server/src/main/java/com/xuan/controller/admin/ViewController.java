@@ -1,7 +1,7 @@
 package com.xuan.controller.admin;
 
 
-import com.xuan.constant.StatusConstant;
+import com.xuan.constant.AdminRoleConstant;
 import com.xuan.context.BaseContext;
 import com.xuan.dto.ViewPageQueryDTO;
 import com.xuan.result.PageResult;
@@ -37,7 +37,7 @@ public class ViewController {
         PageResult<ViewQueryVO> pageResult = viewService.pageQuery(viewPageQueryDTO);
 
         // 游客角色隐藏IP地址
-        if (BaseContext.getCurrentRole().equals(StatusConstant.DISABLE)) {
+        if (BaseContext.getCurrentRole().equals(AdminRoleConstant.VISITOR)) {
             pageResult.getRecords().forEach(v -> v.setIpAddress("游客账号无法查看"));
         }
 

@@ -60,7 +60,7 @@ public class AdminController {
             timeWindow = 60, message = "操作过于频繁，请稍后再试")
     public ResponseEntity<Result<AdminLoginVO>> adminLogin(@Valid @RequestBody AdminLoginDTO adminLoginDTO,
                                                            HttpServletRequest request,
-                                                           HttpServletResponse response) throws Exception {
+                                                           HttpServletResponse response) {
         log.info("管理员登录：{}", adminLoginDTO);
         String ip = IpUtil.getClientIp(request);
         AdminLoginVO adminLoginVO = adminService.login(adminLoginDTO, ip);
@@ -102,7 +102,7 @@ public class AdminController {
      * 管理员修改密码
      */
     @PutMapping("/changePassword")
-    public Result changePassword(@Valid @RequestBody AdminChangePasswordDTO adminChangePasswordDTO) throws Exception {
+    public Result changePassword(@Valid @RequestBody AdminChangePasswordDTO adminChangePasswordDTO) {
         log.info("管理员修改密码：{}", adminChangePasswordDTO);
         adminService.changePassword(adminChangePasswordDTO);
         return Result.success();

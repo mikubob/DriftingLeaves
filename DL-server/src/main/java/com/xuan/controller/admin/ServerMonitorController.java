@@ -1,7 +1,7 @@
 package com.xuan.controller.admin;
 
+import com.xuan.constant.AdminRoleConstant;
 import com.xuan.constant.MessageConstant;
-import com.xuan.constant.StatusConstant;
 import com.xuan.context.BaseContext;
 import com.xuan.dto.ServerMonitorQueryDTO;
 import com.xuan.exception.GuestReadOnlyException;
@@ -167,7 +167,7 @@ public class ServerMonitorController {
      */
     private void checkAdminOnly() {
         Integer role = BaseContext.getCurrentRole();
-        if (role == null || role.equals(StatusConstant.DISABLE)) {
+        if (role == null || role.equals(AdminRoleConstant.VISITOR)) {
             throw new GuestReadOnlyException(MessageConstant.SERVER_MONITOR_ADMIN_ONLY);
         }
     }

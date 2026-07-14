@@ -10,7 +10,6 @@ public interface EncryptPasswordService {
      * @param password
      * @param salt
      * @return
-     * @throws Exception
      */
-    String hashPassword(String password, String salt) throws Exception;
+    String hashPassword(String password, String salt);
 }

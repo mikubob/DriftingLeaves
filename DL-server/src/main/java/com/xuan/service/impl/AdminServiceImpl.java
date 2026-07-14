@@ -1,8 +1,8 @@
 package com.xuan.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.xuan.constant.AdminRoleConstant;
 import com.xuan.constant.MessageConstant;
-import com.xuan.constant.StatusConstant;
 import com.xuan.context.BaseContext;
 import com.xuan.dto.AdminChangeEmailDTO;
 import com.xuan.dto.AdminChangeNicknameDTO;
@@ -62,7 +62,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         Long adminId = admin.getId();
 
         // 2. 游客无须邮箱验证码
-        if (admin.getRole().equals(StatusConstant.DISABLE)) {
+        if (admin.getRole().equals(AdminRoleConstant.VISITOR)) {
             throw new VisitorSendCodeException(MessageConstant.VISITOR_VERIFY_CODE_ERROR
                     + visitorProperties.getVerifyCode());
         }
@@ -92,7 +92,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
      * @return 登录 VO
      */
     @Override
-    public AdminLoginVO login(AdminLoginDTO adminLoginDTO, String ip) throws Exception {
+    public AdminLoginVO login(AdminLoginDTO adminLoginDTO, String ip) {
         // 0. 检查该 IP 是否已被锁定
         if (loginLockService.isLocked(ip)) {
             Long lockRemainingMinutes = loginLockService.getLockRemainingMinutes(ip);
@@ -119,7 +119,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         }
 
         // 4. 区分游客和管理员校验验证码
-        if (admin.getRole() == StatusConstant.ENABLE) {
+        if (admin.getRole() == AdminRoleConstant.ADMIN) {
             // 管理员需要校验邮箱验证码
             Long adminId = admin.getId();
 
@@ -201,7 +201,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
      * @param adminChangePasswordDTO 修改密码参数
      */
     @Override
-    public void changePassword(AdminChangePasswordDTO adminChangePasswordDTO) throws Exception {
+    public void changePassword(AdminChangePasswordDTO adminChangePasswordDTO) {
         // 1. 获取当前管理员
         Long adminId = BaseContext.getCurrentId();
         Admin admin = getById(adminId);

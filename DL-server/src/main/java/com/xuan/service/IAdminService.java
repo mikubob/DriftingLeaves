@@ -23,7 +23,7 @@ public interface IAdminService extends IService<Admin> {
      * @param ip 客户端 IP
      * @return 登录 VO
      */
-    AdminLoginVO login(AdminLoginDTO adminLoginDTO, String ip) throws Exception;
+    AdminLoginVO login(AdminLoginDTO adminLoginDTO, String ip);
 
     /**
      * 获取管理员信息
@@ -42,7 +42,7 @@ public interface IAdminService extends IService<Admin> {
      * 管理员修改密码
      * @param adminChangePasswordDTO
      */
-    void changePassword(AdminChangePasswordDTO adminChangePasswordDTO) throws Exception;
+    void changePassword(AdminChangePasswordDTO adminChangePasswordDTO);
 
     /**
      * 管理员更改昵称

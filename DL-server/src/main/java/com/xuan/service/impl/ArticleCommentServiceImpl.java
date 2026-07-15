@@ -512,12 +512,13 @@ public class ArticleCommentServiceImpl extends ServiceImpl<ArticleCommentMapper,
      * @param emailOrQq 邮箱或 QQ 号
      */
     private void validateEmailOrQq(String emailOrQq) {
+        // 为空时直接通过，该字段为可选
         if (emailOrQq == null || emailOrQq.isEmpty()) {
-            throw new ValidationException(MessageConstant.EMAIL_OR_QQ_REQUIRED);
+            return;
         }
 
         String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
-        String qqRegex = "^[1-9]\\d{4,10}$";
+        String qqRegex = "^[1-9]\\d{4,11}$";
 
         if (!emailOrQq.matches(emailRegex) && !emailOrQq.matches(qqRegex)) {
             throw new ValidationException(MessageConstant.INVALID_EMAIL_FORMAT);

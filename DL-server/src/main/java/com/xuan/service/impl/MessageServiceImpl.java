@@ -50,11 +50,11 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Messages> imp
 
     // 邮箱正则
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
-            "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$"
+            "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
     );
 
-    // QQ号正则 (5-11位数字)
-    private static final Pattern QQ_PATTERN = Pattern.compile("^[1-9][0-9]{4,10}$");
+    // QQ号正则 (5-12位数字，首位非0)
+    private static final Pattern QQ_PATTERN = Pattern.compile("^[1-9]\\d{4,11}$");
 
     /**
      * 提交留言
@@ -380,9 +380,9 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Messages> imp
      * @param emailOrQq 邮箱或QQ号
      */
     private void validateEmailOrQq(String emailOrQq) {
-        //1.判空校验
+        //1.为空时直接通过，该字段为可选
         if (emailOrQq == null || emailOrQq.trim().isEmpty()) {
-            throw new ValidationException(MessageConstant.EMAIL_OR_QQ_REQUIRED);
+            return;
         }
 
         emailOrQq = emailOrQq.trim();

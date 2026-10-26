@@ -29,18 +29,28 @@ public class SocialMedia extends BaseEntity {
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    // 名称
+    /**
+     * 名称
+     */
     private String name;
 
-    // 图标类名
+    /**
+     * 图标 URL
+     */
     private String icon;
 
-    // 链接
+    /**
+     * 链接
+     */
     private String link;
 
-    // 排序，越小越靠前
+    /**
+     * 排序，越小越靠前
+     */
     private Integer sort;
 
-    // 是否可见
+    /**
+     * 是否可见
+     */
     private Integer isVisible;
 }

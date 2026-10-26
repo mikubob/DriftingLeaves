@@ -4,46 +4,36 @@ import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.safety.Safelist;
 
-/**
- * Markdown工具类
- */
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
+import java.util.regex.Pattern;
+
+/** Markdown 渲染及安全过滤，前后端共用相同的标题锚点规则。 */
 public class MarkdownUtil {
 
     private static final Parser parser = Parser.builder().build();
     private static final HtmlRenderer renderer = HtmlRenderer.builder().build();
+    private static final Pattern HEADING_PUNCTUATION = Pattern.compile(
+            "[^\\p{L}\\p{M}\\p{N}_\\s-]", Pattern.UNICODE_CHARACTER_CLASS);
+    private static final Pattern WHITESPACE = Pattern.compile("\\s", Pattern.UNICODE_CHARACTER_CLASS);
 
-    /**
-     * Markdown转HTML（带XSS防护）
-     * @param markdown Markdown文本
-     * @return 安全的HTML文本
-     */
     public static String toHtml(String markdown) {
         if (markdown == null || markdown.trim().isEmpty()) {
             return "";
         }
-        
-        // 解析Markdown
         Node document = parser.parse(markdown);
-        String html = renderer.render(document);
-        
-        // 安全过滤（防止XSS）
-        return sanitizeHtml(html);
+        return sanitizeHtml(renderer.render(document));
     }
 
-    /**
-     * 判断是否是 HTML 内容（如富文本编辑器输出）
-     */
     public static boolean isHtml(String content) {
-        if (content == null) return false;
-        String trimmed = content.trim();
-        return trimmed.startsWith("<");
+        return content != null && content.trim().startsWith("<");
     }
 
-    /**
-     * 对 HTML 内容进行 XSS 安全过滤（不进行 Markdown 转换）
-     */
     public static String sanitize(String html) {
         if (html == null || html.trim().isEmpty()) {
             return "";
@@ -51,18 +41,38 @@ public class MarkdownUtil {
         return sanitizeHtml(html);
     }
 
-    /**
-     * 安全的 HTML 过滤
-     */
     private static String sanitizeHtml(String html) {
         Safelist safelist = Safelist.relaxed()
-                .addTags("code", "pre", "hr")  // 允许的标签
-                .addAttributes("code", "class")  // 允许code标签的class属性（用于语法高亮）
-                .addProtocols("a", "href", "http", "https", "mailto")  // 只允许安全协议
-                .addAttributes("a", "target", "rel")  // 允许target和rel属性
-                .addEnforcedAttribute("a", "rel", "nofollow noopener noreferrer");  // 自动加安全属性
-        
-        // 清理HTML
-        return Jsoup.clean(html, safelist);
+                .addTags("code", "pre", "hr")
+                .addAttributes("code", "class")
+                .addAttributes("h1", "id").addAttributes("h2", "id")
+                .addAttributes("h3", "id").addAttributes("h4", "id")
+                .addAttributes("h5", "id").addAttributes("h6", "id")
+                .addAttributes("a", "id", "name", "target", "rel")
+                // jsoup requires an explicit # protocol for same-document links.
+                .addProtocols("a", "href", "http", "https", "mailto", "#")
+                .preserveRelativeLinks(true)
+                .addEnforcedAttribute("a", "rel", "nofollow noopener noreferrer");
+
+        Document document = Jsoup.parseBodyFragment(Jsoup.clean(html, safelist));
+        Set<String> used = new HashSet<>();
+        for (Element element : document.select("[id]")) {
+            if (!element.id().isEmpty()) used.add(element.id());
+        }
+        for (Element heading : document.select("h1, h2, h3, h4, h5, h6")) {
+            if (!heading.id().isEmpty()) continue;
+            String base = headingSlug(heading.text());
+            String id = base;
+            int suffix = 0;
+            while (!used.add(id)) id = base + "-" + ++suffix;
+            heading.attr("id", id);
+        }
+        return document.body().html();
+    }
+
+    private static String headingSlug(String text) {
+        String slug = HEADING_PUNCTUATION.matcher(text.trim().toLowerCase(Locale.ROOT)).replaceAll("");
+        slug = WHITESPACE.matcher(slug).replaceAll("-");
+        return slug.isEmpty() ? "section" : slug;
     }
 }

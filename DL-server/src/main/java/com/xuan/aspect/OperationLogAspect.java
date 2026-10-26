@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Method;
 
 /**
- * 自定义切面类，用于记录操作日志
+ * 由 Spring 管理的操作日志切面，用于记录管理员操作。
  */
 @Aspect
 @Component
@@ -33,7 +33,11 @@ public class OperationLogAspect {
     }
 
     /**
-     * 环绕通知
+     * 执行目标方法，并读取方法上的操作日志注解以异步保存执行结果。
+     *
+     * @param joinPoint 目标方法及其调用参数
+     * @return 目标方法返回值
+     * @throws Throwable 目标方法抛出的异常，记录后继续向调用方抛出
      */
     @Around("operationLogPointCut()")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -45,15 +49,13 @@ public class OperationLogAspect {
             return result;
         } catch (Throwable e) {
             error = e;
-            throw e; // 重新抛出异常
+            throw e;
         } finally {
-            // 获取注解
-            MethodSignature signature = (MethodSignature) joinPoint.getSignature(); // 方法签名对象
-            Method method = signature.getMethod(); // 方法对象
-            OperationLog operationLog = method.getAnnotation(OperationLog.class); // 获取方法上的注解对象
+            MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+            Method method = signature.getMethod();
+            OperationLog operationLog = method.getAnnotation(OperationLog.class);
 
             if (operationLog != null) {
-                // 异步记录操作日志
                 saveLogAsyncService.saveLogAsync(joinPoint, result, error, operationLog);
             }
         }

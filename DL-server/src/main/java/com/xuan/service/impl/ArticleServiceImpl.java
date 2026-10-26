@@ -103,7 +103,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
 
         //1.判断前端是否进行了md->html的渲染，如果没有则后端进行转换
         if (StrUtil.isNotBlank(articles.getContentHtml())) {
-            articles.setContentHtml(articleDTO.getContentHtml());
+            articles.setContentHtml(MarkdownUtil.sanitize(articleDTO.getContentHtml()));
         } else {
             String rawContent = articleDTO.getContentMarkdown();
             String contentHtml = MarkdownUtil.isHtml(rawContent)
@@ -199,7 +199,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
         if (StrUtil.isNotBlank(articleDTO.getContentMarkdown())) {
             // 2.1.优先查看前端是否渲染了html，渲染了直接使用前端渲染
             if (StrUtil.isNotBlank(articleDTO.getContentHtml())) {
-                articles.setContentHtml(articleDTO.getContentHtml());
+                articles.setContentHtml(MarkdownUtil.sanitize(articleDTO.getContentHtml()));
             } else {
                 //2.2.否则使用markdown转换
                 String rawContent = articleDTO.getContentMarkdown();

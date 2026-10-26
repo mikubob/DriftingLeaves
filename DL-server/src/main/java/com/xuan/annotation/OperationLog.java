@@ -9,7 +9,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 操作日志注解，标识管理员的增删改操作
+ * 操作日志注解，标识管理员的增删改方法，在运行时保留以供切面读取。
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

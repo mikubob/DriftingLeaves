@@ -22,25 +22,37 @@ public class SocialMediaDTO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    // ID
+    /**
+     * ID
+     */
     private Long id;
 
-    // 名称
+    /**
+     * 名称
+     */
     @NotBlank(message = "名称不能为空")
     @Size(max = 20, message = "名称不能超过20字")
     private String name;
 
-    // 图标类名
-    @Size(max = 50, message = "图标类名不能超过 50 字")
+    /**
+     * 图标 URL，长度对应数据库 social_media.icon VARCHAR(255)，与技能图标一致。
+     */
+    @Size(max = 255, message = "社交图标链接不能超过255个字符")
     private String icon;
 
-    // 链接
+    /**
+     * 链接
+     */
     @Size(max = 100, message = "链接不能超过100字")
     private String link;
 
-    // 排序，越小越靠前
+    /**
+     * 排序，越小越靠前
+     */
     private Integer sort;
 
-    // 是否可见
+    /**
+     * 是否可见
+     */
     private Integer isVisible;
 }

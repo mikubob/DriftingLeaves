@@ -89,6 +89,7 @@ application-local.yml
 coverage/
 *.exec
 *.sql
+!DL-server/src/main/resources/sql/migrations/*.sql
 
 # JUnit 临时文件
 .junit/

@@ -22,24 +22,37 @@ public class SkillDTO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    // ID
+    /**
+     * ID
+     */
     private Long id;
 
-    // 技能名称
+    /**
+     * 技能名称
+     */
     @NotBlank(message = "技能名称不能为空")
     @Size(max = 20, message = "技能名称不能超过20字")
     private String name;
 
-    // 技能描述
+    /**
+     * 技能描述
+     */
     @Size(max = 255, message = "技能描述不能超过255字")
     private String description;
 
-    // 图标url
+    /**
+     * 图标 URL，长度对应数据库 skills.icon VARCHAR(255)。
+     */
+    @Size(max = 255, message = "技能图标链接不能超过255个字符")
     private String icon;
 
-    // 排序，越小越靠前
+    /**
+     * 排序，越小越靠前
+     */
     private Integer sort;
 
-    // 是否可见
+    /**
+     * 是否可见
+     */
     private Integer isVisible;
 }

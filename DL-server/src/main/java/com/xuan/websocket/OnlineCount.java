@@ -1,6 +1,10 @@
 package com.xuan.websocket;
 
-import jakarta.websocket.*;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnError;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -16,10 +20,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 @ServerEndpoint("/ws/online")
 public class OnlineCount {
 
-    // 存放所有连接的会话
+    /**
+     * 存放所有连接的会话
+     */
     private static final ConcurrentHashMap<String, Session> sessions = new ConcurrentHashMap<>();
 
-    // 在线人数计数器
+    /**
+     * 在线人数计数器
+     */
     private static final AtomicInteger onlineCount = new AtomicInteger(0);
 
     /**

@@ -5,10 +5,18 @@ import com.xuan.properties.WebsiteProperties;
 import java.time.LocalDate;
 
 /**
- * 邮件模板工具类
- * 提供各种邮件模板的构建方法
+ * 邮件 HTML 模板工具，对外部文本及链接进行转义后组装邮件正文。
  */
 public class EmailTemplateUtil {
+    /**
+     * 转义邮件文本和双引号属性中的特殊字符。
+     * @param value 待插入模板的文本
+     * @return 转义结果，null 转为空字符串
+     */
+    public static String escape(String value) {
+        return value == null ? "" : org.springframework.web.util.HtmlUtils.htmlEscape(value);
+    }
+
 
     /**
      * 构建发送验证码的邮件内容
@@ -17,13 +25,14 @@ public class EmailTemplateUtil {
      * @return 邮件内容
      */
     public static String buildSendVerifyCodeEmailContent(String code, WebsiteProperties websiteProperties) {
+        code = escape(code);
         String year = String.valueOf(LocalDate.now().getYear());
         return "<!DOCTYPE html>" +
                 "<html lang='zh-CN'>" +
                 "<head>" +
                 "    <meta charset='UTF-8'>" +
                 "    <meta name='viewport' content='width=device-width, initial-scale=1.0'>" +
-                "    <title>"+ websiteProperties.getTitle() +"验证码</title>" +
+                "    <title>"+ escape(websiteProperties.getTitle()) +"验证码</title>" +
                 "    <style>" +
                 "        body {" +
                 "            margin: 0;" +
@@ -76,7 +85,7 @@ public class EmailTemplateUtil {
                 "<body>" +
                 "    <div class='email-container'>" +
                 "        <div class='email-header'>" +
-                "            <h1 style='color: white; margin: 0; font-size: 24px; font-weight: 500;'>"+websiteProperties.getTitle()+"</h1>" +
+                "            <h1 style='color: white; margin: 0; font-size: 24px; font-weight: 500;'>"+escape(websiteProperties.getTitle())+"</h1>" +
                 "            <p style='color: #bbb; margin: 8px 0 0; font-size: 14px;'>—— 邮箱验证 ——</p>" +
                 "        </div>" +
                 "        " +
@@ -98,7 +107,7 @@ public class EmailTemplateUtil {
                 "        <div class='footer'>" +
                 "            <p style='margin: 0; line-height: 1.5;'>" +
                 "                此为系统自动发送的邮件，请勿直接回复<br>" +
-                "                © "+ year +" "+ websiteProperties.getTitle() +" - 保留所有权利" +
+                "                © "+ year +" "+ escape(websiteProperties.getTitle()) +" - 保留所有权利" +
                 "            </p>" +
                 "        </div>" +
                 "    </div>" +
@@ -111,13 +120,18 @@ public class EmailTemplateUtil {
      */
     public static String buildReplyNotificationEmailContent(String parentNickname, String parentContent,
                                                       String replyNickname, String replyContent, String typeText, WebsiteProperties websiteProperties) {
+        parentNickname = escape(parentNickname);
+        parentContent = escape(parentContent);
+        replyNickname = escape(replyNickname);
+        replyContent = escape(replyContent);
+        typeText = escape(typeText);
         String year = String.valueOf(LocalDate.now().getYear());
         return "<!DOCTYPE html>" +
                 "<html lang='zh-CN'>" +
                 "<head>" +
                 "    <meta charset='UTF-8'>" +
                 "    <meta name='viewport' content='width=device-width, initial-scale=1.0'>" +
-                "    <title>"+ websiteProperties.getTitle() +"回复通知</title>" +
+                "    <title>"+ escape(websiteProperties.getTitle()) +"回复通知</title>" +
                 "    <style>" +
                 "        body { margin: 0; padding: 0; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; background-color: #f5f5f5; }" +
                 "        .email-container { max-width: 600px; margin: 40px auto; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; }" +
@@ -131,7 +145,7 @@ public class EmailTemplateUtil {
                 "<body>" +
                 "    <div class='email-container'>" +
                 "        <div class='email-header'>" +
-                "            <h1 style='color: white; margin: 0; font-size: 24px; font-weight: 500;'>"+websiteProperties.getTitle()+"</h1>" +
+                "            <h1 style='color: white; margin: 0; font-size: 24px; font-weight: 500;'>"+escape(websiteProperties.getTitle())+"</h1>" +
                 "            <p style='color: #bbb; margin: 8px 0 0; font-size: 14px;'>—— " + typeText + "回复通知 ——</p>" +
                 "        </div>" +
                 "        <div class='email-content'>" +
@@ -147,7 +161,7 @@ public class EmailTemplateUtil {
                 "            </div>" +
                 "        </div>" +
                 "        <div class='footer'>" +
-                "            <p style='margin: 0; line-height: 1.5;'>此为系统自动发送的邮件，请勿直接回复<br>© " + year + " "+websiteProperties.getTitle()+" - 保留所有权利</p>" +
+                "            <p style='margin: 0; line-height: 1.5;'>此为系统自动发送的邮件，请勿直接回复<br>© " + year + " "+escape(websiteProperties.getTitle())+" - 保留所有权利</p>" +
                 "        </div>" +
                 "    </div>" +
                 "</body>" +
@@ -158,14 +172,19 @@ public class EmailTemplateUtil {
      * 构建新文章通知邮件内容
      */
     public static String buildNewArticleNotificationEmailContent(String nickname, String articleTitle,
-                                                           String articleSummary, String articleUrl, WebsiteProperties websiteProperties) {
+                                                           String articleSummary, String articleUrl, String unsubscribeUrl, WebsiteProperties websiteProperties) {
+        nickname = escape(nickname);
+        articleTitle = escape(articleTitle);
+        articleSummary = escape(articleSummary);
+        articleUrl = escape(articleUrl);
+        unsubscribeUrl = escape(unsubscribeUrl);
         String year = String.valueOf(LocalDate.now().getYear());
         return "<!DOCTYPE html>" +
                 "<html lang='zh-CN'>" +
                 "<head>" +
                 "    <meta charset='UTF-8'>" +
                 "    <meta name='viewport' content='width=device-width, initial-scale=1.0'>" +
-                "    <title>"+websiteProperties.getTitle()+"新文章通知</title>" +
+                "    <title>"+escape(websiteProperties.getTitle())+"新文章通知</title>" +
                 "    <style>" +
                 "        body { margin: 0; padding: 0; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; background-color: #f5f5f5; }" +
                 "        .email-container { max-width: 600px; margin: 40px auto; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; }" +
@@ -179,7 +198,7 @@ public class EmailTemplateUtil {
                 "<body>" +
                 "    <div class='email-container'>" +
                 "        <div class='email-header'>" +
-                "            <h1 style='color: white; margin: 0; font-size: 24px; font-weight: 500;'>"+websiteProperties.getTitle()+"</h1>" +
+                "            <h1 style='color: white; margin: 0; font-size: 24px; font-weight: 500;'>"+escape(websiteProperties.getTitle())+"</h1>" +
                 "            <p style='color: #bbb; margin: 8px 0 0; font-size: 14px;'>—— 新文章发布通知 ——</p>" +
                 "        </div>" +
                 "        <div class='email-content'>" +
@@ -191,8 +210,9 @@ public class EmailTemplateUtil {
                 "                <a href='" + articleUrl + "' class='read-btn' style='color: white;'>阅读全文 →</a>" +
                 "            </div>" +
                 "        </div>" +
+                "        <p><a href='" + unsubscribeUrl + "'>取消订阅</a></p>" +
                 "        <div class='footer'>" +
-                "            <p style='margin: 0; line-height: 1.5;'>此为系统自动发送的邮件，请勿直接回复<br>© " + year + " "+websiteProperties.getTitle()+" - 保留所有权利</p>" +
+                "            <p style='margin: 0; line-height: 1.5;'>此为系统自动发送的邮件，请勿直接回复<br>© " + year + " "+escape(websiteProperties.getTitle())+" - 保留所有权利</p>" +
                 "        </div>" +
                 "    </div>" +
                 "</body>" +

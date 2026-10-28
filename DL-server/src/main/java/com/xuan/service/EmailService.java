@@ -1,9 +1,16 @@
 package com.xuan.service;
 
 /**
- * 邮件服务
+ * 邮件服务，发送验证码、回复提醒、邮箱确认和含退订链接的文章通知。
  */
 public interface EmailService {
+    /**
+     * 发送邮箱所有者确认邮件，成功确认前不激活订阅。
+     * @param email 收件邮箱
+     * @param nickname 订阅者昵称
+     * @param url 绑定当前访客及待确认邮箱的确认链接
+     */
+    void sendSubscriptionConfirmation(String email, String nickname, String url);
     
     /**
      * 发送验证码邮件
@@ -31,7 +38,8 @@ public interface EmailService {
      * @param articleTitle 文章标题
      * @param articleSummary 文章摘要
      * @param articleUrl 文章链接
+     * @param unsubscribeUrl 绑定订阅记录及确认版本的退订链接
      */
     void sendNewArticleNotification(String toEmail, String nickname, String articleTitle,
-                                    String articleSummary, String articleUrl);
+                                    String articleSummary, String articleUrl, String unsubscribeUrl);
 }

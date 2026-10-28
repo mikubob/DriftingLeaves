@@ -1,3 +1,5 @@
+> 2026-10-27 更新：本文保留历史接口示例。访客身份、私密内容、评论留言分页、创建文章返回ID、换邮箱发码、算术验证码、RSS确认/退订及错误状态，请以 [最终实施契约](implementation-api-contract-2026-10-27.md) 为准；旧visitorId不再是身份凭据。
+
 ---
 title: 默认模块
 language_tabs:

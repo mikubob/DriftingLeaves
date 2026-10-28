@@ -53,6 +53,7 @@ public class ExperienceServiceImpl extends ServiceImpl<ExperienceMapper, Experie
     @Override
     @CacheEvict(value = "experiences", allEntries = true)
     public void addExperience(ExperienceDTO experienceDTO) {
+        experienceDTO.setId(null);
         //1.创建实体对象
         Experiences experiences = BeanUtil.copyProperties(experienceDTO, Experiences.class);
         //2.添加新的经历信息
@@ -66,10 +67,11 @@ public class ExperienceServiceImpl extends ServiceImpl<ExperienceMapper, Experie
     @Override
     @CacheEvict(value = "experiences", allEntries = true)
     public void updateExperience(ExperienceDTO experienceDTO) {
+        if (experienceDTO.getId() == null || experienceDTO.getId() <= 0) throw new com.xuan.exception.ValidationException("更新ID不能为空且必须为正数");
         //1.创建实体对象
         Experiences experiences = BeanUtil.copyProperties(experienceDTO, Experiences.class);
         //2.修改经历信息
-        updateById(experiences);
+        if (!updateById(experiences)) throw new com.xuan.exception.ValidationException("更新目标不存在");
     }
 
     /**

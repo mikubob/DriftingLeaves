@@ -14,6 +14,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+/**
+ * Tomcat、业务异步任务及 MVC 异步请求的虚拟线程配置。
+ */
 @Slf4j
 @Configuration
 @EnableAsync
@@ -35,13 +38,6 @@ public class VirtualThreadConfiguration implements WebMvcConfigurer {
         return new TaskExecutorAdapter(Executors.newVirtualThreadPerTaskExecutor());
     }
 
-    /**
-     * 配置邮件发送的异步执行器
-     */
-    @Bean(name = "mailTaskExecutor")
-    public AsyncTaskExecutor mailTaskExecutor() {
-        return new TaskExecutorAdapter(Executors.newVirtualThreadPerTaskExecutor());
-    }
 
     /**
      * 配置MVC异步请求支持
@@ -54,12 +50,4 @@ public class VirtualThreadConfiguration implements WebMvcConfigurer {
         configurer.setDefaultTimeout(30000L);  // 30秒超时
     }
 
-    /**
-     * 配置数据库连接池虚拟线程支持
-     */
-    @Bean
-    @Qualifier("dataSourceExecutor")
-    public Executor dataSourceExecutor() {
-        return Executors.newVirtualThreadPerTaskExecutor();
-    }
 }

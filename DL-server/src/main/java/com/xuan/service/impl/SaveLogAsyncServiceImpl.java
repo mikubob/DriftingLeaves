@@ -4,7 +4,6 @@ package com.xuan.service.impl;
 import com.alibaba.fastjson2.JSON;
 import com.xuan.annotation.OperationLog;
 import com.xuan.constant.StatusConstant;
-import com.xuan.context.BaseContext;
 import com.xuan.entity.OperationLogs;
 import com.xuan.service.IOperationLogService;
 import com.xuan.service.SaveLogAsyncService;
@@ -94,25 +93,21 @@ public class SaveLogAsyncServiceImpl implements SaveLogAsyncService {
      * <p>包含这些关键词的字段将被视为敏感字段，其值会被掩码替换</p>
      */
     private static final List<String> SENSITIVE_KEYWORDS = List.of(
-            "password", "pwd", "token", "salt", "secret", "key", "credential"
+            "password", "pwd", "token", "salt", "secret", "key", "credential", "code", "email", "qq"
     );
 
     /**
-     * 异步保存操作日志
-     * <p>
-     * 该方法使用 @Async 注解实现异步执行，不会阻塞主线程。
-     * 会记录操作类型、操作目标、操作时间、操作结果、操作用户、目标 ID 和操作数据等信息。
-     * </p>
-     *
-     * @param joinPoint    切点，包含被拦截方法的信息
-     * @param result       方法执行结果（暂未使用）
-     * @param error        方法执行异常，不为 null 表示操作失败
-     * @param operationLog 操作日志注解，包含操作类型、目标等信息
+     * 异步持久化脱敏、限长后的操作审计，使用请求线程捕获的管理员身份。
+     * @param joinPoint 操作方法及实参
+     * @param result 操作返回值
+     * @param error 操作异常，成功时为 null
+     * @param operationLog 日志注解
+     * @param adminId 请求线程确定的操作者 ID
      */
     @Async("taskExecutor")
     @Override
     public void saveLogAsync(JoinPoint joinPoint, Object result,
-                             Throwable error, OperationLog operationLog) {
+                             Throwable error, OperationLog operationLog, Long adminId) {
         OperationLogs operationLogs = new OperationLogs();
 
         try {
@@ -130,7 +125,6 @@ public class SaveLogAsyncServiceImpl implements SaveLogAsyncService {
             }
 
             // 记录操作用户 ID
-            Long adminId = BaseContext.getCurrentId();
             if (adminId != null) {
                 operationLogs.setAdminId(adminId);
             }
@@ -146,10 +140,6 @@ public class SaveLogAsyncServiceImpl implements SaveLogAsyncService {
             // 记录操作数据（可选）
             if (operationLog.saveData()) {
                 String operateData = buildOperateData(joinPoint);
-                // 限制操作数据长度，防止日志过大
-                if (operateData != null && operateData.length() > MAX_OPERATE_DATA_LENGTH) {
-                    operateData = operateData.substring(0, MAX_OPERATE_DATA_LENGTH) + "...";
-                }
                 operationLogs.setOperateData(operateData);
             }
 
@@ -179,7 +169,7 @@ public class SaveLogAsyncServiceImpl implements SaveLogAsyncService {
         StringBuilder sb = new StringBuilder();
         sb.append(error.getClass().getSimpleName())
                 .append(": ")
-                .append(error.getMessage());
+                .append("操作失败");
 
         String message = sb.toString();
         if (message.length() > MAX_ERROR_MESSAGE_LENGTH) {
@@ -310,7 +300,11 @@ public class SaveLogAsyncServiceImpl implements SaveLogAsyncService {
                 params.put(paramName, paramValue);
             }
 
-            return JSON.toJSONString(params);
+            String json = JSON.toJSONString(params);
+            if (json.length() > MAX_OPERATE_DATA_LENGTH) {
+                return JSON.toJSONString(Map.of("summary", "参数过大，省略详情", "fields", params.keySet()));
+            }
+            return json;
 
         } catch (Exception e) {
             log.warn("构建操作数据失败", e);
@@ -339,34 +333,17 @@ public class SaveLogAsyncServiceImpl implements SaveLogAsyncService {
             return SENSITIVE_VALUE_MASK;
         }
 
-        // 如果参数值是 Map，递归过滤其中的敏感字段
-        if (paramValue instanceof Map<?, ?>) {
-            return filterMapSensitiveFields((Map<?, ?>) paramValue);
+        Object value = JSON.toJSON(paramValue);
+        if (value instanceof Map<?, ?> map) {
+            Map<String, Object> filtered = new java.util.LinkedHashMap<>();
+            map.forEach((k, v) -> filtered.put(String.valueOf(k), filterSensitiveParam(String.valueOf(k), v)));
+            return filtered;
         }
-
-        return paramValue;
-    }
-
-    /**
-     * 过滤 Map 中的敏感字段
-     * <p>
-     * 遍历 Map 的所有键，如果键名包含敏感关键词，则用掩码替换对应的值。
-     * </p>
-     *
-     * @param map 原始 Map
-     * @return 过滤后的新 Map
-     */
-    private Map<String, Object> filterMapSensitiveFields(Map<?, ?> map) {
-        Map<String, Object> filtered = new HashMap<>();
-        for (Map.Entry<?, ?> entry : map.entrySet()) {
-            String key = String.valueOf(entry.getKey());
-            if (isSensitiveField(key)) {
-                filtered.put(key, SENSITIVE_VALUE_MASK);
-            } else {
-                filtered.put(key, entry.getValue());
-            }
+        if (value instanceof Collection<?> collection) {
+            return collection.stream().limit(50).map(v -> filterSensitiveParam("item", v)).toList();
         }
-        return filtered;
+        if (value instanceof String text && text.length() > 500) return text.substring(0, 500) + "…";
+        return value;
     }
 
     /**

@@ -88,11 +88,19 @@ public class ServerMonitorUtil {
      * @param collectTime 本次采集时间
      * @return 当前整批监控快照
      */
-    public static ServerMonitorCurrentSnapshot collectCurrentSnapshot(String collectTime) {
+    public static synchronized ServerMonitorCurrentSnapshot collectCurrentSnapshot(String collectTime) {
         // 1. 先采集 CPU 聚合数据，确保 overview/load/cpu 三块共用同一批底层样本
         CpuAggregate cpuAggregate = collectCpuAggregate();
         MemorySnapshot memorySnapshot = getMemorySnapshot();
-        DiskUsageSnapshot allDiskUsage = getDiskUsage(MonitorConstant.RESOURCE_ALL);
+        List<OSFileStore> stores = OPERATING_SYSTEM.getFileSystem().getFileStores();
+        stores.forEach(OSFileStore::updateAttributes);
+        List<NetworkIF> networks = OshiUtil.getNetworkIFs();
+        networks.forEach(NetworkIF::updateAttributes);
+        List<HWDiskStore> disks = OshiUtil.getDiskStores();
+        disks.forEach(HWDiskStore::updateAttributes);
+        long sampleTime = System.currentTimeMillis();
+        DiskUsageSnapshot allDiskUsage = getDiskUsage(MonitorConstant.RESOURCE_ALL, stores);
+        List<ProcessMetricVO> cpuTop = topProcesses(OperatingSystem.ProcessSorting.CPU_DESC);
 
         // 2. 组装 overview/load/cpu/memory 四块全局快照
         ServerMonitorOverviewVO overview = ServerMonitorOverviewVO.builder()
@@ -109,33 +117,33 @@ public class ServerMonitorUtil {
                 .collectTime(collectTime)
                 .build();
 
-        LoadDetailVO load = buildLoadDetail(cpuAggregate, collectTime);
-        CpuDetailVO cpu = buildCpuDetail(cpuAggregate, collectTime);
+        LoadDetailVO load = buildLoadDetail(cpuAggregate, collectTime, cpuTop);
+        CpuDetailVO cpu = buildCpuDetail(cpuAggregate, collectTime, cpuTop);
         MemoryDetailVO memory = buildMemoryDetail(memorySnapshot, collectTime);
 
         // 3. 列举所有资源选项
-        List<OptionVO> diskOptions = listDiskOptions();
-        List<OptionVO> networkOptions = listNetworkOptions();
-        List<OptionVO> diskIoOptions = listDiskIoOptions();
+        List<OptionVO> diskOptions = listDiskOptions(stores);
+        List<OptionVO> networkOptions = listNetworkOptions(networks);
+        List<OptionVO> diskIoOptions = listDiskIoOptions(disks);
 
         // 4. 采集各磁盘 current 快照
         Map<String, DiskDetailVO> diskDetails = new LinkedHashMap<>();
         for (OptionVO option : diskOptions) {
-            DiskDetailVO detailVO = buildDiskDetail(getDiskUsage(option.getValue()), collectTime);
+            DiskDetailVO detailVO = buildDiskDetail(getDiskUsage(option.getValue(), stores), collectTime);
             diskDetails.put(detailVO.getResourceName(), detailVO);
         }
 
         // 5. 采集各网络 current 快照
         Map<String, NetworkDetailVO> networkDetails = new LinkedHashMap<>();
         for (OptionVO option : networkOptions) {
-            NetworkDetailVO detailVO = buildNetworkDetail(collectNetworkSnapshot(option.getValue()), collectTime);
+            NetworkDetailVO detailVO = buildNetworkDetail(collectNetworkSnapshot(option.getValue(), networks, sampleTime), collectTime);
             networkDetails.put(detailVO.getResourceName(), detailVO);
         }
 
         // 6. 采集各磁盘 IO current 快照
         Map<String, DiskIoDetailVO> diskIoDetails = new LinkedHashMap<>();
         for (OptionVO option : diskIoOptions) {
-            DiskIoDetailVO detailVO = buildDiskIoDetail(collectDiskIoSnapshot(option.getValue()), collectTime);
+            DiskIoDetailVO detailVO = buildDiskIoDetail(collectDiskIoSnapshot(option.getValue(), disks, sampleTime), collectTime);
             diskIoDetails.put(detailVO.getResourceName(), detailVO);
         }
 
@@ -156,7 +164,7 @@ public class ServerMonitorUtil {
     /**
      * 根据 CPU 聚合样本派生负载详情 VO
      */
-    private static LoadDetailVO buildLoadDetail(CpuAggregate cpuAggregate, String collectTime) {
+    private static LoadDetailVO buildLoadDetail(CpuAggregate cpuAggregate, String collectTime, List<ProcessMetricVO> cpuTop) {
         List<OSProcess> processes = OPERATING_SYSTEM.getProcesses();
         long runningCount = processes.stream().filter(process -> process.getState() == OSProcess.State.RUNNING).count();
         CpuTicksSnapshot ticksSnapshot = cpuAggregate.ticksSnapshot();
@@ -178,7 +186,7 @@ public class ServerMonitorUtil {
                 .stealPercent(MetricFormatUtil.percent(ticksSnapshot.steal()))
                 .guestPercent(MetricFormatUtil.percent(ticksSnapshot.guest()))
                 .guestNicePercent(MetricFormatUtil.percent(ticksSnapshot.guestNice()))
-                .topProcesses(topProcesses(OperatingSystem.ProcessSorting.CPU_DESC))
+                .topProcesses(cpuTop)
                 .collectTime(collectTime)
                 .build();
     }
@@ -186,7 +194,7 @@ public class ServerMonitorUtil {
     /**
      * 根据 CPU 聚合样本派生 CPU 详情 VO
      */
-    private static CpuDetailVO buildCpuDetail(CpuAggregate cpuAggregate, String collectTime) {
+    private static CpuDetailVO buildCpuDetail(CpuAggregate cpuAggregate, String collectTime, List<ProcessMetricVO> cpuTop) {
         return CpuDetailVO.builder()
                 .cpuPercent(cpuAggregate.cpuPercent())
                 .cpuModel(PROCESSOR.getProcessorIdentifier().getName())
@@ -194,7 +202,7 @@ public class ServerMonitorUtil {
                 .physicalCoreCount(PROCESSOR.getPhysicalProcessorCount())
                 .logicalCoreCount(PROCESSOR.getLogicalProcessorCount())
                 .coreUsages(cpuAggregate.coreUsages())
-                .topProcesses(topProcesses(OperatingSystem.ProcessSorting.CPU_DESC))
+                .topProcesses(cpuTop)
                 .collectTime(collectTime)
                 .build();
     }
@@ -295,11 +303,10 @@ public class ServerMonitorUtil {
      * <p>
      * 默认先放入 all，后续再追加各文件系统挂载点。
      */
-    public static List<OptionVO> listDiskOptions() {
+    private static List<OptionVO> listDiskOptions(List<OSFileStore> stores) {
         List<OptionVO> options = new ArrayList<>();
         options.add(OptionVO.builder().label("全部").value(MonitorConstant.RESOURCE_ALL).build());
-        FileSystem fileSystem = OPERATING_SYSTEM.getFileSystem();
-        for (OSFileStore fileStore : fileSystem.getFileStores()) {
+        for (OSFileStore fileStore : stores) {
             String mount = blankToDefault(fileStore.getMount(), fileStore.getName());
             if (options.stream().noneMatch(option -> option.getValue().equals(mount))) {
                 options.add(OptionVO.builder().label(mount).value(mount).build());
@@ -311,10 +318,10 @@ public class ServerMonitorUtil {
     /**
      * 列举网络资源选项
      */
-    public static List<OptionVO> listNetworkOptions() {
+    private static List<OptionVO> listNetworkOptions(List<NetworkIF> networks) {
         List<OptionVO> options = new ArrayList<>();
         options.add(OptionVO.builder().label("全部").value(MonitorConstant.RESOURCE_ALL).build());
-        for (NetworkIF networkIF : OshiUtil.getNetworkIFs()) {
+        for (NetworkIF networkIF : networks) {
             String name = networkIF.getName();
             if (name != null && !name.isBlank()) {
                 options.add(OptionVO.builder().label(name).value(name).build());
@@ -328,10 +335,10 @@ public class ServerMonitorUtil {
      * <p>
      * 这里使用 OSHI 可见的 HWDiskStore 名称。
      */
-    public static List<OptionVO> listDiskIoOptions() {
+    private static List<OptionVO> listDiskIoOptions(List<HWDiskStore> disks) {
         List<OptionVO> options = new ArrayList<>();
         options.add(OptionVO.builder().label("全部").value(MonitorConstant.RESOURCE_ALL).build());
-        for (HWDiskStore diskStore : OshiUtil.getDiskStores()) {
+        for (HWDiskStore diskStore : disks) {
             String name = diskStore.getName();
             if (name != null && !name.isBlank() && options.stream().noneMatch(option -> option.getValue().equals(name))) {
                 options.add(OptionVO.builder().label(name).value(name).build());
@@ -351,18 +358,28 @@ public class ServerMonitorUtil {
         for (NetworkIF networkIF : networkIFS) {
             networkIF.updateAttributes();
         }
+        return collectNetworkSnapshot(resourceName, networkIFS, System.currentTimeMillis());
+    }
+
+    /**
+     * 使用同一采样时刻的网卡数据推进差分基线，首帧速率为零。
+     * @param resourceName 指定网卡或 all
+     * @param networkIFS 已更新的网卡列表
+     * @param now 本次采样时间戳（毫秒）
+     * @return 网络速率及累计量快照
+     */
+    private static NetworkRateSnapshot collectNetworkSnapshot(String resourceName, List<NetworkIF> networkIFS, long now) {
         if (MonitorConstant.RESOURCE_ALL.equalsIgnoreCase(defaultResource(resourceName))) {
             // 聚合 all 视角：将所有网卡累计计数求和
             long totalRecv = 0L;
             long totalSent = 0L;
-            long now = System.currentTimeMillis();
             for (NetworkIF networkIF : networkIFS) {
                 totalRecv += safeLong(networkIF.getBytesRecv());
                 totalSent += safeLong(networkIF.getBytesSent());
             }
             CounterSnapshot previous = NETWORK_SNAPSHOTS.put(MonitorConstant.RESOURCE_ALL, new CounterSnapshot(totalRecv, totalSent, now));
-            long inBytesPerSec = calculateRate(previous == null ? 0L : previous.inBytes(), totalRecv, previous == null ? now : previous.timestamp(), now);
-            long outBytesPerSec = calculateRate(previous == null ? 0L : previous.outBytes(), totalSent, previous == null ? now : previous.timestamp(), now);
+            long inBytesPerSec = previous == null ? 0L : calculateRate(previous.inBytes(), totalRecv, previous.timestamp(), now);
+            long outBytesPerSec = previous == null ? 0L : calculateRate(previous.outBytes(), totalSent, previous.timestamp(), now);
             return new NetworkRateSnapshot(MonitorConstant.RESOURCE_ALL, inBytesPerSec, outBytesPerSec, totalRecv, totalSent);
         }
 
@@ -374,12 +391,11 @@ public class ServerMonitorUtil {
         if (target == null) {
             return new NetworkRateSnapshot(defaultResource(resourceName), 0L, 0L, 0L, 0L);
         }
-        long now = System.currentTimeMillis();
         long totalRecv = safeLong(target.getBytesRecv());
         long totalSent = safeLong(target.getBytesSent());
         CounterSnapshot previous = NETWORK_SNAPSHOTS.put(target.getName(), new CounterSnapshot(totalRecv, totalSent, now));
-        long inBytesPerSec = calculateRate(previous == null ? 0L : previous.inBytes(), totalRecv, previous == null ? now : previous.timestamp(), now);
-        long outBytesPerSec = calculateRate(previous == null ? 0L : previous.outBytes(), totalSent, previous == null ? now : previous.timestamp(), now);
+        long inBytesPerSec = previous == null ? 0L : calculateRate(previous.inBytes(), totalRecv, previous.timestamp(), now);
+        long outBytesPerSec = previous == null ? 0L : calculateRate(previous.outBytes(), totalSent, previous.timestamp(), now);
         return new NetworkRateSnapshot(target.getName(), inBytesPerSec, outBytesPerSec, totalRecv, totalSent);
     }
 
@@ -393,6 +409,17 @@ public class ServerMonitorUtil {
         for (HWDiskStore diskStore : diskStores) {
             diskStore.updateAttributes();
         }
+        return collectDiskIoSnapshot(resourceName, diskStores, System.currentTimeMillis());
+    }
+
+    /**
+     * 使用同一采样时刻的磁盘数据推进差分基线。
+     * @param resourceName 指定磁盘或 all
+     * @param diskStores 已更新的磁盘列表
+     * @param now 本次采样时间戳（毫秒）
+     * @return 磁盘吞吐及操作速率快照
+     */
+    private static DiskIoSnapshot collectDiskIoSnapshot(String resourceName, List<HWDiskStore> diskStores, long now) {
         if (MonitorConstant.RESOURCE_ALL.equalsIgnoreCase(defaultResource(resourceName))) {
             // 聚合 all 视角：将所有磁盘块设备的累计计数汇总
             long readBytes = 0L;
@@ -400,7 +427,6 @@ public class ServerMonitorUtil {
             long reads = 0L;
             long writes = 0L;
             long transferTime = 0L;
-            long now = System.currentTimeMillis();
             for (HWDiskStore diskStore : diskStores) {
                 readBytes += safeLong(diskStore.getReadBytes());
                 writeBytes += safeLong(diskStore.getWriteBytes());
@@ -421,7 +447,6 @@ public class ServerMonitorUtil {
         if (target == null) {
             return new DiskIoSnapshot(defaultResource(resourceName), 0L, 0L, 0, 0);
         }
-        long now = System.currentTimeMillis();
         DiskCounterSnapshot current = new DiskCounterSnapshot(
                 safeLong(target.getReadBytes()),
                 safeLong(target.getWriteBytes()),
@@ -591,16 +616,13 @@ public class ServerMonitorUtil {
      * 1. resourceName=all 时返回聚合结果
      * 2. 指定资源时优先匹配 mount/name/volume
      */
-    private static DiskUsageSnapshot getDiskUsage(String resourceName) {
-        FileSystem fileSystem = OPERATING_SYSTEM.getFileSystem();
-        List<OSFileStore> stores = fileSystem.getFileStores();
+    private static DiskUsageSnapshot getDiskUsage(String resourceName, List<OSFileStore> stores) {
         if (!MonitorConstant.RESOURCE_ALL.equalsIgnoreCase(defaultResource(resourceName))) {
             OSFileStore target = stores.stream()
                     .filter(store -> matchDiskResource(store, resourceName))
                     .findFirst()
                     .orElse(null);
             if (target != null) {
-                target.updateAttributes();
                 long total = safeLong(target.getTotalSpace());
                 long available = safeLong(target.getUsableSpace());
                 long used = Math.max(0L, total - available);
@@ -628,7 +650,6 @@ public class ServerMonitorUtil {
         long inodeTotal = 0L;
         long inodeFree = 0L;
         for (OSFileStore store : stores) {
-            store.updateAttributes();
             total += safeLong(store.getTotalSpace());
             available += safeLong(store.getUsableSpace());
             if (store.getTotalInodes() > 0L) {

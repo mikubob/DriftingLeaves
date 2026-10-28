@@ -43,6 +43,7 @@ public class ArticleCommentQueryVO implements Serializable {
 
     // 评论内容（HTML）
     private String contentHtml;
+    private Integer isMarkdown;
 
     // 昵称
     private String nickname;

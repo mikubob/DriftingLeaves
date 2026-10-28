@@ -73,6 +73,7 @@ public class SocialMediaServiceImpl extends ServiceImpl<SocialMediaMapper, Socia
     @Override
     @CacheEvict(value = "socialMedia", allEntries = true)
     public void addSocialMedia(SocialMediaDTO socialMediaDTO) {
+        socialMediaDTO.setId(null);
         SocialMedia socialMedia = BeanUtil.copyProperties(socialMediaDTO, SocialMedia.class);
         save(socialMedia);
     }
@@ -94,7 +95,8 @@ public class SocialMediaServiceImpl extends ServiceImpl<SocialMediaMapper, Socia
     @Override
     @CacheEvict(value = "socialMedia", allEntries = true)
     public void updateSocialMedia(SocialMediaDTO socialMediaDTO) {
+        if (socialMediaDTO.getId() == null || socialMediaDTO.getId() <= 0) throw new com.xuan.exception.ValidationException("更新ID不能为空且必须为正数");
         SocialMedia socialMedia = BeanUtil.copyProperties(socialMediaDTO, SocialMedia.class);
-        updateById(socialMedia);
+        if (!updateById(socialMedia)) throw new com.xuan.exception.ValidationException("更新目标不存在");
     }
 }

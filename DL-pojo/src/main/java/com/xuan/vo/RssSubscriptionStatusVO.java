@@ -27,4 +27,6 @@ public class RssSubscriptionStatusVO implements Serializable {
 
     /** 订阅时使用的邮箱 */
     private String email;
+
+    private String unsubscribeToken;
 }

@@ -51,10 +51,11 @@ public class AsyncEmailServiceImpl implements AsyncEmailService {
      * @param articleTitle 文章标题
      * @param articleSummary 文章摘要
      * @param articleUrl 文章链接
+     * @param unsubscribeUrl 绑定订阅记录及确认版本的退订链接
      */
     @Override
     @Async("taskExecutor")
-    public void sendNewArticleNotificationAsync(String toEmail, String nickname, String articleTitle, String articleSummary, String articleUrl) {
+    public void sendNewArticleNotificationAsync(String toEmail, String nickname, String articleTitle, String articleSummary, String articleUrl, String unsubscribeUrl) {
         try {
             emailService.sendNewArticleNotification(
                     toEmail
@@ -62,6 +63,7 @@ public class AsyncEmailServiceImpl implements AsyncEmailService {
                     , articleTitle
                     , articleSummary
                     , articleUrl
+                    , unsubscribeUrl
             );
         } catch (Exception e){
             log.error("异步发送新文章通知邮件失败: to={}, title={}, ex={}", toEmail, articleTitle, e.getMessage());

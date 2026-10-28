@@ -43,7 +43,6 @@ public class ArticleCommentDTO implements Serializable {
     private String content;
 
     // 访客ID
-    @NotNull(message = "访客ID不能为空")
     private Long visitorId;
 
     // 昵称
@@ -55,12 +54,23 @@ public class ArticleCommentDTO implements Serializable {
     @Size(max = 50, message = "邮箱或QQ号不能超过50字")
     private String emailOrQq;
 
+    @NotBlank(message = "请先获取验证码")
+    private String captchaId;
+    @NotBlank(message = "请输入验证码")
+    private String captchaAnswer;
+
     // 是否使用markdown
+    @jakarta.validation.constraints.Min(0)
+    @jakarta.validation.constraints.Max(1)
     private Integer isMarkdown;
 
-    // 是否匿名
+    // 是否私密（悄悄话）
+    @jakarta.validation.constraints.Min(0)
+    @jakarta.validation.constraints.Max(1)
     private Integer isSecret;
 
     // 有回复是否通知
+    @jakarta.validation.constraints.Min(0)
+    @jakarta.validation.constraints.Max(1)
     private Integer isNotice;
 }

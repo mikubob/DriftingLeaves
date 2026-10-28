@@ -21,7 +21,10 @@ public class RateLimitConfiguration {
     /**
      * 本地Bucket缓存: key -> Bucket
      */
-    private final ConcurrentHashMap<String, Bucket> bucketCache = new ConcurrentHashMap<>();
+    // Current buckets refill fully within 96 seconds; idle expiry must stay above that window.
+    private final com.github.benmanes.caffeine.cache.Cache<String, Bucket> bucketCache =
+            com.github.benmanes.caffeine.cache.Caffeine.newBuilder().maximumSize(10_000)
+                    .expireAfterAccess(Duration.ofHours(1)).build();
 
     /**
      * 获取或创建令牌桶
@@ -32,7 +35,7 @@ public class RateLimitConfiguration {
      * @return Bucket
      */
     public Bucket resolveBucket(String key, int burstCapacity, long tokens, Duration duration) {
-        return bucketCache.computeIfAbsent(key, k -> {
+        return bucketCache.get(key, k -> {
             Bandwidth limit = Bandwidth.classic(
                     burstCapacity,
                     Refill.greedy(tokens, duration)

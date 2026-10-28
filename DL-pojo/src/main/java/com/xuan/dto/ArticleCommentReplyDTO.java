@@ -44,5 +44,7 @@ public class ArticleCommentReplyDTO implements Serializable {
     private String content;
 
     // 是否使用markdown，0-否，1-是
+    @jakarta.validation.constraints.Min(0)
+    @jakarta.validation.constraints.Max(1)
     private Integer isMarkdown;
 }

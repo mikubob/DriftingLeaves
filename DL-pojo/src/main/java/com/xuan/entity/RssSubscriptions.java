@@ -41,6 +41,10 @@ public class RssSubscriptions implements Serializable {
     // 是否激活，0-否，1-是
     private Integer isActive;
 
+    private Integer confirmed;
+
+    private String confirmationId;
+
     // 订阅时间
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime subscribeTime;

@@ -21,10 +21,11 @@ import java.util.List;
 public interface IArticleService extends IService<Articles> {
 
     /**
-     * 创建文章
-     * @param articleDTO
+     * 创建文章并返回生成的 ID，忽略客户端提供的 ID；首次发布在事务提交后通知订阅者。
+     * @param articleDTO 文章内容、分类及标签
+     * @return 新文章 ID
      */
-    void createArticle(ArticleDTO articleDTO);
+    Long createArticle(ArticleDTO articleDTO);
 
     /**
      * 分页条件查询文章列表（含草稿）

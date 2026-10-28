@@ -16,6 +16,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 访客封禁服务实现，维护封禁状态及请求前的封禁检查。
+ */
 @Service
 @Slf4j
 public class BlockServiceImpl implements BlockService {
@@ -123,9 +126,8 @@ public class BlockServiceImpl implements BlockService {
         LocalDateTime expiresAt = LocalDateTime.now().plusDays(BLOCK_DURATION_DAYS);
         
         if (visitor != null) {
-            visitor.setIsBlocked(1);
-            visitor.setExpiresAt(expiresAt);
-            visitorService.updateById(visitor);
+            visitorService.lambdaUpdate().eq(Visitors::getId, visitor.getId())
+                    .set(Visitors::getIsBlocked, 1).set(Visitors::getExpiresAt, expiresAt).update();
             log.warn("更新访客封禁状态: id={}, fingerprint={}, expiresAt={}", visitor.getId(), fingerprint, expiresAt);
         } else {
             // 创建新的访客记录并设置为封禁状态

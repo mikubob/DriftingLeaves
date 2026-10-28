@@ -46,7 +46,7 @@ public @interface RateLimit {
 
     enum Type {
         IP,        // IP限流
-        USER,      // 用户限流
+      // 用户限流
         GLOBAL,    // 全局限流
         ENDPOINT   // 接口限流
     }

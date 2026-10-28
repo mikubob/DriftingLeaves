@@ -14,6 +14,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+/**
+ * RSS 与站点地图服务实现，生成已发布文章的安全 XML 及路径链接。
+ */
 @Service
 @RequiredArgsConstructor
 public class RssFeedServiceImpl implements IRssFeedService {
@@ -45,18 +48,18 @@ public class RssFeedServiceImpl implements IRssFeedService {
         xml.append("<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\">\n");
         xml.append("  <channel>\n");
         xml.append("    <title>").append(escapeXml(siteName)).append("</title>\n");
-        xml.append("    <link>").append(BLOG_BASE_URL).append("</link>\n");
+        xml.append("    <link>").append(escapeXml(BLOG_BASE_URL)).append("</link>\n");
         xml.append("    <description>").append(escapeXml(siteDescription)).append("</description>\n");
         xml.append("    <language>zh-CN</language>\n");
         xml.append("    <lastBuildDate>").append(LocalDateTime.now().format(RSS_DATE_FMT)).append("</lastBuildDate>\n");
-        xml.append("    <atom:link href=\"").append(BLOG_BASE_URL).append("/rss\" rel=\"self\" type=\"application/rss+xml\"/>\n");
+        xml.append("    <atom:link href=\"").append(escapeXml(BLOG_BASE_URL + "/rss")).append("\" rel=\"self\" type=\"application/rss+xml\"/>\n");
 
         if (articles != null) {
             for (BlogArticleVO article : articles) {
                 xml.append("    <item>\n");
                 xml.append("      <title>").append(escapeXml(article.getTitle())).append("</title>\n");
-                xml.append("      <link>").append(BLOG_BASE_URL).append("/article/").append(article.getSlug()).append("</link>\n");
-                xml.append("      <guid isPermaLink=\"true\">").append(BLOG_BASE_URL).append("/article/").append(article.getSlug()).append("</guid>\n");
+                xml.append("      <link>").append(escapeXml(BLOG_BASE_URL + "/article/" + org.springframework.web.util.UriUtils.encodePathSegment(article.getSlug(), java.nio.charset.StandardCharsets.UTF_8))).append("</link>\n");
+                xml.append("      <guid isPermaLink=\"true\">").append(escapeXml(BLOG_BASE_URL + "/article/" + org.springframework.web.util.UriUtils.encodePathSegment(article.getSlug(), java.nio.charset.StandardCharsets.UTF_8))).append("</guid>\n");
                 if (article.getSummary() != null) {
                     xml.append("      <description>").append(escapeXml(article.getSummary())).append("</description>\n");
                 }

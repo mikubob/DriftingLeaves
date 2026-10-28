@@ -25,7 +25,6 @@ public class RssSubscriptionDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     // 访客ID
-    @NotNull(message = "访客ID不能为空")
     private Long visitorId;
 
     // 昵称
@@ -35,5 +34,6 @@ public class RssSubscriptionDTO implements Serializable {
     // 邮箱
     @NotBlank(message = "邮箱不能为空")
     @Email(message = "邮箱格式不正确")
+    @Size(max = 254, message = "邮箱不能超过254字")
     private String email;
 }

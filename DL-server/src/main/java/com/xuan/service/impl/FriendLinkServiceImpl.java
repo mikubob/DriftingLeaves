@@ -49,6 +49,7 @@ public class FriendLinkServiceImpl extends ServiceImpl<FriendLinkMapper, FriendL
     @Override
     @CacheEvict(value = "friendLinks", allEntries = true)
     public void addFriendLink(FriendLinkDTO friendLinkDTO) {
+        friendLinkDTO.setId(null);
         //1.创建友情链接对象
         FriendLinks friendLinks = BeanUtil.copyProperties(friendLinkDTO, FriendLinks.class);
         //2.保存友情链接
@@ -74,8 +75,9 @@ public class FriendLinkServiceImpl extends ServiceImpl<FriendLinkMapper, FriendL
     @Override
     @CacheEvict(value = "friendLinks", allEntries = true)
     public void updateFriendLink(FriendLinkDTO friendLinkDTO) {
+        if (friendLinkDTO.getId() == null || friendLinkDTO.getId() <= 0) throw new com.xuan.exception.ValidationException("更新ID不能为空且必须为正数");
         FriendLinks friendLinks = BeanUtil.copyProperties(friendLinkDTO, FriendLinks.class);
-        updateById(friendLinks);
+        if (!updateById(friendLinks)) throw new com.xuan.exception.ValidationException("更新目标不存在");
     }
 
     /**

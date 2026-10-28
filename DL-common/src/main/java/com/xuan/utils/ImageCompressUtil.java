@@ -84,7 +84,8 @@ public class ImageCompressUtil {
 
             Thumbnails.of(inputStream)
                     .scale(1.0)  // 保持原尺寸
-                    .imageType(BufferedImage.TYPE_INT_RGB) // 强制标准RGB，防止WebP色彩空间转换偏绿
+                    .imageType(("png".equalsIgnoreCase(imageProperties.getOutPutFormat()) || "webp".equalsIgnoreCase(imageProperties.getOutPutFormat()))
+                            ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB) // 强制标准RGB，防止WebP色彩空间转换偏绿
                     .outputFormat(imageProperties.getOutPutFormat())
                     .outputQuality(quality)
                     .toOutputStream(outputStream);
@@ -93,7 +94,13 @@ public class ImageCompressUtil {
         }
     }
 
-    private boolean shouldCompress(MultipartFile file) throws IOException {
+    /**
+     * 判断当前文件是否确实需要且支持压缩转码，供调用方选择输出后缀。
+     * @param file 上传文件
+     * @return 是否需要压缩转码
+     * @throws IOException 无法读取文件内容
+     */
+    public boolean shouldCompress(MultipartFile file) throws IOException {
         // 检查是否开启图片压缩
         if(!imageProperties.isEnabled()){
             return false;

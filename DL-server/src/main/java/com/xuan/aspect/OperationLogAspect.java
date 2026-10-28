@@ -56,7 +56,7 @@ public class OperationLogAspect {
             OperationLog operationLog = method.getAnnotation(OperationLog.class);
 
             if (operationLog != null) {
-                saveLogAsyncService.saveLogAsync(joinPoint, result, error, operationLog);
+                saveLogAsyncService.saveLogAsync(joinPoint, result, error, operationLog, com.xuan.context.BaseContext.getCurrentId());
             }
         }
     }

@@ -31,7 +31,7 @@ public class ArticleLikeController {
     @PostMapping("/{articleId}")
     @RateLimit(type = RateLimit.Type.IP, tokens = 10, burstCapacity = 15,
               timeWindow = 60, message = "点赞操作过于频繁，请稍后再试")
-    public Result<String> like(@PathVariable Long articleId, @RequestParam Long visitorId) {
+    public Result<String> like(@PathVariable Long articleId, @RequestParam(required = false) Long visitorId) {
         log.info("访客点赞文章: articleId={}, visitorId={}", articleId, visitorId);
         articleLikeService.likeArticle(articleId, visitorId);
         return Result.success();
@@ -43,7 +43,7 @@ public class ArticleLikeController {
     @DeleteMapping("/{articleId}")
     @RateLimit(type = RateLimit.Type.IP, tokens = 10, burstCapacity = 15,
               timeWindow = 60, message = "操作过于频繁，请稍后再试")
-    public Result<String> unlike(@PathVariable Long articleId, @RequestParam Long visitorId) {
+    public Result<String> unlike(@PathVariable Long articleId, @RequestParam(required = false) Long visitorId) {
         log.info("访客取消点赞: articleId={}, visitorId={}", articleId, visitorId);
         articleLikeService.unlikeArticle(articleId, visitorId);
         return Result.success();
@@ -53,7 +53,7 @@ public class ArticleLikeController {
      * 检查是否已点赞
      */
     @GetMapping("/{articleId}")
-    public Result<Boolean> hasLiked(@PathVariable Long articleId, @RequestParam Long visitorId) {
+    public Result<Boolean> hasLiked(@PathVariable Long articleId, @RequestParam(required = false) Long visitorId) {
         log.info("检查是否已点赞: articleId={}, visitorId={}", articleId, visitorId);
         boolean liked = articleLikeService.hasLiked(articleId, visitorId);
         return Result.success(liked);

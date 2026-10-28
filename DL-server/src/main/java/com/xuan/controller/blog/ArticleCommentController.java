@@ -35,6 +35,19 @@ public class ArticleCommentController {
     private final IArticleCommentService articleCommentService;
 
     /**
+     * 按可见根节点分页返回评论及其可见回复。
+     * @param articleId 已发布文章 ID
+     * @param page 页码，从 1 开始
+     * @param pageSize 每页根节点数，1..50
+     * @return 当前请求访客可见的评论分页
+     */
+    @GetMapping("/article/{articleId}/page")
+    public Result<com.xuan.result.PageResult<ArticleCommentVO>> getTreePage(@PathVariable Long articleId, @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        return Result.success(articleCommentService.getTreePage(articleId, page, pageSize));
+    }
+
+    /**
      * 根据文章ID获取评论列表（树形结构，含当前访客的未审核评论）
      */
     @GetMapping("/article/{articleId}")
@@ -53,7 +66,7 @@ public class ArticleCommentController {
               timeWindow = 60, message = "评论过于频繁，请稍后再试")
     public Result<String> submitComment(@Valid @RequestBody ArticleCommentDTO articleCommentDTO,
                                         HttpServletRequest request) {
-        log.info("访客提交文章评论: {}", articleCommentDTO);
+        log.info("访客提交内容");
         articleCommentService.submitComment(articleCommentDTO, request);
         return Result.success();
     }
@@ -76,7 +89,7 @@ public class ArticleCommentController {
     @DeleteMapping("/{id}")
     @RateLimit(type = RateLimit.Type.IP, tokens = 5, burstCapacity = 8,
               timeWindow = 60, message = "操作过于频繁，请稍后再试")
-    public Result<String> deleteComment(@PathVariable Long id, @RequestParam Long visitorId) {
+    public Result<String> deleteComment(@PathVariable Long id, @RequestParam(required = false) Long visitorId) {
         log.info("访客删除评论: id={}, visitorId={}", id, visitorId);
         articleCommentService.visitorDeleteComment(id, visitorId);
         return Result.success();

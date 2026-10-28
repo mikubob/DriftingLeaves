@@ -15,5 +15,5 @@ public interface AsyncEmailService {
      * 异步发送新文章通知邮件
      */
     void sendNewArticleNotificationAsync(String toEmail, String nickname, String articleTitle,
-                                         String articleSummary, String articleUrl);
+                                         String articleSummary, String articleUrl, String unsubscribeUrl);
 }

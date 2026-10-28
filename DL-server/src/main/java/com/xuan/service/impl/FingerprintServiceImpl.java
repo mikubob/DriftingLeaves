@@ -12,16 +12,12 @@ import org.springframework.util.StringUtils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * 访客设备摘要服务实现，仅提供展示信息，设备特征不作为身份凭据。
+ */
 @Service
 @Slf4j
 public class FingerprintServiceImpl implements FingerprintService {
-
-    // 预编译正则，提高性能
-    private static final Pattern CHROME_PATTERN = Pattern.compile("chrome/(\\d+)", Pattern.CASE_INSENSITIVE);
-    private static final Pattern FIREFOX_PATTERN = Pattern.compile("firefox/(\\d+)", Pattern.CASE_INSENSITIVE);
-    private static final Pattern SAFARI_PATTERN = Pattern.compile("version/(\\d+)", Pattern.CASE_INSENSITIVE);
-    private static final Pattern EDGE_PATTERN = Pattern.compile("edg[ea]?(\\d+)", Pattern.CASE_INSENSITIVE); // 兼容 Edge 和 Edg
-    private static final Pattern OPERA_PATTERN = Pattern.compile("opr/(\\d+)", Pattern.CASE_INSENSITIVE);
 
     @Override
     public String generateVisitorFingerprint(VisitorRecordDTO dto, HttpServletRequest request) {
@@ -37,7 +33,6 @@ public class FingerprintServiceImpl implements FingerprintService {
         String timezone = StringUtils.hasText(dto.getTimezone()) ? dto.getTimezone() : "unknown";
         
         // 优化：只提取浏览器类型，去掉版本号，防止因浏览器自动升级导致指纹失效
-        // 如果业务强依赖版本区分，可改回 extractBrowserInfoWithVersion
         String browserType = extractBrowserType(userAgent);
 
         String fingerprintSource = String.format("%s|%s|%s|%s|%d|%d|%s",
@@ -89,46 +84,12 @@ public class FingerprintServiceImpl implements FingerprintService {
         return "Other";
     }
 
-    /**
-     * 如果需要带版本号的逻辑，可以使用正则优化版
-     */
-    private String extractBrowserInfoWithVersion(String userAgent) {
-        if (!StringUtils.hasText(userAgent)) {
-            return "Unknown_0";
-        }
-
-        if (userAgent.toLowerCase().contains("edg") || userAgent.toLowerCase().contains("edge")) {
-            return "Edge_" + extractVersion(userAgent, EDGE_PATTERN);
-        }
-        if (userAgent.toLowerCase().contains("opr") || userAgent.toLowerCase().contains("opera")) {
-            return "Opera_" + extractVersion(userAgent, OPERA_PATTERN);
-        }
-        if (userAgent.toLowerCase().contains("chrome")) {
-            return "Chrome_" + extractVersion(userAgent, CHROME_PATTERN);
-        }
-        if (userAgent.toLowerCase().contains("firefox")) {
-            return "Firefox_" + extractVersion(userAgent, FIREFOX_PATTERN);
-        }
-        if (userAgent.toLowerCase().contains("safari")) {
-            return "Safari_" + extractVersion(userAgent, SAFARI_PATTERN);
-        }
-
-        return "Other_0";
-    }
-
-    private String extractVersion(String ua, Pattern pattern) {
-        Matcher matcher = pattern.matcher(ua);
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-        return "0";
-    }
-
     private String simplifyPlatform(String platform) {
         if (!StringUtils.hasText(platform)) return "unknown";
         String lower = platform.toLowerCase();
         if (lower.contains("win")) return "Windows";
         if (lower.contains("mac")) return "MacOS";
+        if (lower.contains("android")) return "Android";
         if (lower.contains("linux")) return "Linux";
         if (lower.contains("iphone") || lower.contains("ipad")) return "iOS";
         if (lower.contains("android")) return "Android";

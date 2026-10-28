@@ -26,5 +26,5 @@ public class CaptchaVO implements Serializable {
     private String question;
 
     /** 正确答案 */
-    private int result;
+
 }

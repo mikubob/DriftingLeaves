@@ -1,56 +1,28 @@
 package com.xuan.controller.blog;
 
-
+import com.xuan.annotation.RateLimit;
 import com.xuan.result.Result;
+import com.xuan.service.CaptchaService;
 import com.xuan.vo.CaptchaVO;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Random;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
 
 /**
- * 博客端公共接口
+ * 博客公共接口，向已验证访客签发服务端算术验证码。
  */
 @RestController("blogCommonController")
 @RequestMapping("/blog/common")
+@RequiredArgsConstructor
 public class CommonController {
-
-    private final Random random = new Random();
+    private final CaptchaService captchaService;
 
     /**
-     * 生成算术验证码
+     * 为当前已验证访客生成五分钟、一次使用的算术挑战。
+     * @return 仅包含题目及挑战 ID 的结果
      */
     @GetMapping("/captcha/generate")
+    @RateLimit(type = RateLimit.Type.IP, tokens = 10, burstCapacity = 15, timeWindow = 60)
     public Result<CaptchaVO> generateCaptcha() {
-        int num1 = random.nextInt(9) + 1;
-        int num2 = random.nextInt(9) + 1;
-
-        String[] operators = {"+", "-", "×"};
-        String operator = operators[random.nextInt(operators.length)];
-
-        // 确保减法不会产生负数
-        if ("-".equals(operator) && num1 < num2) {
-            int temp = num1; num1 = num2; num2 = temp;
-        }
-
-        int result;
-        switch (operator) {
-            case "+": result = num1 + num2; break;
-            case "-": result = num1 - num2; break;
-            case "×": result = num1 * num2; break;
-            default: result = num1 + num2;
-        }
-
-        String question = num1 + " " + operator + " " + num2 + " = ?";
-        String captchaId = "captcha_" + System.currentTimeMillis() + "_" + random.nextInt(1000);
-
-        CaptchaVO captchaVO = CaptchaVO.builder()
-                .captchaId(captchaId)
-                .question(question)
-                .result(result)
-                .build();
-
-        return Result.success(captchaVO);
+        return Result.success(captchaService.generate());
     }
 }

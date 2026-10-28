@@ -33,7 +33,7 @@ public class CommonServiceImpl implements CommonService {
      */
     @Override
     public String uploadFile(MultipartFile file) {
-        if (file.isEmpty()){
+        if (file == null || file.isEmpty()){
             throw new UploadFileErrorException(MessageConstant.FILE_EMPTY);
         }
 
@@ -41,14 +41,17 @@ public class CommonServiceImpl implements CommonService {
             //获取文件名
             String fileName = file.getOriginalFilename();
             //获取文件名后缀
-            String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+            if (fileName == null || fileName.lastIndexOf('.') < 0 || fileName.endsWith(".")) {
+                throw new UploadFileErrorException("文件名或扩展名无效");
+            }
+            String extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase(java.util.Locale.ROOT);
             //获取文件字节数组
             byte[] bytes = file.getBytes();
 
             //如果是图片，先压缩后上传
-            if (aliOssUtil.getFileCategory(extension).equals("image")){
+            if (aliOssUtil.getFileCategory(extension).equals("image") && imageCompressUtil.shouldCompress(file)){
                 bytes = imageCompressUtil.compress(file);
-                extension = imageProperties.getOutPutFormat();
+                extension = imageProperties.getOutPutFormat().toLowerCase(java.util.Locale.ROOT);
             }
 
             //获取uuid文件名

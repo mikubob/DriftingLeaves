@@ -6,65 +6,66 @@ package com.xuan.service;
 public interface VerifyCodeService {
 
     /**
-     * 生成验证码
+     * 使用安全随机数生成六位邮件验证码。
+     * @return 含前导零的六位验证码
      */
     String generateCode();
 
     /**
-     * 保存验证码并设置发送频率
-     *
-     * @param userId 用户 ID
-     * @param code   验证码
+     * 原子预约验证码及发送冷却，锁定或冷却期间不覆盖现有预约。
+     * @param userId 管理员 ID
+     * @param code 待发送验证码
+     * @return 本次预约的唯一标识，预约失败时为 null
      */
-    void saveCode(Long userId, String code);
+    String reserveCode(Long userId, String code);
 
     /**
-     * 邮箱是否可以发送验证码（频率限制）
-     *
-     * @param userId 用户 ID
+     * 邮件发送失败时仅撤销仍属于本次预约的验证码和冷却。
+     * @param userId 管理员 ID
+     * @param reservation reserveCode 返回的预约标识
      */
-    boolean canSendCode(Long userId);
+    void cancelCode(Long userId, String reservation);
 
     /**
-     * 获取剩余验证码冷却时间(秒)
-     *
-     * @param userId 用户 ID
+     * 获取当前管理员发送验证码的剩余冷却时间。
+     * @param userId 管理员 ID
+     * @return 剩余秒数，无冷却时为零
      */
     Long getRemainingCooldown(Long userId);
 
     /**
-     * 是否被锁定
-     *
-     * @param userId 用户 ID
+     * 检查当前管理员的邮件验证码是否被锁定。
+     * @param userId 管理员 ID
+     * @return 是否处于锁定期
      */
     boolean isLocked(Long userId);
 
     /**
-     * 获取锁定剩余时间（分钟）
-     *
-     * @param userId 用户 ID
+     * 读取验证码锁定的剩余时间。
+     * @param userId 管理员 ID
+     * @return 剩余整分钟数，无锁定时为零
      */
     Long getLockRemainingMinutes(Long userId);
 
     /**
-     * 是否允许尝试验证
-     *
-     * @param userId 用户 ID
+     * 检查当前管理员是否可以尝试邮件验证码验证。
+     * @param userId 管理员 ID
+     * @return 未锁定时为 true
      */
     boolean canAttempt(Long userId);
 
     /**
-     * 验证验证码
-     *
-     * @param userId 用户 ID
-     * @param code   验证码
+     * 原子验证并消费验证码；成功保留发送冷却，失败累计次数并按阈值锁定。
+     * @param userId 管理员 ID
+     * @param code 提交的验证码
+     * @return 验证是否成功
      */
     boolean verifyCode(Long userId, String code);
 
     /**
-     * 获取剩余尝试次数
-     *
-     * @param userId 用户 ID
+     * 读取锁定前剩余的验证码尝试次数。
+     * @param userId 管理员 ID
+     * @return 剩余次数，锁定时为零
      */
     Long getRemainingAttempts(Long userId);
 }

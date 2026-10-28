@@ -38,6 +38,7 @@ public class MusicServiceImpl extends ServiceImpl<MusicMapper, Music> implements
     @Override
     @CacheEvict(value = "musicList", allEntries = true)
     public void addMusic(MusicDTO musicDTO) {
+        musicDTO.setId(null);
         Music music = BeanUtil.copyProperties(musicDTO, Music.class);
         save(music);
     }
@@ -68,8 +69,9 @@ public class MusicServiceImpl extends ServiceImpl<MusicMapper, Music> implements
     @Override
     @CacheEvict(value = "musicList", allEntries = true)
     public void updateMusic(MusicDTO musicDTO) {
+        if (musicDTO.getId() == null || musicDTO.getId() <= 0) throw new com.xuan.exception.ValidationException("更新ID不能为空且必须为正数");
         Music music = BeanUtil.copyProperties(musicDTO, Music.class);
-        updateById(music);
+        if (!updateById(music)) throw new com.xuan.exception.ValidationException("更新目标不存在");
     }
 
     /**

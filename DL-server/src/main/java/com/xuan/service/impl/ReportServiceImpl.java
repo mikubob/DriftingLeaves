@@ -196,6 +196,10 @@ public class ReportServiceImpl implements IReportService {
      * 获取指定日期范围内的日期列表
      */
     private List<LocalDate> getDateList(LocalDate begin, LocalDate end) {
+        if (begin == null || end == null || begin.isAfter(end)
+                || java.time.temporal.ChronoUnit.DAYS.between(begin, end) > 366) {
+            throw new com.xuan.exception.ValidationException("日期区间无效，最多查询367天");
+        }
         List<LocalDate> dateList = new ArrayList<>();
         dateList.add(begin);
         while (!begin.equals(end)) {

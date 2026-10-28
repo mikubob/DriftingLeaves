@@ -67,21 +67,37 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
                     + visitorProperties.getVerifyCode());
         }
 
-        // 3. 检查是否可以发送验证码
-        if (!verifyCodeService.canSendCode(adminId)) {
-            Long cooldown = verifyCodeService.getRemainingCooldown(adminId);
-            throw new VerifyCodeCoolDownException("验证码冷却中，请等待" + cooldown + "秒后重试");
+        sendCode(admin);
+    }
+
+    @Override
+    public void sendChangeEmailCode() {
+        Admin admin = getById(BaseContext.getCurrentId());
+        if (admin == null || !Integer.valueOf(AdminRoleConstant.ADMIN).equals(admin.getRole())) {
+            throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
         }
+        sendCode(admin);
+    }
 
-        // 4. 生成并保存验证码
+    /**
+     * 预约当前管理员的邮件验证码，发送失败仅撤销本次预约。
+     * @param admin 已查得且允许发送验证码的管理员
+     */
+    private void sendCode(Admin admin) {
+        Long id = admin.getId();
+        if (verifyCodeService.isLocked(id)) throw new VerifyCodeLockException("验证码已锁定，请稍后重试");
         String code = verifyCodeService.generateCode();
-        String email = admin.getEmail();
-
-        verifyCodeService.saveCode(adminId, code);
-
-        // 5. 发送验证码
-        emailService.sendVerifyCode(email, code);
-        log.info("发送验证码成功：username={}, email={}", username, email);
+        String reservation = verifyCodeService.reserveCode(id, code);
+        if (reservation == null) {
+            throw new VerifyCodeCoolDownException("验证码发送冷却或锁定中，请稍后重试");
+        }
+        try {
+            emailService.sendVerifyCode(admin.getEmail(), code);
+        } catch (RuntimeException ex) {
+            verifyCodeService.cancelCode(id, reservation);
+            throw ex;
+        }
+        log.info("发送验证码成功：adminId={}", id);
     }
 
     /**

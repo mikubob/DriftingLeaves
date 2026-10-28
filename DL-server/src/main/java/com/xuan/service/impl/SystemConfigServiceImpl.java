@@ -67,6 +67,7 @@ public class SystemConfigServiceImpl extends ServiceImpl<SystemConfigMapper, Sys
     @Override
     @CacheEvict(value = "systemConfig", allEntries = true)
     public void addConfig(SystemConfigDTO systemConfigDTO) {
+        systemConfigDTO.setId(null);
         //1.检查配置键是否已存在
         LambdaQueryWrapper<SystemConfig> wrapper=new LambdaQueryWrapper<>();
         wrapper.eq(SystemConfig::getConfigKey, systemConfigDTO.getConfigKey());
@@ -86,8 +87,9 @@ public class SystemConfigServiceImpl extends ServiceImpl<SystemConfigMapper, Sys
     @Override
     @CacheEvict(value = "systemConfig", allEntries = true)
     public void updateConfig(SystemConfigDTO systemConfigDTO) {
+        if (systemConfigDTO.getId() == null || systemConfigDTO.getId() <= 0) throw new com.xuan.exception.ValidationException("更新ID不能为空且必须为正数");
         SystemConfig systemConfig = BeanUtil.copyProperties(systemConfigDTO, SystemConfig.class);
-        updateById(systemConfig);
+        if (!updateById(systemConfig)) throw new com.xuan.exception.ValidationException("更新目标不存在");
     }
 
     /**

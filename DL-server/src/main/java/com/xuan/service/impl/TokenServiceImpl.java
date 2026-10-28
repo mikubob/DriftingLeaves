@@ -21,7 +21,7 @@ import java.util.Map;
 
 /**
  * Token 服务实现类
- * 核心逻辑：JWT + Redis Set 实现多端登录与令牌管理
+ * 核心逻辑：JWT + Redis ZSet 实现多端登录与令牌管理
  * 优化点：使用 Lua 脚本保证 Token 数量限制的原子性，防止并发绕过限制
  *
  * @author Xuan
@@ -78,8 +78,8 @@ public class TokenServiceImpl implements TokenService {
                 claims
         );
 
-        String tokenKey = RedisConstant.TOKEN_PREFIX + userId;
-        long ttlMillis = jwtProperties.getTtl();
+        String tokenKey = RedisConstant.TOKEN_PREFIX + "v2:" + userId;
+        long expiresAt = JwtUtil.parseJWT(jwtProperties.getSecretKey(), token).getExpiration().getTime();
 
         // 3. 执行 Lua 脚本 (原子操作：检查数量 + 添加 + 设置过期)
         // 这解决了之前代码中 check 和 add 分离导致的并发竞态问题
@@ -88,8 +88,9 @@ public class TokenServiceImpl implements TokenService {
                     tokenAddScript,
                     Collections.singletonList(tokenKey),
                     token,
-                    String.valueOf(ttlMillis),
-                    String.valueOf(MAX_TOKEN_COUNT)
+                    String.valueOf(expiresAt),
+                    String.valueOf(MAX_TOKEN_COUNT),
+                    String.valueOf(System.currentTimeMillis())
             );
 
             if (result != null && result == 1) {
@@ -122,10 +123,9 @@ public class TokenServiceImpl implements TokenService {
             return false;
         }
 
-        String tokenKey = RedisConstant.TOKEN_PREFIX + userId;
-        Boolean isMember = stringRedisTemplate.opsForSet().isMember(tokenKey, token);
-        
-        return Boolean.TRUE.equals(isMember);
+        String tokenKey = RedisConstant.TOKEN_PREFIX + "v2:" + userId;
+        Double expiresAt = stringRedisTemplate.opsForZSet().score(tokenKey, token);
+        return expiresAt != null && expiresAt > System.currentTimeMillis();
     }
 
     /**
@@ -136,8 +136,8 @@ public class TokenServiceImpl implements TokenService {
         if (userId == null || token == null) {
             return;
         }
-        String tokenKey = RedisConstant.TOKEN_PREFIX + userId;
-        Long removedCount = stringRedisTemplate.opsForSet().remove(tokenKey, token);
+        String tokenKey = RedisConstant.TOKEN_PREFIX + "v2:" + userId;
+        Long removedCount = stringRedisTemplate.opsForZSet().remove(tokenKey, token);
         
         if (removedCount != null && removedCount > 0) {
             log.info("用户 [{}] 单端登出成功", userId);
@@ -152,7 +152,7 @@ public class TokenServiceImpl implements TokenService {
         if (userId == null) {
             return;
         }
-        String tokenKey = RedisConstant.TOKEN_PREFIX + userId;
+        String tokenKey = RedisConstant.TOKEN_PREFIX + "v2:" + userId;
         Boolean deleted = stringRedisTemplate.delete(tokenKey);
         
         if (Boolean.TRUE.equals(deleted)) {

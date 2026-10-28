@@ -16,8 +16,28 @@ import org.apache.ibatis.annotations.Param;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * 文章持久层，提供文章投影查询、关系锁及统计增量更新。
+ */
 @Mapper
 public interface ArticleMapper extends BaseMapper<Articles> {
+    /**
+     * 以行锁读取文章，调用方须处于数据库事务内。
+     * @param id 文章 ID
+     * @return 锁定的记录，不存在时为 null
+     */
+    @org.apache.ibatis.annotations.Select("SELECT * FROM articles WHERE id = #{id} FOR UPDATE")
+    Articles lockById(Long id);
+
+    /**
+     * 原子累加审核评论数，下限为零。
+     * @param id 文章 ID
+     * @param delta 审核、重新编辑或删除导致的数量变化
+     * @return 受影响行数
+     */
+    @org.apache.ibatis.annotations.Update("UPDATE articles SET comment_count = GREATEST(0, COALESCE(comment_count,0) + #{delta}) WHERE id = #{id}")
+    int addCommentCount(@Param("id") Long id, @Param("delta") long delta);
+
 
     /**
      * 管理端分页查询文章列表。
@@ -105,9 +125,19 @@ public interface ArticleMapper extends BaseMapper<Articles> {
      */
     IPage<BlogArticleVO> getPublishedByTagId(IPage<BlogArticleVO> page, @Param("tagId") Long tagId);
 
-    void addViewCount(@Param("id") Long id, @Param("increment") int increment);
+    /**
+     * 原子累加本批浏览计数，由批次服务在事务内调用。
+     * @param id 文章 ID
+     * @param increment 本批增量
+     */
+    void addViewCount(@Param("id") Long id, @Param("increment") long increment);
 
-    void addLikeCount(@Param("id") Long id, @Param("increment") int increment);
+    /**
+     * 原子累加本批点赞计数，允许取消点赞产生负增量。
+     * @param id 文章 ID
+     * @param increment 本批增量
+     */
+    void addLikeCount(@Param("id") Long id, @Param("increment") long increment);
 
     /**
      * 获取文章浏览量 top10

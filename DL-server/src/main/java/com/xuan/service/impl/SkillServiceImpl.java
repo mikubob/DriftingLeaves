@@ -48,6 +48,7 @@ public class SkillServiceImpl extends ServiceImpl<SkillMapper, Skills> implement
     @Override
     @CacheEvict(value = "skills", allEntries = true)
     public void addSkill(SkillDTO skillDTO) {
+        skillDTO.setId(null);
         Skills skills = BeanUtil.copyProperties(skillDTO, Skills.class);
         save(skills);
     }
@@ -71,8 +72,9 @@ public class SkillServiceImpl extends ServiceImpl<SkillMapper, Skills> implement
     @Override
     @CacheEvict(value = "skills", allEntries = true)
     public void updateSkill(SkillDTO skillDTO) {
+        if (skillDTO.getId() == null || skillDTO.getId() <= 0) throw new com.xuan.exception.ValidationException("更新ID不能为空且必须为正数");
         Skills skills = BeanUtil.copyProperties(skillDTO, Skills.class);
-        updateById(skills);
+        if (!updateById(skills)) throw new com.xuan.exception.ValidationException("更新目标不存在");
     }
 
     /**

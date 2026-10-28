@@ -13,6 +13,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+/**
+ * 邮件服务实现，使用安全模板发送验证码、回复、订阅确认及文章通知。
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -21,6 +24,23 @@ public class EmailServiceImpl implements EmailService {
     private final JavaMailSender mailSender;
     private final EmailProperties emailProperties;
     private final WebsiteProperties websiteProperties;
+
+    @Override
+    public void sendSubscriptionConfirmation(String email, String nickname, String url) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(emailProperties.getFrom(), emailProperties.getPersonal());
+            helper.setTo(email);
+            helper.setSubject(websiteProperties.getTitle() + " - 确认RSS订阅");
+            helper.setText("<p>" + EmailTemplateUtil.escape(nickname) + "，请在24小时内确认订阅：</p><p><a href='"
+                    + EmailTemplateUtil.escape(url) + "'>确认订阅</a></p><p>若非本人操作，请忽略此邮件。</p>", true);
+            mailSender.send(message);
+        } catch (Exception ex) {
+            log.error("发送订阅确认邮件失败");
+            throw new EmailSendErrorException(MessageConstant.EMAIL_SEND_ERROR);
+        }
+    }
 
     /**
      * 发送验证码
@@ -77,16 +97,17 @@ public class EmailServiceImpl implements EmailService {
      * @param articleTitle 文章标题
      * @param articleSummary 文章摘要
      * @param articleUrl 文章链接
+     * @param unsubscribeUrl 绑定订阅记录及确认版本的退订链接
      */
     @Override
-    public void sendNewArticleNotification(String toEmail, String nickname, String articleTitle, String articleSummary, String articleUrl) {
+    public void sendNewArticleNotification(String toEmail, String nickname, String articleTitle, String articleSummary, String articleUrl, String unsubscribeUrl) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setFrom(emailProperties.getFrom(), emailProperties.getPersonal());
             helper.setTo(toEmail);
             helper.setSubject(websiteProperties.getTitle() + " - 新文章发布：" + articleTitle);
-            helper.setText(EmailTemplateUtil.buildNewArticleNotificationEmailContent(nickname, articleTitle, articleSummary, articleUrl, websiteProperties), true);
+            helper.setText(EmailTemplateUtil.buildNewArticleNotificationEmailContent(nickname, articleTitle, articleSummary, articleUrl, unsubscribeUrl, websiteProperties), true);
             mailSender.send(message);
             log.info("发送新文章通知邮件成功: to={}, title={}", toEmail, articleTitle);
         } catch (Exception e) {

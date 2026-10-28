@@ -28,7 +28,6 @@ public class ArticleCommentEditDTO implements Serializable {
     private Long id;
 
     // 访客ID（用于验证身份）
-    @NotNull(message = "访客ID不能为空")
     private Long visitorId;
 
     // 编辑后的内容
@@ -37,5 +36,7 @@ public class ArticleCommentEditDTO implements Serializable {
     private String content;
 
     // 是否使用markdown
+    @jakarta.validation.constraints.Min(0)
+    @jakarta.validation.constraints.Max(1)
     private Integer isMarkdown;
 }

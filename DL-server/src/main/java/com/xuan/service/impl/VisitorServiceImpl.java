@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xuan.constant.StatusConstant;
+import com.xuan.context.VisitorContext;
 import com.xuan.dto.DailyViewCountDTO;
 import com.xuan.dto.ProvinceCountDTO;
 import com.xuan.dto.VisitorPageQueryDTO;
@@ -14,8 +15,8 @@ import com.xuan.mapper.VisitorMapper;
 import com.xuan.result.PageResult;
 import com.xuan.service.AsyncVisitorService;
 import com.xuan.service.BlockService;
-import com.xuan.service.FingerprintService;
 import com.xuan.service.IVisitorService;
+import com.xuan.service.VisitorTokenService;
 import com.xuan.utils.IpUtil;
 import com.xuan.vo.VisitorQueryVO;
 import com.xuan.vo.VisitorRecordVO;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static com.xuan.constant.RedisConstant.BLOCKED_KEY;
@@ -44,7 +46,7 @@ import static com.xuan.constant.RedisConstant.VISITOR_KEY;
 public class VisitorServiceImpl extends ServiceImpl<VisitorMapper, Visitors> implements IVisitorService {
 
     private final RedisTemplate<String,Object> redisTemplate;
-    private final FingerprintService fingerprintService;
+    private final VisitorTokenService visitorTokenService;
     private final BlockService blockService;
     private final AsyncVisitorService asyncVisitorService;
 
@@ -60,7 +62,9 @@ public class VisitorServiceImpl extends ServiceImpl<VisitorMapper, Visitors> imp
         String sessionId = getOrCreateSessionId(httpRequest);
 
         // 生成设备指纹
-        String fingerprint = fingerprintService.generateVisitorFingerprint(visitorRecordDTO,httpRequest);
+        Long verifiedId = VisitorContext.getId();
+        Visitors verifiedVisitor = verifiedId == null ? null : getById(verifiedId);
+        String fingerprint = verifiedVisitor == null ? UUID.randomUUID().toString() : verifiedVisitor.getFingerprint();
 
         //获取ip
         String ip = IpUtil.getClientIp(httpRequest);
@@ -86,6 +90,7 @@ public class VisitorServiceImpl extends ServiceImpl<VisitorMapper, Visitors> imp
 
         // 封装VO（立即返回，不等待异步操作完成）
         return VisitorRecordVO.builder()
+                .visitorToken(visitorTokenService.issue(visitor.getId()))
                 .visitorFingerprint(fingerprint)
                 .sessionId(sessionId)
                 .visitorId(visitor.getId())
@@ -279,77 +284,24 @@ public class VisitorServiceImpl extends ServiceImpl<VisitorMapper, Visitors> imp
      */
     private Visitors findOrCreateVisitor(String fingerprint, String sessionId,
                                          String userAgent, String ip){
-        // 尝试从Redis中获取访客信息
-        String cacheKey = VISITOR_KEY + fingerprint;
-        Visitors visitor = (Visitors) redisTemplate.opsForValue().get(cacheKey);
-
-        if(visitor!=null){
-            // 缓存命中,更新基本信息
-            log.info("【访客追踪】缓存命中: id={}, fingerprint={}, ip={}, cachedViews={}",
-                    visitor.getId(), fingerprint, ip, visitor.getTotalViews());
-            visitor.setSessionId(sessionId);
-            visitor.setIp(ip);
-            visitor.setLastVisitTime(LocalDateTime.now());
-            visitor.setTotalViews(visitor.getTotalViews() + 1);
-            updateById(visitor);
-            // 回写Redis缓存，保持缓存数据与数据库同步（修复totalViews等字段不一致的问题）
-            redisTemplate.opsForValue().set(cacheKey, visitor, 1, TimeUnit.HOURS);
-            return visitor;
-        }
-
-        // 缓存未命中，通过指纹查找访客
-        visitor = findVisitorByFingerprint(fingerprint);
-
-        if(visitor==null){
-            // 新访客：创建记录（地理位置字段由异步任务填充）
-            log.info("【访客追踪】新访客创建: fingerprint={}, ip={}", fingerprint, ip);
-            visitor = Visitors.builder()
-                    .fingerprint(fingerprint)
-                    .sessionId(sessionId)
-                    .ip(ip)
-                    .userAgent(userAgent)
-                    .firstVisitTime(LocalDateTime.now())
-                    .lastVisitTime(LocalDateTime.now())
-                    .totalViews(1L)
-                    .isBlocked(StatusConstant.DISABLE)
-                    .build();
+        Visitors visitor = findVisitorByFingerprint(fingerprint);
+        if (visitor == null) {
+            visitor = Visitors.builder().fingerprint(fingerprint).sessionId(sessionId).ip(ip)
+                    .userAgent(userAgent).firstVisitTime(LocalDateTime.now()).lastVisitTime(LocalDateTime.now())
+                    .totalViews(1L).isBlocked(StatusConstant.DISABLE).build();
             try {
                 save(visitor);
-                log.info("【访客追踪】新访客插入成功: id={}, fingerprint={}", visitor.getId(), fingerprint);
-            } catch (DuplicateKeyException e) {
-                // 并发场景：另一个请求已经插入了相同指纹的访客，回退到数据库查询
-                log.warn("【访客追踪】并发创建，回退查询: fingerprint={}", fingerprint);
+                return visitor;
+            } catch (DuplicateKeyException ex) {
                 visitor = findVisitorByFingerprint(fingerprint);
-                if (visitor != null) {
-                    visitor.setLastVisitTime(LocalDateTime.now());
-                    visitor.setTotalViews(visitor.getTotalViews() + 1);
-                    visitor.setSessionId(sessionId);
-                    visitor.setIp(ip);
-                    updateById(visitor);
-                }
+                if (visitor == null) throw ex;
             }
-        }else{
-            // 老访客：更新基本信息
-            log.info("【访客追踪】老访客更新: id={}, fingerprint={}, ip={}, dbViews={}",
-                    visitor.getId(), fingerprint, ip, visitor.getTotalViews());
-            visitor.setLastVisitTime(LocalDateTime.now());
-            visitor.setTotalViews(visitor.getTotalViews() + 1);
-
-            // 如果session已过期或不同，则视为新的浏览器会话
-            boolean sessionExpired = !sessionId.equals(visitor.getSessionId());
-            if(sessionExpired){
-                visitor.setSessionId(sessionId);
-            }
-
-            visitor.setIp(ip);
-            updateById(visitor);
         }
-
-        // 统一写入/更新Redis缓存
-        if (visitor != null) {
-            redisTemplate.opsForValue().set(cacheKey, visitor, 1, TimeUnit.HOURS);
-        }
-        return visitor;
+        lambdaUpdate().eq(Visitors::getId, visitor.getId())
+                .set(Visitors::getSessionId, sessionId).set(Visitors::getIp, ip)
+                .set(Visitors::getLastVisitTime, LocalDateTime.now())
+                .setSql("total_views = total_views + 1").update();
+        return getById(visitor.getId());
     }
 
     /**

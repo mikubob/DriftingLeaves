@@ -1,8 +1,8 @@
 package com.xuan.interceptor;
 
 import cn.hutool.core.util.StrUtil;
-import com.xuan.constant.JwtClaimsConstant;
 import com.xuan.constant.AdminRoleConstant;
+import com.xuan.constant.JwtClaimsConstant;
 import com.xuan.constant.MessageConstant;
 import com.xuan.context.BaseContext;
 import com.xuan.exception.GuestReadOnlyException;
@@ -12,7 +12,6 @@ import com.xuan.properties.JwtProperties;
 import com.xuan.service.TokenService;
 import com.xuan.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +21,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 
 /**
  * jwt令牌校验的拦截器
@@ -72,7 +69,8 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
             }
 
             // 游客账号(role=0)只允许GET查询操作，禁止增删改
-            if(role.equals(AdminRoleConstant.VISITOR) && !"GET".equalsIgnoreCase(request.getMethod())){
+            if(role.equals(AdminRoleConstant.VISITOR) && (!"GET".equalsIgnoreCase(request.getMethod())
+                    || request.getRequestURI().matches("/admin/(articleComment|message|rssSubscription|operationLog)(/.*)?"))){
                 throw new GuestReadOnlyException(MessageConstant.GUEST_READ_ONLY);
             }
 
@@ -95,16 +93,7 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
      * @return Token 字符串，不存在则返回 null
      */
     private String getTokenFromCookie(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) {
-            return null;
-        }
-        for (Cookie cookie : cookies) {
-            if (jwtProperties.getCookieName().equals(cookie.getName())) {
-                return URLDecoder.decode(cookie.getValue(), StandardCharsets.UTF_8);
-            }
-        }
-        return null;
+        return JwtUtil.cookieToken(request, jwtProperties.getCookieName());
     }
 
     /**

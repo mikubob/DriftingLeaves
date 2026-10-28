@@ -44,10 +44,12 @@ public class PersonalInfoServiceImpl extends ServiceImpl<PersonalInfoMapper, Per
      * @param personalInfoDTO 个人信息
      */
     @Override
-    @CacheEvict(value = "personalInfo", allEntries = true)
+    @org.springframework.cache.annotation.Caching(evict = {
+        @CacheEvict(value = "personalInfo", allEntries = true),
+        @CacheEvict(value = "rssFeed", allEntries = true)})
     public void updatePersonalInfo(PersonalInfoDTO personalInfoDTO) {
         LambdaUpdateWrapper<PersonalInfo> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(PersonalInfo::getId, personalInfoDTO.getId());
+        updateWrapper.eq(PersonalInfo::getId, 1L);
         if (personalInfoDTO.getNickname() != null) {
             updateWrapper.set(PersonalInfo::getNickname, personalInfoDTO.getNickname());
         }
@@ -72,7 +74,7 @@ public class PersonalInfoServiceImpl extends ServiceImpl<PersonalInfoMapper, Per
         if (personalInfoDTO.getLocation() != null) {
             updateWrapper.set(PersonalInfo::getLocation, personalInfoDTO.getLocation());
         }
-        update(updateWrapper);
+        if (!update(updateWrapper)) throw new com.xuan.exception.ValidationException("个人信息不存在");
     }
 
     /**

@@ -1,21 +1,14 @@
 package com.xuan.service;
 
 /**
- * UserAgent解析服务
+ * User-Agent 解析服务，一次解析并返回系统与浏览器信息。
  */
 public interface UserAgentService {
-    
+    record Info(String os, String browser) {}
     /**
-     * 解析UserAgent获取操作系统名称
-     * @param userAgent UserAgent字符串
-     * @return 操作系统名称(首字母大写)
+     * 一次解析请求的系统和浏览器名称。
+     * @param userAgent 请求头，可为空
+     * @return 解析结果，未知信息以 Unknown 表示
      */
-    String getOsName(String userAgent);
-    
-    /**
-     * 解析UserAgent获取浏览器名称
-     * @param userAgent UserAgent字符串
-     * @return 浏览器名称(首字母大写)
-     */
-    String getBrowserName(String userAgent);
+    Info parse(String userAgent);
 }

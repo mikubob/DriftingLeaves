@@ -45,6 +45,17 @@ public class AdminController {
     private final JwtProperties jwtProperties;
 
     /**
+     * 向当前管理员的绑定邮箱发送换绑验证码。
+     * @return 发码结果
+     */
+    @PostMapping("/sendChangeEmailCode")
+    @RateLimit(type = RateLimit.Type.IP, tokens = 5, burstCapacity = 8, timeWindow = 60)
+    public Result sendChangeEmailCode() {
+        adminService.sendChangeEmailCode();
+        return Result.success();
+    }
+
+    /**
      * 发送验证码
      */
     @PostMapping("/sendCode")
@@ -66,7 +77,7 @@ public class AdminController {
     public ResponseEntity<Result<AdminLoginVO>> adminLogin(@Valid @RequestBody AdminLoginDTO adminLoginDTO,
                                                            HttpServletRequest request,
                                                            HttpServletResponse response) {
-        log.info("管理员登录：{}", adminLoginDTO);
+        log.info("管理员登录：username={}", adminLoginDTO.getUsername());
         String ip = IpUtil.getClientIp(request);
         AdminLoginVO adminLoginVO = adminService.login(adminLoginDTO, ip);
 
@@ -108,7 +119,7 @@ public class AdminController {
      */
     @PutMapping("/changePassword")
     public Result changePassword(@Valid @RequestBody AdminChangePasswordDTO adminChangePasswordDTO) {
-        log.info("管理员修改密码：{}", adminChangePasswordDTO);
+        log.info("管理员修改密码");
         adminService.changePassword(adminChangePasswordDTO);
         return Result.success();
     }
@@ -128,7 +139,7 @@ public class AdminController {
      */
     @PutMapping("/changeEmail")
     public Result changeEmail(@Valid @RequestBody AdminChangeEmailDTO adminChangeEmailDTO) {
-        log.info("管理员换绑邮箱：{}", adminChangeEmailDTO);
+        log.info("管理员换绑邮箱");
         adminService.changeEmail(adminChangeEmailDTO);
         return Result.success();
     }
@@ -137,16 +148,7 @@ public class AdminController {
      * 从请求 Cookie 中读取 Token（自动 URL 解码）
      */
     private String getTokenFromRequest(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) {
-            return null;
-        }
-        for (Cookie cookie : cookies) {
-            if (jwtProperties.getCookieName().equals(cookie.getName())) {
-                return URLDecoder.decode(cookie.getValue(), StandardCharsets.UTF_8);
-            }
-        }
-        return null;
+        return com.xuan.utils.JwtUtil.cookieToken(request, jwtProperties.getCookieName());
     }
 
     /**

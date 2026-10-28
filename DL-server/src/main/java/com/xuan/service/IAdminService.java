@@ -10,7 +10,15 @@ import com.xuan.entity.Admin;
 import com.xuan.vo.AdminLoginVO;
 import com.xuan.vo.AdminVO;
 
+/**
+ * 管理员账户服务，负责验证码、登录、会话及个人账户变更。
+ */
 public interface IAdminService extends IService<Admin> {
+    /**
+     * 向当前登录管理员的绑定邮箱发送换绑验证码。
+     * @throws com.xuan.exception.AccountNotFoundException 当前账户不存在或不是管理员
+     */
+    void sendChangeEmailCode();
 
     /**
      * 发送验证码

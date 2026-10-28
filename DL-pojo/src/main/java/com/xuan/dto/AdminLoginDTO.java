@@ -32,7 +32,6 @@ public class AdminLoginDTO implements Serializable {
     // 密码
     @NotBlank(message = "密码不能为空")
     @Size(min = 6, max = 32, message = "密码长度应在 6-32 个字符之间")
-    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "密码只能包含字母、数字和下划线")
     private String password;
 
     // 验证码

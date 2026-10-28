@@ -2,25 +2,19 @@ package com.xuan.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.xuan.constant.MessageConstant;
-import com.xuan.constant.StatusConstant;
-import com.xuan.dto.MessageDTO;
-import com.xuan.dto.MessageEditDTO;
-import com.xuan.dto.MessagePageQueryDTO;
-import com.xuan.dto.MessageReplyDTO;
+import com.xuan.context.VisitorContext;
+import com.xuan.dto.*;
 import com.xuan.entity.Messages;
 import com.xuan.exception.ValidationException;
 import com.xuan.mapper.MessageMapper;
 import com.xuan.properties.WebsiteProperties;
 import com.xuan.result.PageResult;
-import com.xuan.service.AsyncEmailService;
-import com.xuan.service.IMessageService;
-import com.xuan.service.UserAgentService;
+import com.xuan.service.*;
+import com.xuan.utils.CommitActions;
+import com.xuan.utils.DiscussionUtil;
 import com.xuan.utils.IpUtil;
-import com.xuan.utils.MarkdownUtil;
 import com.xuan.vo.MessageQueryVO;
 import com.xuan.vo.MessageVO;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,445 +22,309 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
- * 留言服务实现类
+ * 留言服务实现，管理审核、线程可见性及经验证访客的内容操作。
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class MessageServiceImpl extends ServiceImpl<MessageMapper, Messages> implements IMessageService {
-
     private final UserAgentService userAgentService;
     private final AsyncEmailService asyncEmailService;
     private final WebsiteProperties websiteProperties;
+    private final CaptchaService captchaService;
 
-    // 邮箱正则
-    private static final Pattern EMAIL_PATTERN = Pattern.compile(
-            "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
-    );
-
-    // QQ号正则 (5-12位数字，首位非0)
-    private static final Pattern QQ_PATTERN = Pattern.compile("^[1-9]\\d{4,11}$");
-
-    /**
-     * 提交留言
-     *
-     * @param messageDTO 留言数据
-     * @param request    请求对象
-     */
     @Override
-    public void submitMessage(MessageDTO messageDTO, HttpServletRequest request) {
-        //1.校验邮箱或 QQ 号
-        validateEmailOrQq(messageDTO.getEmailOrQq());
-        //2.创建留言对象
-        Messages messages = BeanUtil.copyProperties(messageDTO, Messages.class);
-        //3.处理Markdown内容
-        if (messageDTO.getIsMarkdown() != null && messageDTO.getIsMarkdown() == 1) {
-            // 如果是Markdown，转换为HTML
-            String html = MarkdownUtil.toHtml(messageDTO.getContent());
-            messages.setContentHtml(html);
-        } else {
-            // 如果不是Markdown，直接使用原内容
-            messages.setContentHtml(messageDTO.getContent());
-        }
-        //4.设置访客id
-        messages.setVisitorId(messageDTO.getVisitorId());
-
-        //5.获取ip地址信息
-        String clientIp = IpUtil.getClientIp(request);
-        Map<String, String> geoInfo = IpUtil.getGeoInfo(clientIp);
-
-        //拼接地址：省份-城市
-        String province = geoInfo.getOrDefault("province", "");
-        String city = geoInfo.getOrDefault("city", "");
-        String location = province.isEmpty() && city.isEmpty() ? null
-                : province.equals(city) ? province
-                : String.format("%s-%s", province, city).replaceAll("^-|-$", "");
-        if (location != null && !location.isEmpty()) {
-            messages.setLocation(location);
-        }
-
-        //6.解析UserAgent
-        String userAgent = request.getHeader("User-Agent");
-        String osName = userAgentService.getOsName(userAgent);
-        String browserName = userAgentService.getBrowserName(userAgent);
-        messages.setUserAgentOs(osName);
-        messages.setUserAgentBrowser(browserName);
-
-        //7.设置默认值
-        messages.setIsApproved(StatusConstant.DISABLE);
-        messages.setIsEdited(StatusConstant.DISABLE);
-        messages.setCreateTime(LocalDateTime.now());
-        messages.setUpdateTime(LocalDateTime.now());
-
-        //8.保存到数据库
-        save(messages);
-
-        //9.检查父留言是否开启邮箱通知
-        if (messageDTO.getParentId() != null) {
-            notifyParentIfNeeded(messageDTO.getParentId(), messageDTO.getNickname(),
-                    messageDTO.getContent(), "message");
-        }
-
-        log.info("访客提交留言成功：{}", messages);
+    public PageResult pageQuery(MessagePageQueryDTO dto) {
+        var query = new LambdaQueryWrapper<Messages>()
+                .eq(dto.getIsApproved() != null, Messages::getIsApproved, dto.getIsApproved())
+                .ge(dto.getStartTime() != null, Messages::getCreateTime, dto.getStartTime())
+                .le(dto.getEndTime() != null, Messages::getCreateTime, dto.getEndTime())
+                .orderByDesc(Messages::getCreateTime);
+        Page<Messages> result = page(new Page<>(dto.getPage(), dto.getPageSize()), query);
+        List<MessageQueryVO> records = result.getRecords().stream().map(c -> {
+            MessageQueryVO vo = BeanUtil.copyProperties(c, MessageQueryVO.class);
+            vo.setContentHtml(DiscussionUtil.html(c.getContent(), c.getIsMarkdown()));
+            return vo;
+        }).toList();
+        return PageResult.of(records, result.getTotal(), result.getCurrent(), result.getSize());
     }
 
-    /**
-     * 分页查询留言
-     *
-     * @param messagePageQueryDTO 查询条件
-     * @return 分页结果
-     */
     @Override
-    public PageResult pageQuery(MessagePageQueryDTO messagePageQueryDTO) {
-        //1.构建查询条件
-        LambdaQueryWrapper<Messages> queryWrapper = new LambdaQueryWrapper<>();
-
-        // 是否审核通过
-        if (messagePageQueryDTO.getIsApproved() != null) {
-            queryWrapper.eq(Messages::getIsApproved, messagePageQueryDTO.getIsApproved());
-        }
-
-        // 开始时间
-        if (messagePageQueryDTO.getStartTime() != null) {
-            queryWrapper.ge(Messages::getCreateTime, messagePageQueryDTO.getStartTime());
-        }
-
-        // 结束时间
-        if (messagePageQueryDTO.getEndTime() != null) {
-            queryWrapper.le(Messages::getCreateTime, messagePageQueryDTO.getEndTime());
-        }
-
-        // 按创建时间倒序排序
-        queryWrapper.orderByDesc(Messages::getCreateTime);
-
-        //2.执行分页查询
-        Page<Messages> page = new Page<>(messagePageQueryDTO.getPage(), messagePageQueryDTO.getPageSize());
-        page(page, queryWrapper);
-
-        //3.转换为 QueryVO 并返回
-        Page<MessageQueryVO> voPage = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
-        voPage.setRecords(page.getRecords().stream()
-                .map(msg -> BeanUtil.copyProperties(msg, MessageQueryVO.class))
-                .toList());
-        return PageResult.fromIPage(voPage);
-    }
-
-    /**
-     * 批量审核通过留言
-     *
-     * @param ids 留言id列表
-     */
-    @Override
+    @Transactional
     public void batchApprove(List<Long> ids) {
-        //1.构建更新条件
-        LambdaUpdateWrapper<Messages> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.in(Messages::getId, ids)
-                .set(Messages::getIsApproved, StatusConstant.ENABLE)
-                .set(Messages::getUpdateTime, LocalDateTime.now());
-        //2.执行批量更新
-        update(updateWrapper);
+        for (Long id : ids.stream().distinct().sorted().toList()) {
+            Messages c = lockedComment(id);
+            if (c == null) continue;
+            boolean changed = lambdaUpdate().eq(Messages::getId, id).eq(Messages::getIsApproved, 0)
+                    .set(Messages::getIsApproved, 1).set(Messages::getUpdateTime, java.time.LocalDateTime.now()).update();
+            if (changed) {
+                CommitActions.afterCommit(() -> notifyParent(c));
+            }
+        }
     }
 
-    /**
-     * 批量删除留言
-     *
-     * @param ids 留言id列表
-     */
     @Override
     @Transactional
     public void batchDelete(List<Long> ids) {
-        //1.如果是根留言，级联删除所有子留言
-        for (Long id : ids) {
-            Messages message = getById(id);
-            if (message != null && (message.getRootId() == null || message.getRootId() == 0)) {
-                LambdaQueryWrapper<Messages> wrapper = new LambdaQueryWrapper<>();
-                wrapper.eq(Messages::getRootId, id);
-                long childCount = count(wrapper);
-                if (childCount > 0) {
-                    remove(wrapper);
+        for (Long id : ids.stream().distinct().sorted().toList()) {
+            Messages c = lockedComment(id);
+            if (c == null) continue;
+            var scope = new LambdaQueryWrapper<Messages>().eq(Messages::getId, id);
+            if (isRoot(c)) scope.or().eq(Messages::getRootId, id);
+            else {
+                Messages root = baseMapper.lockById(c.getRootId());
+                if (root != null) {
+                    var replies = lambdaUpdate().eq(Messages::getParentId, id).eq(Messages::getRootId, root.getId())
+                            .set(Messages::getParentId, root.getId()).set(Messages::getParentNickname, root.getNickname());
+                    if (Integer.valueOf(1).equals(c.getIsSecret())) replies.set(Messages::getIsSecret, 1);
+                    replies.update();
                 }
             }
+            remove(scope);
         }
-        //2.批量删除留言
-        removeBatchByIds(ids);
     }
 
-    /**
-     * 管理员回复留言
-     *
-     * @param messageReplyDTO 回复DTO
-     * @param request         请求对象
-     */
-    @Override
-    public void adminReply(MessageReplyDTO messageReplyDTO, HttpServletRequest request) {
-        //1.拷贝属性
-        Messages messages = BeanUtil.copyProperties(messageReplyDTO, Messages.class);
-        //2.处理其中的markdown内容
-        if (messageReplyDTO.getIsMarkdown() != null && messageReplyDTO.getIsMarkdown() == 1) {
-            String html = MarkdownUtil.toHtml(messageReplyDTO.getContent());
-            messages.setContentHtml(html);
-        } else {
-            messages.setContentHtml(messageReplyDTO.getContent());
-        }
-        //3.设置管理员回复标识
-        messages.setIsAdminReply(StatusConstant.ENABLE);
-        messages.setIsApproved(StatusConstant.ENABLE);//默认审核通过
-        messages.setIsEdited(StatusConstant.DISABLE);
-        messages.setNickname(websiteProperties.getTitle());
-        messages.setCreateTime(LocalDateTime.now());
-        messages.setUpdateTime(LocalDateTime.now());
-
-        //4.捕获Ip/地理位置/UserAgent
-        if (request != null) {
-            String clientIp = IpUtil.getClientIp(request);
-            Map<String, String> geoInfo = IpUtil.getGeoInfo(clientIp);
-            String province = geoInfo.getOrDefault("province", "");
-            String city = geoInfo.getOrDefault("city", "");
-            String location = province.isEmpty() && city.isEmpty() ? null
-                    : province.equals(city) ? province
-                    : String.format("%s-%s", province, city).replaceAll("^-|-$", "");
-            if (location != null && !location.isEmpty()) {
-                messages.setLocation(location);
-            }
-            String userAgent = request.getHeader("User-Agent");
-            String osName = userAgentService.getOsName(userAgent);
-            messages.setUserAgentOs(osName);
-            String browserName = userAgentService.getBrowserName(userAgent);
-            messages.setUserAgentBrowser(browserName);
-        }
-
-        //5.保存到数据库
-        save(messages);
-
-        //6.检查父留言是否开启邮箱通知
-        if (messageReplyDTO.getParentId() != null) {
-            notifyParentIfNeeded(messageReplyDTO.getParentId(), websiteProperties.getTitle(),
-                    messageReplyDTO.getContent(), "message");
-        }
-
-        log.info("管理员回复留言成功: parentId={}, content={}", messageReplyDTO.getParentId(), messageReplyDTO.getContent());
-    }
-
-    /**
-     * 获取留言树形结构
-     *
-     * @param visitorId 访客id
-     * @return 留言树形结构
-     */
-    @Override
-    public List<MessageVO> getMessageTree(Long visitorId) {
-        //1.构建查询条件：已审核通过 或 属于当前访客的留言
-        LambdaQueryWrapper<Messages> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.and(wrapper -> wrapper
-                .eq(Messages::getIsApproved, StatusConstant.ENABLE)
-                .or(w -> {
-                    if (visitorId != null) {
-                        w.eq(Messages::getVisitorId, visitorId);
-                    }
-                })
-        ).orderByAsc(Messages::getCreateTime);
-
-        //2.查询所有留言
-        List<Messages> allMessages = list(queryWrapper);
-
-        //3.转换为 VO 列表
-        List<MessageVO> allMessageVOs = allMessages.stream()
-                .map(msg -> BeanUtil.copyProperties(msg, MessageVO.class))
-                .toList();
-
-        //4.构建树形结构
-        List<MessageVO> rootMessages = new ArrayList<>();
-        Map<Long, MessageVO> messageMap = allMessageVOs.stream()
-                .collect(Collectors.toMap(MessageVO::getId, m -> m));
-
-        for (MessageVO msg : allMessageVOs) {
-            if (msg.getRootId() == null || msg.getRootId() == 0) {
-                msg.setChildren(new ArrayList<>());
-                rootMessages.add(msg);
-            } else {
-                MessageVO rootMsg = messageMap.get(msg.getRootId());
-                if (rootMsg != null) {
-                    if (rootMsg.getChildren() == null) {
-                        rootMsg.setChildren(new ArrayList<>());
-                    }
-                    rootMsg.getChildren().add(msg);
-                }
-            }
-        }
-
-        //5.返回根留言列表
-        return rootMessages;
-    }
-
-    /**
-     * 编辑留言
-     *
-     * @param editDTO 编辑留言 DTO
-     */
-    @Override
-    public void editMessage(MessageEditDTO editDTO) {
-        //1.查询留言
-        Messages messages = getById(editDTO.getId());
-        if (messages == null) {
-            throw new ValidationException(MessageConstant.MESSAGE_NOT_FOUND);
-        }
-        if (!messages.getVisitorId().equals(editDTO.getVisitorId())) {
-            throw new ValidationException(MessageConstant.MESSAGE_NOT_EDIT);
-        }
-
-        //2.拷贝属性
-        Messages updateMessage = new Messages();
-        updateMessage.setId(editDTO.getId());
-        updateMessage.setContent(editDTO.getContent());
-
-        if (editDTO.getIsMarkdown() != null && editDTO.getIsMarkdown() == 1) {
-            updateMessage.setContentHtml(MarkdownUtil.toHtml(editDTO.getContent()));
-        } else {
-            updateMessage.setContentHtml(editDTO.getContent());
-        }
-
-        //3.更新数据库
-        updateById(updateMessage);
-        log.info("访客编辑留言成功: id={}, visitorId={}", editDTO.getId(), editDTO.getVisitorId());
-    }
-
-    /**
-     * 访客删除留言
-     * @param id 留言id
-     * @param visitorId 访客id
-     */
     @Override
     @Transactional
-    public void visitorDeleteMessage(Long id, Long visitorId) {
-        //1.查询留言
-        Messages messages = getById(id);
-        if (messages == null){
-            throw new ValidationException(MessageConstant.MESSAGE_NOT_FOUND);
-        }
-        if (!messages.getVisitorId().equals(visitorId)){
-            throw new ValidationException(MessageConstant.MESSAGE_NOT_DELETE);
-        }
-
-        //2.如果是根留言，级联删除所有子留言
-        if (messages.getRootId() == null || messages.getRootId() == 0) {
-            LambdaQueryWrapper<Messages> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(Messages::getRootId, id);
-            long childCount = count(wrapper);
-            if (childCount > 0){
-                remove(wrapper);
-            }
-        }
-
-        //3.删除留言本身
-        removeById(id);
-        log.info("访客删除留言成功: id={}, visitorId={}", id, visitorId);
+    public void adminReply(MessageReplyDTO dto, HttpServletRequest request) {
+        Messages c = BeanUtil.copyProperties(dto, Messages.class);
+        bindParent(c, true);
+        c.setNickname(websiteProperties.getTitle());
+        c.setIsAdminReply(1);
+        c.setIsApproved(1);
+        c.setIsEdited(0);
+        prepare(c, request);
+        save(c);
+        CommitActions.afterCommit(() -> notifyParent(c));
     }
 
-
-//<==========私有辅助方法==========>
-
-    /**
-     * 校验邮箱或QQ号
-     *
-     * @param emailOrQq 邮箱或QQ号
-     */
-    private void validateEmailOrQq(String emailOrQq) {
-        //1.为空时直接通过，该字段为可选
-        if (emailOrQq == null || emailOrQq.trim().isEmpty()) {
-            return;
-        }
-
-        emailOrQq = emailOrQq.trim();
-
-        //2.先判断是否是QQ号
-        if (QQ_PATTERN.matcher(emailOrQq).matches()) {
-            return;
-        }
-
-        //3.再判断是否是邮箱
-        if (EMAIL_PATTERN.matcher(emailOrQq).matches()) {
-            return;
-        }
-
-        //4.都不匹配，抛出异常
-        if (emailOrQq.matches("^[0-9]+$")) {
-            throw new ValidationException(MessageConstant.INVALID_QQ_FORMAT);
-        } else {
-            throw new ValidationException(MessageConstant.INVALID_EMAIL_FORMAT);
-        }
+    @Override
+    public List<MessageVO> getMessageTree(Long ignoredVisitorId) {
+        return getTreePage(1, 10).getRecords();
     }
 
-    /**
-     * 检查父留言是否开启邮箱通知，如果是则发送通知邮件
-     *
-     * @param parentId      父留言ID
-     * @param replyNickname 回复者昵称
-     * @param replyContent  回复内容
-     * @param type          类型
-     */
-    private void notifyParentIfNeeded(Long parentId, String replyNickname, String replyContent, String type) {
-        //1.判空校验
-        if (parentId == null) {
-            return;
+    @Override
+    public PageResult<MessageVO> getTreePage(int page, int pageSize) {
+        checkPage(page, pageSize);
+        var roots = visible().and(w -> w.isNull(Messages::getRootId).or().eq(Messages::getRootId, 0))
+                .orderByAsc(Messages::getCreateTime, Messages::getId);
+        Page<Messages> result = page(new Page<>(page, pageSize), roots);
+        Map<Long, MessageVO> map = new LinkedHashMap<>();
+        for (Messages c : result.getRecords()) {
+            MessageVO vo = convert(c);
+            vo.setChildren(new ArrayList<>());
+            map.put(c.getId(), vo);
         }
-        try {
-            //2.查询父留言
-            Messages parentMessage = getById(parentId);
-            if (parentMessage != null
-                    && parentMessage.getIsNotice() != null
-                    && parentMessage.getIsNotice() == 1
-                    && parentMessage.getEmailOrQq() != null) {
-                //3.解析邮箱地址
-                String emailOrQq = parentMessage.getEmailOrQq().trim();
-                String email;
-                if (emailOrQq.contains("@")) {
-                    email = emailOrQq;
-                } else if (emailOrQq.matches("^[1-9]\\d{4,10}$")) {
-                    email = emailOrQq + "@qq.com";
-                } else {
-                    return;
+        if (!map.isEmpty()) {
+            List<Messages> children = list(visible().in(Messages::getRootId, map.keySet())
+                    .orderByAsc(Messages::getCreateTime, Messages::getId));
+            Map<Long, List<Messages>> byParent = children.stream().filter(c -> c.getParentId() != null).collect(java.util.stream.Collectors.groupingBy(Messages::getParentId));
+            var queue = new ArrayDeque<Long>(map.keySet());
+            var seen = new HashSet<Long>(map.keySet());
+            while (!queue.isEmpty()) {
+                for (Messages child : byParent.getOrDefault(queue.remove(), List.of())) {
+                    if (!seen.add(child.getId())) continue;
+                    queue.add(child.getId());
                 }
-                //4.发送通知邮件
-                asyncEmailService.sendReplyNotificationAsync(
-                        email,
-                        parentMessage.getNickname(),
-                        parentMessage.getContent(),
-                        replyNickname,
-                        replyContent,
-                        type
-                );
             }
-        } catch (Exception e) {
-            log.error("发送留言回复通知邮件异常: parentId={}, ex={}", parentId, e.getMessage());
+            // Emit in the original query order after resolving ancestor visibility.
+            for (Messages child : children) {
+                if (seen.contains(child.getId())) map.get(child.getRootId()).getChildren().add(convert(child));
+            }
+        }
+        return PageResult.of(new ArrayList<>(map.values()), result.getTotal(), page, pageSize);
+    }
+
+    /**
+     * 构造当前请求访客可见的留言条件，匿名访客仅能读取公开且已审核内容。
+     */
+    private LambdaQueryWrapper<Messages> visible() {
+        Long visitorId = VisitorContext.getId();
+        return new LambdaQueryWrapper<Messages>()
+                .and(w -> {
+                    w.eq(Messages::getIsApproved, 1);
+                    if (visitorId != null) w.or().eq(Messages::getVisitorId, visitorId);
+                }).and(w -> {
+                    w.isNull(Messages::getIsSecret).or().eq(Messages::getIsSecret, 0);
+                    if (visitorId != null) w.or().eq(Messages::getVisitorId, visitorId);
+                });
+    }
+
+    @Override
+    @Transactional
+    public void submitMessage(MessageDTO dto, HttpServletRequest request) {
+        Long visitorId = VisitorContext.requireId();
+        DiscussionUtil.email(dto.getEmailOrQq());
+        Messages c = BeanUtil.copyProperties(dto, Messages.class);
+        c.setVisitorId(visitorId);
+        bindParent(c, false);
+        captchaService.verify(dto.getCaptchaId(), dto.getCaptchaAnswer());
+        c.setIsApproved(0);
+        c.setIsAdminReply(0);
+        c.setIsEdited(0);
+        prepare(c, request);
+        save(c);
+    }
+
+    @Override
+    @Transactional
+    public void editMessage(MessageEditDTO dto) {
+        Long visitorId = VisitorContext.requireId();
+        Messages c = lockedComment(dto.getId());
+        requireOwner(c, visitorId);
+        int markdown = Integer.valueOf(1).equals(dto.getIsMarkdown()) ? 1 : 0;
+        lambdaUpdate().eq(Messages::getId, c.getId()).set(Messages::getContent, dto.getContent())
+                .set(Messages::getContentHtml, DiscussionUtil.html(dto.getContent(), markdown))
+                .set(Messages::getIsMarkdown, markdown).set(Messages::getIsEdited, 1)
+                .set(Messages::getIsApproved, 0).set(Messages::getUpdateTime, java.time.LocalDateTime.now()).update();
+    }
+
+    @Override
+    @Transactional
+    public void visitorDeleteMessage(Long id, Long ignoredVisitorId) {
+        Long visitorId = VisitorContext.requireId();
+        requireOwner(lockedComment(id), visitorId);
+        batchDelete(List.of(id));
+    }
+
+    /**
+     * 按根留言、目标留言顺序加锁，串行化审核、编辑及删除。
+     * @param id 目标 ID
+     * @return 锁定的留言，不存在时为 null
+     */
+    private Messages lockedComment(Long id) {
+        Messages c = getById(id);
+        if (c == null) return null;
+        baseMapper.lockById(isRoot(c) ? c.getId() : c.getRootId());
+        return baseMapper.lockById(id);
+    }
+
+    /**
+     * 锁定并验证回复关系；访客必须可见完整祖先链，管理员回复继承私密归属。
+     * @param c 待保存的回复
+     * @param admin 是否为管理员回复
+     * @throws ValidationException 关系不一致、祖先缺失或目标不可见
+     */
+    private void bindParent(Messages c, boolean admin) {
+        if (c.getParentId() == null || c.getParentId() == 0) {
+            if (c.getRootId() != null && c.getRootId() != 0) throw new ValidationException("回复关系不一致");
+            c.setRootId(null); c.setParentId(null); c.setParentNickname(null);
+            return;
+        }
+        Messages parent = getById(c.getParentId());
+        if (parent == null) {
+            throw new ValidationException("回复目标不存在或不属于该文章");
+        }
+        Long rootId = isRoot(parent) ? parent.getId() : parent.getRootId();
+        Messages root = baseMapper.lockById(rootId);
+        parent = baseMapper.lockById(c.getParentId());
+        if (parent == null) throw new ValidationException("回复目标不存在");
+        if (root == null || !isRoot(root)) {
+            throw new ValidationException("回复根节点不存在");
+        }
+        if (c.getRootId() != null && c.getRootId() != 0 && !rootId.equals(c.getRootId())) {
+            throw new ValidationException("回复根节点不一致");
+        }
+        Messages ancestor = parent;
+        Set<Long> seen = new HashSet<>();
+        while (!rootId.equals(ancestor.getId())) {
+            if (!seen.add(ancestor.getId()) || !rootId.equals(ancestor.getRootId())) {
+                throw new ValidationException("回复关系不一致");
+            }
+            if (!admin) requireVisible(ancestor);
+            if (Integer.valueOf(1).equals(ancestor.getIsSecret())) {
+                c.setIsSecret(1);
+                if (admin) c.setVisitorId(ancestor.getVisitorId());
+            }
+            ancestor = baseMapper.lockById(ancestor.getParentId());
+            if (ancestor == null) throw new ValidationException("回复祖先不存在");
+        }
+        if (!admin) requireVisible(root);
+        if (Integer.valueOf(1).equals(root.getIsSecret())) {
+            c.setIsSecret(1);
+            if (admin) c.setVisitorId(root.getVisitorId());
+        }
+        c.setRootId(rootId);
+        c.setParentNickname(parent.getNickname());
+    }
+
+    /**
+     * 要求当前访客可见回复祖先，避免通过已知 ID 回复隐藏内容。
+     * @param c 已锁定的祖先节点
+     * @throws ValidationException 节点未审核或私密且不属于当前访客
+     */
+    private void requireVisible(Messages c) {
+        boolean own = Objects.equals(c.getVisitorId(), VisitorContext.requireId());
+        if ((!Integer.valueOf(1).equals(c.getIsApproved()) || Integer.valueOf(1).equals(c.getIsSecret())) && !own) {
+            throw new ValidationException("回复目标不可见");
         }
     }
 
     /**
-     * 统计总留言数
-     * @return 总留言数
+     * 校验内容属于当前访客，管理员回复不能由访客编辑或删除。
+     * @param c 目标内容，可为 null
+     * @param visitorId 已验证访客 ID
+     * @throws ValidationException 内容不存在或无权修改
      */
-    @Override
-    public Integer countTotal() {
-        return Math.toIntExact(count());
+    private void requireOwner(Messages c, Long visitorId) {
+        if (c == null || !visitorId.equals(c.getVisitorId()) || Integer.valueOf(1).equals(c.getIsAdminReply())) {
+            throw new ValidationException("内容不存在或无权修改");
+        }
     }
 
     /**
-     * 统计待审核留言数
-     * @return 待审核留言数
+     * 安全渲染内容，并从请求补充地点与一次解析的设备信息。
+     * @param c 待保存内容
+     * @param request 当前请求，可为 null
      */
-    @Override
-    public Integer countPending() {
-        LambdaQueryWrapper<Messages> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Messages::getIsApproved, StatusConstant.DISABLE);
-        return Math.toIntExact(count(wrapper));
+    private void prepare(Messages c, HttpServletRequest request) {
+        c.setContentHtml(DiscussionUtil.html(c.getContent(), c.getIsMarkdown()));
+        if (request == null) return;
+        c.setLocation(DiscussionUtil.location(IpUtil.getGeoInfo(IpUtil.getClientIp(request))));
+        String ua = request.getHeader("User-Agent");
+        UserAgentService.Info device = userAgentService.parse(ua);
+        c.setUserAgentOs(device.os());
+        c.setUserAgentBrowser(device.browser());
     }
+
+    /**
+     * 安全渲染历史内容并组装公开视图；联系方式不进入公开 VO。
+     * @param c 数据库记录
+     * @return 包含服务端归属标记的视图
+     */
+    private MessageVO convert(Messages c) {
+        MessageVO vo = BeanUtil.copyProperties(c, MessageVO.class);
+        vo.setContentHtml(DiscussionUtil.html(c.getContent(), c.getIsMarkdown()));
+        vo.setIsOwn(VisitorContext.getId() != null && VisitorContext.getId().equals(c.getVisitorId())
+                && !Integer.valueOf(1).equals(c.getIsAdminReply()));
+        return vo;
+    }
+
+    /**
+     * 成功提交后通知开启邮件提醒的父节点作者，通知故障仅记录日志。
+     * @param reply 已审核回复
+     */
+    private void notifyParent(Messages reply) {
+        if (reply.getParentId() == null) return;
+        try {
+            Messages parent = getById(reply.getParentId());
+            if (parent == null || !Integer.valueOf(1).equals(parent.getIsNotice())) return;
+            String email = DiscussionUtil.email(parent.getEmailOrQq());
+            if (email == null) return;
+            asyncEmailService.sendReplyNotificationAsync(email, parent.getNickname(), parent.getContent(),
+                    reply.getNickname(), reply.getContent(), "message");
+        } catch (Exception ex) {
+            log.error("发送留言通知失败: parentId={}", reply.getParentId(), ex);
+        }
+    }
+
+    private boolean isRoot(Messages c) { return c.getRootId() == null || c.getRootId() == 0; }
+    private void checkPage(int page, int size) {
+        if (page < 1 || size < 1 || size > 50) throw new ValidationException("分页范围不正确，page>=1，pageSize=1..50");
+    }
+    @Override public Integer countTotal() { return Math.toIntExact(count()); }
+    @Override public Integer countPending() { return Math.toIntExact(lambdaQuery().eq(Messages::getIsApproved, 0).count()); }
 }

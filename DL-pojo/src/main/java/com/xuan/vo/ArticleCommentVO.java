@@ -54,7 +54,9 @@ public class ArticleCommentVO implements Serializable {
     private String nickname;
 
     // 邮箱或QQ
-    private String emailOrQq;
+    private String avatarUrl;
+
+    private Boolean isOwn;
 
     // 地区
     private String location;

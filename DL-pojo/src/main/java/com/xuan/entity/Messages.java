@@ -68,7 +68,7 @@ public class Messages extends BaseEntity {
     // 是否使用 markdown，0-否，1-是
     private Integer isMarkdown;
 
-    // 是否匿名，0-否，1-是
+    // 是否私密（悄悄话），0-否，1-是
     private Integer isSecret;
 
     // 有回复是否通知，0-否，1-是

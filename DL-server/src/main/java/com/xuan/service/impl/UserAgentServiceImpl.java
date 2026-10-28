@@ -15,20 +15,25 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserAgentServiceImpl implements UserAgentService {
 
+    @Override
+    public Info parse(String userAgent) {
+        if (StrUtil.isBlank(userAgent)) return new Info("Unknown", "Unknown");
+        UserAgent ua = UserAgentUtil.parse(userAgent);
+        return new Info(osName(userAgent, ua), browserName(userAgent, ua));
+    }
+
     /**
      * 获取操作系统名称
      * @param userAgent 用户代理字符串
      * @return 系统名称 (如: Windows, macOS, Android, iOS, Linux)
      */
-    @Override
-    public String getOsName(String userAgent) {
+    private String osName(String userAgent, UserAgent ua) {
         // 使用 Hutool StrUtil 进行空值检查
         if (StrUtil.isBlank(userAgent)) {
             return "Unknown";
         }
 
         // 使用 Hutool 解析
-        UserAgent ua = UserAgentUtil.parse(userAgent);
         
         if (ua == null) {
             return "Unknown";
@@ -55,13 +60,6 @@ public class UserAgentServiceImpl implements UserAgentService {
         
         // 处理 Mac 系列 (macOS, Mac OS X)
         if (osName.startsWith("Mac")) {
-            // 针对 iPadOS 13+ 可能伪装成 Mac 的情况做二次确认
-            // 如果 UA 中包含 iPad 但 OS 识别为 Mac，根据业务需求可强制返回 iOS
-            // 这里保持 Hutool 的默认行为，通常新版 Hutool 能较好区分
-            if (userAgent.contains("iPad") || userAgent.contains("iPhone")) {
-                 // 如果确定是移动设备但被识别为 Mac，可取消下面这行的注释强制转为 iOS
-                 // return "iOS"; 
-            }
             return "macOS";
         }
 
@@ -99,8 +97,7 @@ public class UserAgentServiceImpl implements UserAgentService {
      * @param userAgent 用户代理字符串
      * @return 浏览器名称 (如: Chrome, Firefox, Safari, Edge, WeChat)
      */
-    @Override
-    public String getBrowserName(String userAgent) {
+    private String browserName(String userAgent, UserAgent ua) {
         if (StrUtil.isBlank(userAgent)) {
             return "Unknown";
         }
@@ -125,7 +122,6 @@ public class UserAgentServiceImpl implements UserAgentService {
         }
 
         // 2. 使用 Hutool 解析常规浏览器
-        UserAgent ua = UserAgentUtil.parse(userAgent);
         
         if (ua == null) {
             return "Unknown";

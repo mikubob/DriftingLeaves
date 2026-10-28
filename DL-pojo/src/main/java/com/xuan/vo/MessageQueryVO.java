@@ -37,6 +37,7 @@ public class MessageQueryVO implements Serializable {
 
     // 留言内容（HTML）
     private String contentHtml;
+    private Integer isMarkdown;
 
     // 昵称
     private String nickname;

@@ -6,16 +6,24 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.xuan.annotation.EvictArticleCaches;
 import com.xuan.constant.MessageConstant;
 import com.xuan.constant.RedisConstant;
 import com.xuan.constant.StatusConstant;
 import com.xuan.dto.ArticleDTO;
 import com.xuan.dto.ArticlePageQueryDTO;
 import com.xuan.dto.ArticleTitleViewCountDTO;
+import com.xuan.entity.ArticleComments;
+import com.xuan.entity.ArticleLikes;
 import com.xuan.entity.ArticleTags;
 import com.xuan.entity.Articles;
 import com.xuan.entity.RssSubscriptions;
 import com.xuan.exception.ArticleException;
+import com.xuan.exception.ValidationException;
+import com.xuan.mapper.ArticleCategoryMapper;
+import com.xuan.mapper.ArticleCommentMapper;
+import com.xuan.mapper.ArticleCountReader;
+import com.xuan.mapper.ArticleLikeMapper;
 import com.xuan.mapper.ArticleMapper;
 import com.xuan.properties.WebsiteProperties;
 import com.xuan.result.PageResult;
@@ -23,6 +31,7 @@ import com.xuan.service.AsyncEmailService;
 import com.xuan.service.IArticleService;
 import com.xuan.service.IArticleTagService;
 import com.xuan.service.IRssSubscriptionService;
+import com.xuan.utils.CommitActions;
 import com.xuan.utils.MarkdownUtil;
 import com.xuan.vo.ArticleArchiveItemVO;
 import com.xuan.vo.ArticleArchiveVO;
@@ -32,9 +41,7 @@ import com.xuan.vo.BlogArticleVO;
 import com.xuan.vo.HotArticleVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +51,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 文章服务实现类
@@ -58,6 +66,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     private final WebsiteProperties websiteProperties;
     private final AsyncEmailService asyncEmailService;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final ArticleCategoryMapper categoryMapper;
+    private final ArticleCommentMapper commentMapper;
+    private final ArticleLikeMapper likeMapper;
+    private final ArticleCountReader countReader;
 
     //分钟阅读量：300字/分钟
     private static final int VIEWS = 300;
@@ -80,23 +92,17 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
         return PageResult.fromIPage(articlePage);
     }
 
-    // ===== 其他方法待实现 =====
-
     /**
-     * 创建文章
-     *
-     * @param articleDTO 文章数据
+     * 创建文章、初始化统计及关联标签，首次发布成功提交后发送订阅通知。
+     * @param articleDTO 文章数据，客户端 ID 被忽略
+     * @return 数据库生成的文章 ID
      */
     @Override
     @Transactional
-    @Caching(evict = {
-            @CacheEvict(value = "articleList", allEntries = true),
-            @CacheEvict(value = "articleDetail", allEntries = true),
-            @CacheEvict(value = "articleArchive", allEntries = true),
-            @CacheEvict(value = "blogReport", allEntries = true),
-            @CacheEvict(value = "hotArticles", allEntries = true)
-    })
-    public void createArticle(ArticleDTO articleDTO) {
+    @EvictArticleCaches
+    public Long createArticle(ArticleDTO articleDTO) {
+        articleDTO.setId(null);
+        validateRelations(articleDTO);
         Articles articles = BeanUtil.copyProperties(articleDTO, Articles.class);
 
         boolean firstPublishNow = StatusConstant.ENABLE.equals(articleDTO.getIsPublished());
@@ -142,8 +148,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
 
         //7.仅首次发布时通知RSS订阅者
         if (firstPublishNow) {
-            notifyRssSubscribers(articles);
+            CommitActions.afterCommit(() -> notifyRssSubscribers(articles));
         }
+        return articles.getId();
     }
 
 
@@ -172,15 +179,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
      */
     @Override
     @Transactional
-    @Caching(evict = {
-            @CacheEvict(value = "articleList", allEntries = true),
-            @CacheEvict(value = "articleDetail", allEntries = true),
-            @CacheEvict(value = "articleArchive", allEntries = true),
-            @CacheEvict(value = "blogReport", allEntries = true),
-            @CacheEvict(value = "hotArticles", allEntries = true)
-    })
+    @EvictArticleCaches
     public void updateArticle(ArticleDTO articleDTO) {
-        Articles articles = getById(articleDTO.getId());
+        if (articleDTO.getId() == null || articleDTO.getId() <= 0) throw new ValidationException("更新ID无效");
+        validateRelations(articleDTO);
+        Articles articles = baseMapper.lockById(articleDTO.getId());
         if (articles == null) {
             throw new ArticleException(MessageConstant.ARTICLE_NOT_FOUND);
         }
@@ -217,7 +220,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
         }
 
         //4.更新文章
-        updateById(articles);
+        articles.setViewCount(null);
+        articles.setLikeCount(null);
+        articles.setCommentCount(null);
+        if (!updateById(articles)) throw new ValidationException("更新目标不存在");
 
         //5.更新文章-标签关联
         if (articleDTO.getTagIds() != null){
@@ -229,7 +235,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
 
         //6.仅首次发布时通知RSS订阅者
         if (firstPublishNow) {
-            notifyRssSubscribers(articles);
+            CommitActions.afterCommit(() -> notifyRssSubscribers(articles));
         }
     }
 
@@ -239,36 +245,37 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
      */
     @Override
     @Transactional
-    @Caching(evict = {
-            @CacheEvict(value = "articleList", allEntries = true),
-            @CacheEvict(value = "articleDetail", allEntries = true),
-            @CacheEvict(value = "articleArchive", allEntries = true),
-            @CacheEvict(value = "blogReport", allEntries = true),
-            @CacheEvict(value = "hotArticles", allEntries = true)
-    })
+    @EvictArticleCaches
     public void batchDelete(List<Long> ids) {
         //1.批量删除文章-标签关联
         articleTagService.batchDeleteRelationsByArticleIds(ids);
-        //2.批量删除文章
+        for (Long id : ids.stream().distinct().sorted().toList()) {
+            baseMapper.lockById(id);
+            commentMapper.delete(new LambdaQueryWrapper<ArticleComments>().eq(ArticleComments::getArticleId, id));
+            likeMapper.delete(new LambdaQueryWrapper<ArticleLikes>().eq(ArticleLikes::getArticleId, id));
+        }
         removeByIds(ids);
+        CommitActions.afterCommit(() -> {
+            for (Long id : ids) {
+                redisTemplate.delete(RedisConstant.ARTICLE_LIKE_USER_SET + id);
+                redisTemplate.opsForHash().delete(RedisConstant.ARTICLE_VIEW_COUNT, id.toString());
+                redisTemplate.opsForHash().delete(RedisConstant.ARTICLE_LIKE_COUNT, id.toString());
+            }
+        });
     }
 
     /**
-     * 发布或取消发布文章
-     * @param id 文章id
-     * @param isPublished 是否发布
+     * 锁定文章并切换发布状态，串行判断首次发布时间，成功提交后仅发送一次首次发布通知。
+     * @param id 文章 ID
+     * @param isPublished 1 发布，0 取消发布
      */
     @Override
-    @Caching(evict = {
-            @CacheEvict(value = "articleList", allEntries = true),
-            @CacheEvict(value = "articleDetail", allEntries = true),
-            @CacheEvict(value = "articleArchive", allEntries = true),
-            @CacheEvict(value = "blogReport", allEntries = true),
-            @CacheEvict(value = "hotArticles", allEntries = true)
-    })
+    @Transactional
+    @EvictArticleCaches
     public void publishOrCancel(Long id, Integer isPublished) {
+        if (isPublished == null || (isPublished != 0 && isPublished != 1)) throw new ValidationException("发布状态无效");
         //1.查询文章是否存在
-        Articles articles = getById(id);
+        Articles articles = baseMapper.lockById(id);
         if (articles == null) {
             throw new ArticleException(MessageConstant.ARTICLE_NOT_FOUND);
         }
@@ -291,7 +298,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
 
         //5.仅首次发布时通知RSS订阅者
         if (firstPublishNow) {
-            notifyRssSubscribers(articles);
+            CommitActions.afterCommit(() -> notifyRssSubscribers(articles));
         }
     }
 
@@ -301,12 +308,9 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
      * @param isTop 是否置顶
      */
     @Override
-    @Caching(evict = {
-            @CacheEvict(value = "articleList", allEntries = true),
-            @CacheEvict(value = "articleDetail", allEntries = true),
-            @CacheEvict(value = "hotArticles", allEntries = true)
-    })
+    @EvictArticleCaches
     public void toggleTop(Long id, Integer isTop) {
+        if (isTop == null || (isTop != 0 && isTop != 1)) throw new ValidationException("置顶状态无效");
         //1.根据id获取当前文章
         Articles articles = getById(id);
         if (articles == null) {
@@ -347,7 +351,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
      * @return 分页结果
      */
     @Override
-    @Cacheable(value = "articleList", key = "'page:' + #page + ':' + #pageSize")
     public PageResult<BlogArticleVO> getPublishedPage(int page, int pageSize) {
         // 1. 创建分页对象
         Page<BlogArticleVO> mpPage = new Page<>(page, pageSize);
@@ -356,6 +359,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
         IPage<BlogArticleVO> resultPage = baseMapper.getPublishedPage(mpPage);
 
         // 3. 返回分页结果
+        countReader.merge(resultPage.getRecords());
         return PageResult.fromIPage(resultPage);
     }
 
@@ -365,7 +369,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
      * @return 文章详情
      */
     @Override
-    @Cacheable(value = "articleDetail", key = "#slug")
     public BlogArticleDetailVO getBySlug(String slug) {
         //1.根据slug获取文章详情
         BlogArticleDetailVO articleDetail = baseMapper.getBySlug(slug);
@@ -391,6 +394,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
                     baseMapper.getRelatedArticles(articleDetail.getId(), articleDetail.getCategoryId())
             );
         }
+        articleDetail.setContentHtml(MarkdownUtil.sanitize(articleDetail.getContentHtml()));
+        countReader.merge(articleDetail);
         return articleDetail;
     }
 
@@ -411,7 +416,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
      * @return 分页结果
      */
     @Override
-    @Cacheable(value = "articleList", key = "'cat:' + #categoryId + ':' + #page + ':' + #pageSize")
     public PageResult<BlogArticleVO> getPublishedByCategoryId(Long categoryId, int page, int pageSize) {
         //1.创建分页对象
         Page<BlogArticleVO> mpPage = new Page<>(page, pageSize);
@@ -420,6 +424,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
         IPage<BlogArticleVO> resultPage = baseMapper.getPublishedByCategoryId(mpPage, categoryId);
 
         //3.返回分页结果
+        countReader.merge(resultPage.getRecords());
         return PageResult.fromIPage(resultPage);
     }
 
@@ -467,10 +472,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
      * @return 分页结果
      */
     @Override
-    @Cacheable(value = "articleList", key = "'search:' + #keyword + ':' + #page + ':' + #pageSize")
     public PageResult<BlogArticleVO> searchPublished(String keyword, int page, int pageSize) {
         Page<BlogArticleVO> mpPage = new Page<>(page, pageSize);
         IPage<BlogArticleVO> resultPage = baseMapper.searchPublished(mpPage, keyword);
+        countReader.merge(resultPage.getRecords());
         return PageResult.fromIPage(resultPage);
     }
 
@@ -482,7 +487,6 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
      * @return 分页结果
      */
     @Override
-    @Cacheable(value = "articleList", key = "'tag:' + #tagId + ':' + #page + ':' + #pageSize")
     public PageResult<BlogArticleVO> getPublishedByTagId(Long tagId, int page, int pageSize) {
         //1.创建分页对象
         Page<BlogArticleVO> mpPage = new Page<>(page, pageSize);
@@ -491,6 +495,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
         IPage<BlogArticleVO> resultPage = baseMapper.getPublishedByTagId(mpPage, tagId);
 
         //3.返回分页结果
+        countReader.merge(resultPage.getRecords());
         return PageResult.fromIPage(resultPage);
     }
 
@@ -516,20 +521,17 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
     }
 
 
-//<==========私有辅助方法辅助==========>
-
-    /**
-     * 构建查询条件
-     */
     /**
      * 获取本月热门文章点赞榜（前 5 篇）
      * @return 本月点赞数最高的已发布文章列表
      */
     @Override
-    @Cacheable(value = "hotArticles", key = "'month:like'")
     public List<HotArticleVO> getMonthHotArticlesByLike() {
         LocalDateTime begin = LocalDateTime.now().withDayOfMonth(1).toLocalDate().atStartOfDay();
-        return baseMapper.getMonthHotArticlesByLike(begin, begin.plusMonths(1));
+        List<HotArticleVO> articles = baseMapper.getMonthHotArticlesByLike(begin, begin.plusMonths(1));
+        countReader.merge(articles);
+        articles.forEach(a -> a.setHotValue(a.getLikeCount()));
+        return articles;
     }
 
     /**
@@ -537,10 +539,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
      * @return 本月浏览量最高的已发布文章列表
      */
     @Override
-    @Cacheable(value = "hotArticles", key = "'month:view'")
     public List<HotArticleVO> getMonthHotArticlesByView() {
         LocalDateTime begin = LocalDateTime.now().withDayOfMonth(1).toLocalDate().atStartOfDay();
-        return baseMapper.getMonthHotArticlesByView(begin, begin.plusMonths(1));
+        List<HotArticleVO> articles = baseMapper.getMonthHotArticlesByView(begin, begin.plusMonths(1));
+        countReader.merge(articles);
+        articles.forEach(a -> a.setHotValue(a.getViewCount()));
+        return articles;
     }
 
     /**
@@ -548,9 +552,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
      * @return 全站总点赞数最高的已发布文章列表
      */
     @Override
-    @Cacheable(value = "hotArticles", key = "'site:like'")
     public List<HotArticleVO> getSiteHotArticlesByLike() {
-        return baseMapper.getSiteHotArticlesByLike();
+        List<HotArticleVO> articles = baseMapper.getSiteHotArticlesByLike();
+        countReader.merge(articles);
+        articles.forEach(a -> a.setHotValue(a.getLikeCount()));
+        return articles;
     }
 
     /**
@@ -558,33 +564,28 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
      * @return 全站总浏览量最高的已发布文章列表
      */
     @Override
-    @Cacheable(value = "hotArticles", key = "'site:view'")
     public List<HotArticleVO> getSiteHotArticlesByView() {
-        return baseMapper.getSiteHotArticlesByView();
+        List<HotArticleVO> articles = baseMapper.getSiteHotArticlesByView();
+        countReader.merge(articles);
+        articles.forEach(a -> a.setHotValue(a.getViewCount()));
+        return articles;
     }
 
-    private LambdaQueryWrapper<Articles> buildQueryWrapper(ArticlePageQueryDTO dto) {
-        LambdaQueryWrapper<Articles> wrapper = new LambdaQueryWrapper<>();
-
-        // 标题模糊搜索
-        if (StrUtil.isNotBlank(dto.getTitle())) {
-            wrapper.like(Articles::getTitle, dto.getTitle());
+    /**
+     * 校验并锁定文章分类及标签，防止保存期间关联目标被并发删除。
+     * @param dto 待保存文章
+     * @throws com.xuan.exception.ValidationException 关联目标缺失或标签列表含空项
+     */
+    private void validateRelations(ArticleDTO dto) {
+        if (dto.getCategoryId() == null || categoryMapper.lockById(dto.getCategoryId()) == null) {
+            throw new ValidationException("文章分类不存在");
         }
-
-        // 分类 ID 精确匹配
-        if (dto.getCategoryId() != null) {
-            wrapper.eq(Articles::getCategoryId, dto.getCategoryId());
+        if (dto.getTagIds() != null && !dto.getTagIds().isEmpty()
+                && (dto.getTagIds().stream().anyMatch(Objects::isNull)
+                || articleTagService.list(new LambdaQueryWrapper<ArticleTags>().in(ArticleTags::getId, dto.getTagIds()).orderByAsc(ArticleTags::getId).last("FOR UPDATE")).size()
+                != dto.getTagIds().stream().distinct().count())) {
+            throw new ValidationException("文章标签不存在");
         }
-
-        // 发布状态匹配
-        if (dto.getIsPublished() != null) {
-            wrapper.eq(Articles::getIsPublished, dto.getIsPublished());
-        }
-
-        // 排序：先按置顶降序，再按创建时间降序
-        wrapper.orderByDesc(Articles::getIsTop, Articles::getCreateTime);
-
-        return wrapper;
     }
 
     /**
@@ -646,7 +647,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Articles> imp
                         subscriber.getNickname() != null ? subscriber.getNickname() : "订阅者",
                         article.getTitle(),
                         article.getSummary(),
-                        articleUrl
+                        articleUrl,
+                        blogUrl + "/?rssUnsubscribe=" + rssSubscriptionService.unsubscribeToken(subscriber)
                 );
             }
             log.info("已向 {} 个RSS订阅者发送新文章通知: title={}", subscribers.size(), article.getTitle());

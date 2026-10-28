@@ -48,8 +48,7 @@ public class RateLimitAspect {
             return joinPoint.proceed();
         } else {
             log.warn("限流触发: key={}, type={}, message={}", key, rateLimit.type(), rateLimit.message());
-            // 403封禁异常
-            throw new BlockedException(rateLimit.message());
+            throw new com.xuan.exception.RateLimitException(rateLimit.message());
         }
     }
 

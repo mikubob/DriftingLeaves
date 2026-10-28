@@ -26,6 +26,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 
     private final JwtTokenAdminInterceptor jwtTokenAdminInterceptor;
     private final ObjectMapper objectMapper;
+    private final com.xuan.interceptor.VisitorTokenInterceptor visitorTokenInterceptor;
 
     /**
      * 注册自定义拦截器
@@ -33,6 +34,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(visitorTokenInterceptor).addPathPatterns("/blog/**", "/home/**", "/cv/**");
         registry.addInterceptor(jwtTokenAdminInterceptor)
                 .addPathPatterns("/admin/**")
                 .excludePathPatterns("/admin/admin/login")

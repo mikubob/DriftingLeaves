@@ -95,7 +95,6 @@
             <artifactId>aspectjweaver</artifactId>
         </dependency>
 
-
         <!--redis-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -120,23 +119,10 @@
             <artifactId>bucket4j-core</artifactId>
         </dependency>
 
-        <!-- Bucket4j JCache集成 - 分布式限流支持 -->
-        <dependency>
-            <groupId>com.bucket4j</groupId>
-            <artifactId>bucket4j-jcache</artifactId>
-        </dependency>
-
-
-        <!-- JCache API 规范 -->
-        <dependency>
-            <groupId>javax.cache</groupId>
-            <artifactId>cache-api</artifactId>
-        </dependency>
-
-        <!-- Caffeine JCache实现 - 高性能内存缓存 -->
+        <!-- Caffeine - 高性能内存缓存 -->
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
-            <artifactId>jcache</artifactId>
+            <artifactId>caffeine</artifactId>
         </dependency>
 
         <!-- 邮件发送 -->

@@ -10,6 +10,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
 
+/**
+ * 签名 JWT 的生成、校验及 Cookie 凭据读取工具。
+ */
 public class JwtUtil {
     /**
      * 生成jwt
@@ -35,9 +38,29 @@ public class JwtUtil {
                 // 设置签名使用的签名算法和签名使用的秘钥
                 .signWith(key)
                 // 设置过期时间
-                .expiration(exp);
+                .expiration(exp)
+                .id(java.util.UUID.randomUUID().toString());
 
         return builder.compact();
+    }
+
+    /**
+     * 按配置名称读取并解码 Cookie 令牌。
+     * @param request 当前请求
+     * @param name Cookie 名称
+     * @return 令牌，不存在或编码损坏时返回 null
+     */
+    public static String cookieToken(jakarta.servlet.http.HttpServletRequest request, String name) {
+        if (request.getCookies() == null) return null;
+        for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+            if (!name.equals(cookie.getName())) continue;
+            try {
+                return java.net.URLDecoder.decode(cookie.getValue(), StandardCharsets.UTF_8);
+            } catch (IllegalArgumentException ex) {
+                return null;
+            }
+        }
+        return null;
     }
 
     /**

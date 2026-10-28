@@ -3,19 +3,19 @@ package com.xuan.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.xuan.annotation.EvictArticleCaches;
 import com.xuan.constant.MessageConstant;
 import com.xuan.dto.ArticleCategoryDTO;
 import com.xuan.entity.ArticleCategories;
 import com.xuan.entity.Articles;
 import com.xuan.exception.ArticleCategoryException;
+import com.xuan.exception.ValidationException;
 import com.xuan.mapper.ArticleCategoryMapper;
 import com.xuan.service.IArticleCategoryService;
 import com.xuan.service.IArticleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,12 +54,9 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
      */
     @Override
     @Transactional
-    @Caching(evict = {
-            @CacheEvict(value = "articleCategories", allEntries = true),
-            @CacheEvict(value = "articleList", allEntries = true),
-            @CacheEvict(value = "blogReport", allEntries = true)
-    })
+    @EvictArticleCaches
     public void addCategory(ArticleCategoryDTO articleCategoryDTO) {
+        articleCategoryDTO.setId(null);
         //1.复制属性
         ArticleCategories articleCategories = BeanUtil.copyProperties(articleCategoryDTO, ArticleCategories.class);
         //2.保存分类
@@ -73,12 +70,9 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
      */
     @Override
     @Transactional
-    @Caching(evict = {
-            @CacheEvict(value = "articleCategories", allEntries = true),
-            @CacheEvict(value = "articleList", allEntries = true),
-            @CacheEvict(value = "blogReport", allEntries = true)
-    })
+    @EvictArticleCaches
     public void updateCategory(ArticleCategoryDTO articleCategoryDTO) {
+        if (articleCategoryDTO.getId() == null || articleCategoryDTO.getId() <= 0) throw new ValidationException("更新ID无效");
         //1.根据 ID 查询分类
         ArticleCategories articleCategories = getById(articleCategoryDTO.getId());
         if (articleCategories == null) {
@@ -88,7 +82,7 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
         //2.复制属性
         BeanUtil.copyProperties(articleCategoryDTO, articleCategories);
         //3.更新分类
-        updateById(articleCategories);
+        if (!updateById(articleCategories)) throw new ValidationException("更新目标不存在");
     }
 
     /**
@@ -98,14 +92,11 @@ public class ArticleCategoryServiceImpl extends ServiceImpl<ArticleCategoryMappe
      */
     @Override
     @Transactional
-    @Caching(evict = {
-            @CacheEvict(value = "articleCategories", allEntries = true),
-            @CacheEvict(value = "articleList", allEntries = true),
-            @CacheEvict(value = "blogReport", allEntries = true)
-    })
+    @EvictArticleCaches
     public void batchDelete(List<Long> ids) {
         //1.检查分类下是否有关联文章
-        for (Long id : ids) {
+        for (Long id : ids.stream().distinct().sorted().toList()) {
+            baseMapper.lockById(id);
             long count = articleService.count(new LambdaQueryWrapper<Articles>()
                     .eq(Articles::getCategoryId, id));
             if (count > 0) {

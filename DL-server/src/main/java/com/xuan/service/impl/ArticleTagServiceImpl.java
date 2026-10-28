@@ -3,22 +3,22 @@ package com.xuan.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.xuan.annotation.EvictArticleCaches;
 import com.xuan.dto.ArticleTagDTO;
 import com.xuan.entity.ArticleTagRelations;
 import com.xuan.entity.ArticleTags;
+import com.xuan.exception.ValidationException;
 import com.xuan.mapper.ArticleTagMapper;
 import com.xuan.service.IArticleTagService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 文章标签服务实现类
@@ -51,11 +51,9 @@ public class ArticleTagServiceImpl extends ServiceImpl<ArticleTagMapper, Article
      * @param articleTagDTO 新增标签数据
      */
     @Override
-    @Caching(evict = {
-            @CacheEvict(value = "articleTags", allEntries = true),
-            @CacheEvict(value = "blogReport", allEntries = true)
-    })
+    @EvictArticleCaches
     public void addTag(ArticleTagDTO articleTagDTO) {
+        articleTagDTO.setId(null);
         // 1. 转换数据并保存标签
         save(BeanUtil.copyProperties(articleTagDTO, ArticleTags.class));
     }
@@ -66,16 +64,14 @@ public class ArticleTagServiceImpl extends ServiceImpl<ArticleTagMapper, Article
      * @param articleTagDTO 修改的标签数据
      */
     @Override
-    @Caching(evict = {
-            @CacheEvict(value = "articleTags", allEntries = true),
-            @CacheEvict(value = "blogReport", allEntries = true)
-    })
+    @EvictArticleCaches
     public void updateTag(ArticleTagDTO articleTagDTO) {
+        if (articleTagDTO.getId() == null || articleTagDTO.getId() <= 0) throw new ValidationException("更新ID不能为空且必须为正数");
         // 1. 拷贝更新的数据
         ArticleTags articleTags = BeanUtil.copyProperties(articleTagDTO, ArticleTags.class);
 
         // 2. 更新标签
-        updateById(articleTags);
+        if (!updateById(articleTags)) throw new ValidationException("更新目标不存在");
     }
 
     /**
@@ -85,11 +81,9 @@ public class ArticleTagServiceImpl extends ServiceImpl<ArticleTagMapper, Article
      */
     @Override
     @Transactional
-    @Caching(evict = {
-            @CacheEvict(value = "articleTags", allEntries = true),
-            @CacheEvict(value = "blogReport", allEntries = true)
-    })
+    @EvictArticleCaches
     public void batchDeleteTags(List<Long> ids) {
+        list(new LambdaQueryWrapper<ArticleTags>().in(ArticleTags::getId, ids).orderByAsc(ArticleTags::getId).last("FOR UPDATE"));
         // 1. 先删除关联关系中涉及这些标签的记录
         baseMapper.deleteRelationsByTagIds(ids);
 
@@ -148,8 +142,12 @@ public class ArticleTagServiceImpl extends ServiceImpl<ArticleTagMapper, Article
             return;
         }
         
+        if (tagIds.stream().anyMatch(Objects::isNull)
+                || list(new LambdaQueryWrapper<ArticleTags>().in(ArticleTags::getId, tagIds).orderByAsc(ArticleTags::getId).last("FOR UPDATE")).size() != tagIds.stream().distinct().count()) {
+            throw new ValidationException("文章标签不存在");
+        }
         // 2. 构建文章标签关系列表
-        List<ArticleTagRelations> relations = tagIds.stream()
+        List<ArticleTagRelations> relations = tagIds.stream().distinct()
                 .map(tagId -> ArticleTagRelations.builder()
                         .articleId(articleId)
                         .tagId(tagId)

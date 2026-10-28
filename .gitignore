@@ -100,3 +100,5 @@ coverage/
 
 # VM 选项文件
 *.vmoptions
+
+!DL-server/src/main/resources/sql/schema.sql

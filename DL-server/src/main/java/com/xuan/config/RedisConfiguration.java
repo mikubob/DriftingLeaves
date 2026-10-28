@@ -30,6 +30,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Redis 序列化与事务感知缓存配置，缓存写入和驱逐延后到成功提交。
+ */
 @Configuration
 @Slf4j
 public class RedisConfiguration {
@@ -175,6 +178,7 @@ public class RedisConfiguration {
         cacheConfigurations.put("rssFeed", defaultConfig.entryTtl(Duration.ofMinutes(30)));
 
         return RedisCacheManager.builder(redisConnectionFactory)
+                .transactionAware()
                 .cacheDefaults(defaultConfig)
                 .withInitialCacheConfigurations(cacheConfigurations)
                 .build();

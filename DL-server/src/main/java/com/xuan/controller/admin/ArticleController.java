@@ -70,8 +70,7 @@ public class ArticleController {
     @OperationLog(value = OperationType.INSERT, target = "article")
     public Result createArticle(@Valid @RequestBody ArticleDTO articleDTO) {
         log.info("创建文章: {}", articleDTO);
-        articleService.createArticle(articleDTO);
-        return Result.success();
+        return Result.success(articleService.createArticle(articleDTO));
     }
 
     /**
